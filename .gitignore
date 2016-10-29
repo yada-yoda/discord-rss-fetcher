@@ -54,4 +54,4 @@ jspm_packages
 # Output of 'npm pack'
 *.tgz
 
-/config.json
+/botConfig.json
