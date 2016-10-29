@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/benji7425/discord-feed-bot#readme",
   "dependencies": {
-    "discord.io": "^2.2.4"
+    "discord.io": "^2.2.4",
+    "feed-read": "0.0.1"
   }
 }
