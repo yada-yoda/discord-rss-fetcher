@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/benji7425/discord-feed-bot/issues"
   },
-  "homepage": "https://github.com/benji7425/discord-feed-bot#readme"
+  "homepage": "https://github.com/benji7425/discord-feed-bot#readme",
+  "dependencies": {
+    "discord.io": "^2.2.4"
+  }
 }
