@@ -8,6 +8,9 @@
 
 - Add checking for >100 messages (currently if 100 messages are sent after posting the link, it will be re-posted straight away because it wont be detected in the previous 100)
 - Add checking for link within other messages (currently only checks for messages identical to the link)
+- Addition of user-defined URLs to match as 'sent' (ie if a user posts a youtu.be link, the bot will still post a youtube.com link, even if they point to the same palce - I would like to add a setting whereby you can specify alternate hosts to match)
+
+Feel free to contact me with suggestions and feature requests - if you need a new feature, just let me know and I will see what I can do! (No promises though :p)
 
 # Installation
 
