@@ -53,7 +53,7 @@ Dns.resolve("discordapp.com", function (err) {
 
 		bot.on("message", function (user, userID, channelID, message) {
 			//check if the message is a link, cache it if it is
-			if (new RegExp(linkRegExp.test(message))){
+			if (linkRegExp.test(message)){
 				logEvent("Detected user posted link: " + message);
 				cacheLink(Uri.withinString(message, function (url) { return url; }));
 			}
