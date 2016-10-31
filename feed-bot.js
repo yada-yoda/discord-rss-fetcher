@@ -1,10 +1,11 @@
-var console = require("console");
-var Dns = require("dns");
-var Url = require("url");
-var Discord = require("discord.io");
-var FeedRead = require("feed-read");
-var BotConfig = require("./botConfig.json");
-var Config = require("./config.json");
+var console = require("console"); //for console logging
+var Dns = require("dns"); //for connectivity checking
+var Url = require("url"); //for url parsing
+var Uri = require("urijs"); //for finding urls within message strings
+var Discord = require("discord.io"); //for obvious reasons
+var FeedRead = require("feed-read"); //for rss feed reading
+var BotConfig = require("./botConfig.json"); //bot config file containing bot token
+var Config = require("./config.json"); //config file containing other settings
 
 //get a URL object from the feedUrl so we can examine it and check connectivity later
 var url = Url.parse(Config.feedUrl);
@@ -12,9 +13,24 @@ var url = Url.parse(Config.feedUrl);
 //placeholder for our bot - we need to check for connectivity before assigning this though
 var bot;
 
+var linkRegExp = new RegExp(["http", "https", "www"].join("|"));
+
+var cachedLinks = [];
+//caches a link so we can check again later
+function cacheLink(link) {
+	//store the new link if not stored already
+	if (!cachedLinks.includes(link)){
+		cachedLinks.push(link);
+		logEvent("Cached URL: " + link);
+	}
+	//get rid of the first array element if we have reached our cache limit
+	if (cachedLinks.length > (Config.numLinksToCache || 10))
+		cachedLinks.shift();
+}
+
 //check if we can connect to discordapp.com to authenticate the bot
 Dns.resolve("discordapp.com", function (err) {
-	if (err) console.log("CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot (you are probably not connected to the internet). Details: " + (err.message || err));
+	if (err) reportError("CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot (you are probably not connected to the internet). Details: " + (err.message || err));
 	else {
 		//if there was no error, go ahead and create and authenticate the bot
 		bot = new Discord.Client({
@@ -24,18 +40,20 @@ Dns.resolve("discordapp.com", function (err) {
 
 		//when the bot is ready, set a polling interval for the rss feed
 		bot.on("ready", function () {
-			console.log(bot.username + " - (" + bot.id + ")");
+			logEvent(new Date().toLocaleString() + " Registered bot " + bot.username + " - (" + bot.id + ")");
 
+			//as we don't have any links cached, we need to check recent messages
+			checkPreviousMessagesForLinks();
+
+			logEvent("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
 			setInterval(checkFeedAndPost, Config.pollingInterval);
 		});
 
-		//easy way to check if the bot is active - replies "pong" when you type "ping" in discord
 		bot.on("message", function (user, userID, channelID, message) {
-			if (message === "ping") {
-				bot.sendMessage({
-					to: channelID,
-					message: "pong"
-				});
+			//check if the message is a link, cache it if it is
+			if (new RegExp(linkRegExp.test(message))){
+				logEvent("Detected user posted link: " + message);
+				cacheLink(Uri.withinString(message, function (url) { return url; }));
 			}
 		});
 	}
@@ -44,43 +62,54 @@ Dns.resolve("discordapp.com", function (err) {
 function checkFeedAndPost() {
 	//check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
 	Dns.resolve(url.host, function (err) {
-		if (err) console.log("CONNECTION ERROR: Cannot resolve host (you are probably not connected to the internet). Details: " + (err.message || err));
-		else {
-			//check the feed asynchronously, check the latest link when done
-			FeedRead(Config.feedUrl, function (err, articles) {
-				try {
-					checkLinkAndPost(err, articles);
-				}
-				catch (ex) {
-					//checkFeedAndPost is async due to being called by setInterval so the console log has to be here
-					console.log("FEED ERROR: " + (ex.message || ex));
-				}
-			});
-		}
+		if (err) reportError("CONNECTION ERROR: Cannot resolve host (you are probably not connected to the internet). Details: " + (err.message || err));
+		else FeedRead(Config.feedUrl, checkLinkAndPost);
 	});
 }
 
 //checks if the link has been posted previously, posts if not
 function checkLinkAndPost(err, articles) {
-	if (err) throw "Error reading RSS feed: " + (err.message || err);
-
-	var latestLink = articles[0].link;
-
-	//get the latest 100 messages (100 is the limit)
-	bot.getMessages({
-		channelID: Config.channelID,
-		limit: 100
-	}, function (err, messages) {
-		if (err) throw err;
-
-		//get an array of strings from the array of message objects
-		var messageContents = messages.map((message) => { return message.content; });
-
-		//if the messageContents array doesn't include the latest link, post it
-		if (!messageContents.includes(latestLink))
+	if (err) reportError("FEED ERROR: Error reading RSS feed. Details: " + (err.message || err));
+	else {
+		//get the latest link and check if it has already been posted and cached
+		var latestLink = articles[0].link;
+		if (!cachedLinks.includes(latestLink)) {
+			logEvent("Attempting to post new link: " + latestLink);
 			bot.sendMessage({
 				to: Config.channelID,
 				message: latestLink
 			});
+			cacheLink(latestLink);
+		}
+	}
+}
+
+//gets last 100 messages and extracts any links found (for use on startup)
+function checkPreviousMessagesForLinks() {
+	var limit = 100;
+	logEvent("Attempting to check past " + limit + " messages for links");
+	bot.getMessages({
+		channelID: Config.channelID,
+		limit: limit
+	}, function (err, messages) {
+		if (err) reportError("Error fetching discord messages. Details: " + (err.message || err));
+		else {
+			logEvent("Pulled last " + messages.length + " messages, scanning for links");
+			var messageContents = messages.map((x) => { return x.content; });
+			for (var message in messageContents) {
+				message = messageContents[message];
+				if (linkRegExp.test(message))
+					cacheLink(Uri.withinString(message, function (url) { return url; }));
+			}
+		}
 	});
+}
+
+function logEvent(message){
+	console.log(new Date().toLocaleDateString() + " " + message);
+}
+
+//logs error to console with a timestamp
+function reportError(message) {
+	console.log(new Date().toLocaleString() + " ERROR: " + message);
 }
