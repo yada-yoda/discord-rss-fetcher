@@ -18,6 +18,8 @@ var linkRegExp = new RegExp(["http", "https", "www"].join("|"));
 var cachedLinks = [];
 //caches a link so we can check again later
 function cacheLink(link) {
+	//cheaty way to get around http and https not matching
+	link = link.replace("https://", "http://");
 	//store the new link if not stored already
 	if (!cachedLinks.includes(link)){
 		cachedLinks.push(link);
@@ -72,7 +74,7 @@ function checkLinkAndPost(err, articles) {
 	if (err) reportError("FEED ERROR: Error reading RSS feed. Details: " + (err.message || err));
 	else {
 		//get the latest link and check if it has already been posted and cached
-		var latestLink = articles[0].link;
+		var latestLink = articles[0].link.replace("https", "http"); //replace https with http for cheaty way of getting around matching issue
 		if (!cachedLinks.includes(latestLink)) {
 			logEvent("Attempting to post new link: " + latestLink);
 			bot.sendMessage({
