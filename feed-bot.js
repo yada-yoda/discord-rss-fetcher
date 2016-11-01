@@ -7,6 +7,8 @@ var FeedRead = require("feed-read"); //for rss feed reading
 var BotConfig = require("./botConfig.json"); //bot config file containing bot token
 var Config = require("./config.json"); //config file containing other settings
 
+var verboseLogging = false;
+
 //get a URL object from the feedUrl so we can examine it and check connectivity later
 var url = Url.parse(Config.feedUrl);
 
@@ -50,6 +52,12 @@ Dns.resolve("discordapp.com", function (err) {
 			setInterval(checkFeedAndPost, Config.pollingInterval);
 		});
 
+		bot.on("disconnect", function(err, code){
+			logEvent("Bot was disconnected. Code: " + code + ". Details: " + (err.message || err));
+			logEvent("Trying to reconnect bot");
+			bot.connect();
+		});
+
 		bot.on("message", function (user, userID, channelID, message) {
 			//check if the message is a link, cache it if it is
 			if (linkRegExp.test(message) && (message !== latestFeedLink)) {
@@ -59,12 +67,17 @@ Dns.resolve("discordapp.com", function (err) {
 					cacheLink(url);
 					return url;
 				});
+			} else if(message === "enableVerboseLogging"){
+				verboseLogging = true;
+			} else if(message === "disableVerboseLogging"){
+				verboseLogging = false;
 			}
 		});
 	}
 });
 
 function checkFeedAndPost() {
+	if(verboseLogging) logEvent("Bot is currently " + (bot.connected ? "connected to" : "disconnected from") + " discord");
 	//check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
 	Dns.resolve(url.host, function (err) {
 		if (err) reportError("CONNECTION ERROR: Cannot resolve host (you are probably not connected to the internet). Details: " + (err.message || err));
@@ -84,6 +97,16 @@ function checkLinkAndPost(err, articles) {
 			bot.sendMessage({
 				to: Config.channelID,
 				message: latestLink
+			}, function(err, message){
+				reportError("ERROR: Failed to send message: " + (err.message || err) + " " + message);
+				logEvent("Checking bot connectivity");
+				if(bot.connected)
+					logEvent("Connectivity seems fine - I have no idea why the message didn't post");
+				else{
+					reportError("Bot appears to be disconnected! Attempting to reconnect...")
+					bot.connect();
+				}
+					
 			});
 			cacheLink(latestLink);
 		}
