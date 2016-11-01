@@ -12,16 +12,15 @@ var url = Url.parse(Config.feedUrl);
 
 //placeholder for our bot - we need to check for connectivity before assigning this though
 var bot;
-
+var latestFeedLink = "";
 var linkRegExp = new RegExp(["http", "https", "www"].join("|"));
-
 var cachedLinks = [];
 //caches a link so we can check again later
 function cacheLink(link) {
 	//cheaty way to get around http and https not matching
 	link = link.replace("https://", "http://");
 	//store the new link if not stored already
-	if (!cachedLinks.includes(link)){
+	if (!cachedLinks.includes(link)) {
 		cachedLinks.push(link);
 		logEvent("Cached URL: " + link);
 	}
@@ -53,7 +52,7 @@ Dns.resolve("discordapp.com", function (err) {
 
 		bot.on("message", function (user, userID, channelID, message) {
 			//check if the message is a link, cache it if it is
-			if (linkRegExp.test(message)){
+			if (linkRegExp.test(message)) {
 				logEvent("Detected user posted link: " + message);
 				cacheLink(Uri.withinString(message, function (url) { return url; }));
 			}
@@ -74,7 +73,8 @@ function checkLinkAndPost(err, articles) {
 	if (err) reportError("FEED ERROR: Error reading RSS feed. Details: " + (err.message || err));
 	else {
 		//get the latest link and check if it has already been posted and cached
-		var latestLink = articles[0].link.replace("https", "http"); //replace https with http for cheaty way of getting around matching issue
+		var latestLink = articles[0].link.replace("https", "http");
+
 		if (!cachedLinks.includes(latestLink)) {
 			logEvent("Attempting to post new link: " + latestLink);
 			bot.sendMessage({
@@ -83,6 +83,10 @@ function checkLinkAndPost(err, articles) {
 			});
 			cacheLink(latestLink);
 		}
+		else if (latestFeedLink != latestLink)
+			logEvent("Didn't post new feed link because already detected as posted " + latestLink);
+
+		latestFeedLink = latestLink;
 	}
 }
 
@@ -97,7 +101,7 @@ function checkPreviousMessagesForLinks() {
 		if (err) reportError("Error fetching discord messages. Details: " + (err.message || err));
 		else {
 			logEvent("Pulled last " + messages.length + " messages, scanning for links");
-			var messageContents = messages.map((x) => { return x.content; });
+			var messageContents = messages.map((x) => { return x.content; }).reverse();
 			for (var message in messageContents) {
 				message = messageContents[message];
 				if (linkRegExp.test(message))
@@ -107,7 +111,7 @@ function checkPreviousMessagesForLinks() {
 	});
 }
 
-function logEvent(message){
+function logEvent(message) {
 	console.log(new Date().toLocaleDateString() + " " + message);
 }
 
