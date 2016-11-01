@@ -112,7 +112,7 @@ function checkPreviousMessagesForLinks() {
 }
 
 function logEvent(message) {
-	console.log(new Date().toLocaleDateString() + " " + message);
+	console.log(new Date().toLocaleString() + " " + message);
 }
 
 //logs error to console with a timestamp
