@@ -50,6 +50,12 @@ Dns.resolve("discordapp.com", function (err) {
 			setInterval(checkFeedAndPost, Config.pollingInterval);
 		});
 
+		bot.on("disconnect", function(err, code){
+			logEvent("Bot was disconnected. Code: " + code + ". Details: " + (err.message || err));
+			logEvent("Trying to reconnect bot");
+			bot.connect();
+		});
+
 		bot.on("message", function (user, userID, channelID, message) {
 			//check if the message is a link, cache it if it is
 			if (linkRegExp.test(message) && (message !== latestFeedLink)) {
@@ -84,6 +90,16 @@ function checkLinkAndPost(err, articles) {
 			bot.sendMessage({
 				to: Config.channelID,
 				message: latestLink
+			}, function(err, message){
+				reportError("ERROR: Failed to send message: " + (err.message || err) + " " + message);
+				logEvent("Checking bot connectivity");
+				if(bot.connected)
+					logEvent("Connectivity seems fine - I have no idea why the message didn't post");
+				else{
+					reportError("Bot appears to be disconnected! Attempting to reconnect...")
+					bot.connect();
+				}
+					
 			});
 			cacheLink(latestLink);
 		}
