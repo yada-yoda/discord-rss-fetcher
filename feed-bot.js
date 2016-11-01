@@ -54,7 +54,11 @@ Dns.resolve("discordapp.com", function (err) {
 			//check if the message is a link, cache it if it is
 			if (linkRegExp.test(message) && (message !== latestFeedLink)) {
 				logEvent("Detected posted link: " + message);
-				cacheLink(Uri.withinString(message, function (url) { return url; }));
+				//detect the url inside the string, and cache it
+				Uri.withinString(message, function (url) {
+					cacheLink(url);
+					return url;
+				});
 			}
 		});
 	}
@@ -105,7 +109,11 @@ function checkPreviousMessagesForLinks() {
 			for (var message in messageContents) {
 				message = messageContents[message];
 				if (linkRegExp.test(message))
-					cacheLink(Uri.withinString(message, function (url) { return url; }));
+					//detect the url inside the string, and cache it
+					Uri.withinString(message, function (url) {
+						cacheLink(url);
+						return url;
+					});
 			}
 		}
 	});
