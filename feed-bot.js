@@ -67,17 +67,12 @@ Dns.resolve("discordapp.com", function (err) {
 					cacheLink(url);
 					return url;
 				});
-			} else if(message === "enableVerboseLogging"){
-				verboseLogging = true;
-			} else if(message === "disableVerboseLogging"){
-				verboseLogging = false;
 			}
 		});
 	}
 });
 
 function checkFeedAndPost() {
-	if(verboseLogging) logEvent("Bot is currently " + (bot.connected ? "connected to" : "disconnected from") + " discord");
 	//check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
 	Dns.resolve(url.host, function (err) {
 		if (err) reportError("CONNECTION ERROR: Cannot resolve host (you are probably not connected to the internet). Details: " + (err.message || err));
