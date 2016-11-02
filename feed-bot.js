@@ -62,7 +62,7 @@ Dns.resolve("discordapp.com", function (err) {
 		bot.on("message", function (user, userID, channelID, message) {
 			//check if the message contains a link, in the right channel, and not the latest link from the rss feed
 			if (channelID === Config.channelID && linkRegExp.test(message) && (message !== latestFeedLink)) {
-				logEvent("Detected posted link: " + message);
+				logEvent("Detected posted link in this message: " + message);
 				//detect the url inside the string, and cache it
 				Uri.withinString(message, function (url) {
 					cacheLink(url);
