@@ -94,7 +94,7 @@ function checkLinkAndPost(err, articles) {
 				to: Config.channelID,
 				message: latestLink
 			}, function (err, message) {
-				reportError("ERROR: Failed to send message: " + (err.message || err) + " " + message);
+				if(err) reportError("ERROR: Failed to send message: " + (err.message || err) + " " + message);
 				logEvent("Checking bot connectivity");
 				if (bot.connected)
 					logEvent("Connectivity seems fine - I have no idea why the message didn't post");
