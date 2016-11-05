@@ -7,6 +7,8 @@ var FeedRead = require("feed-read"); //for rss feed reading
 var BotConfig = require("./botConfig.json"); //bot config file containing bot token
 var Config = require("./config.json"); //config file containing other settings
 
+var verboseLogging = false;
+
 //get a URL object from the feedUrl so we can examine it and check connectivity later
 var url = Url.parse(Config.feedUrl);
 
@@ -50,10 +52,17 @@ Dns.resolve("discordapp.com", function (err) {
 			setInterval(checkFeedAndPost, Config.pollingInterval);
 		});
 
+		bot.on("disconnect", function (err, code) {
+			logEvent("Bot was disconnected! " + code != null ? code : "No disconnect code provided");
+			if (err) reportError("Bot disconnect error: " + (err.message || err));
+			logEvent("Trying to reconnect bot");
+			bot.connect();
+		});
+
 		bot.on("message", function (user, userID, channelID, message) {
-			//check if the message is a link, cache it if it is
-			if (linkRegExp.test(message) && (message !== latestFeedLink)) {
-				logEvent("Detected posted link: " + message);
+			//check if the message contains a link, in the right channel, and not the latest link from the rss feed
+			if (channelID === Config.channelID && linkRegExp.test(message) && (message !== latestFeedLink)) {
+				logEvent("Detected posted link in this message: " + message);
 				//detect the url inside the string, and cache it
 				Uri.withinString(message, function (url) {
 					cacheLink(url);
@@ -84,6 +93,16 @@ function checkLinkAndPost(err, articles) {
 			bot.sendMessage({
 				to: Config.channelID,
 				message: latestLink
+			}, function (err, message) {
+				if(err) reportError("ERROR: Failed to send message: " + (err.message || err) + " " + message);
+				logEvent("Checking bot connectivity");
+				if (bot.connected)
+					logEvent("Connectivity seems fine - I have no idea why the message didn't post");
+				else {
+					reportError("Bot appears to be disconnected! Attempting to reconnect...")
+					bot.connect();
+				}
+
 			});
 			cacheLink(latestLink);
 		}
