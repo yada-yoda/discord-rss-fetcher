@@ -17,6 +17,9 @@ var latestFeedLink = "";
 var linkRegExp = new RegExp(["http", "https", "www"].join("|"));
 var cachedLinks = [];
 
+var youtubeShareUrl = "http://youtu.be/";
+var youtubeFullUrl = "http://www.youtube.com/watch?v=";
+
 //caches a link so we can check again later
 function cacheLink(link) {
 	//cheaty way to get around http and https not matching
@@ -29,6 +32,18 @@ function cacheLink(link) {
 	//get rid of the first array element if we have reached our cache limit
 	if (cachedLinks.length > (Config.numLinksToCache || 10))
 		cachedLinks.shift();
+}
+
+function checkCache(link) {
+	if (Config.youtubeMode && link.includes(youtubeFullUrl)) {
+		return cachedLinks.includes(convertToYoutubeShareUrl(link));
+	}
+	return cachedLinks.includes(link);
+}
+
+function convertToYoutubeShareUrl(fullUrl){
+	var shareUrl = fullUrl.replace(youtubeFullUrl, youtubeShareUrl);
+	shareUrl.splice(0, shareUrl.indexOf("&"));
 }
 
 //check if we can connect to discordapp.com to authenticate the bot
@@ -96,7 +111,7 @@ function checkLinkAndPost(err, articles) {
 		var latestLink = articles[0].link.replace("https", "http");
 
 		//check whether the latest link out the feed exists in our cache
-		if (!cachedLinks.includes(latestLink)) {
+		if (!checkCache(latestLink)) {
 			Log.info("Attempting to post new link: " + latestLink);
 
 			//send a messsage containing the new feed link to our discord channel
