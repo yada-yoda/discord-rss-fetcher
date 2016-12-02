@@ -5,7 +5,7 @@ var Discord = require("discord.io"); //for obvious reasons
 var FeedRead = require("feed-read"); //for rss feed reading
 var BotConfig = require("./bot-config.json"); //bot config file containing bot token
 var Config = require("./config.json"); //config file containing other settings
-var log = require("./log.js"); //some very simple logging functions I made
+var Log = require("./log.js"); //some very simple logging functions I made
 
 //get a URL object from the feedUrl so we can examine it and check connectivity later
 var url = Url.parse(Config.feedUrl);
@@ -17,6 +17,9 @@ var latestFeedLink = "";
 var linkRegExp = new RegExp(["http", "https", "www"].join("|"));
 var cachedLinks = [];
 
+var youtubeShareUrl = "http://youtu.be/";
+var youtubeFullUrl = "http://www.youtube.com/watch?v=";
+
 //caches a link so we can check again later
 function cacheLink(link) {
 	//cheaty way to get around http and https not matching
@@ -24,16 +27,32 @@ function cacheLink(link) {
 	//store the new link if not stored already
 	if (!cachedLinks.includes(link)) {
 		cachedLinks.push(link);
-		log.info("Cached URL: " + link);
+		Log.info("Cached URL: " + link);
 	}
 	//get rid of the first array element if we have reached our cache limit
 	if (cachedLinks.length > (Config.numLinksToCache || 10))
 		cachedLinks.shift();
 }
 
+function checkCache(link) {
+	if (Config.youtubeMode && link.includes(youtubeFullUrl)) {
+		return cachedLinks.includes(convertToYoutubeShareUrl(link));
+	}
+	return cachedLinks.includes(link);
+}
+
+function convertToYoutubeShareUrl(fullUrl) {
+	var shareUrl = fullUrl.replace(youtubeFullUrl, youtubeShareUrl);
+	var ampersandIdx = shareUrl.indexOf("&");
+	if (ampersandIdx > -1)
+		return shareUrl.slice(0, ampersandIdx);
+	else
+		return shareUrl;
+}
+
 //check if we can connect to discordapp.com to authenticate the bot
 Dns.resolve("discordapp.com", function (err) {
-	if (err) log.error("CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot (you are probably not connected to the internet).", err);
+	if (err) Log.error("CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot (you are probably not connected to the internet).", err);
 	else {
 		//if there was no error, go ahead and create and authenticate the bot
 		bot = new Discord.Client({
@@ -43,12 +62,12 @@ Dns.resolve("discordapp.com", function (err) {
 
 		//when the bot is ready, set a polling interval for the rss feed
 		bot.on("ready", function () {
-			log.info("Registered bot " + bot.username + " - (" + bot.id + ")");
+			Log.info("Registered bot " + bot.username + " - (" + bot.id + ")");
 
 			//as we don't have any links cached, we need to check recent messages
 			checkPreviousMessagesForLinks();
 
-			log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
+			Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
 
 			if (!timer) {
 				setInterval(checkFeedAndPost, Config.pollingInterval);
@@ -58,9 +77,9 @@ Dns.resolve("discordapp.com", function (err) {
 
 		bot.on("disconnect", function (err, code) {
 			//do a bunch of logging
-			log.event("Bot was disconnected! " + code ? code : "No disconnect code provided", "Discord.io");
-			if (err) log.error("Bot disconnected!", err);
-			log.info("Trying to reconnect bot");
+			Log.event("Bot was disconnected! " + code ? code : "No disconnect code provided", "Discord.io");
+			if (err) Log.error("Bot disconnected!", err);
+			Log.info("Trying to reconnect bot");
 
 			//then actually attempt to reconnect
 			bot.connect();
@@ -69,7 +88,7 @@ Dns.resolve("discordapp.com", function (err) {
 		bot.on("message", function (user, userID, channelID, message) {
 			//check if the message contains a link, in the right channel, and not the latest link from the rss feed
 			if (channelID === Config.channelID && linkRegExp.test(message) && (message !== latestFeedLink)) {
-				log.event("Detected posted link in this message: " + message, "Discord.io");
+				Log.event("Detected posted link in this message: " + message, "Discord.io");
 				//detect the url inside the string, and cache it
 				Uri.withinString(message, function (url) {
 					cacheLink(url);
@@ -83,21 +102,23 @@ Dns.resolve("discordapp.com", function (err) {
 function checkFeedAndPost() {
 	//check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
 	Dns.resolve(url.host, function (err) {
-		if (err) log.error("CONNECTION ERROR: Cannot resolve host (you are probably not connected to the internet)", err);
+		if (err) Log.error("CONNECTION ERROR: Cannot resolve host (you are probably not connected to the internet)", err);
 		else FeedRead(Config.feedUrl, checkLinkAndPost);
 	});
 }
 
 //checks if the link has been posted previously, posts if not
 function checkLinkAndPost(err, articles) {
-	if (err) log.error("FEED ERROR: Error reading RSS feed.", err);
+	if (err) Log.error("FEED ERROR: Error reading RSS feed.", err);
 	else {
 		//get the latest link and check if it has already been posted and cached
 		var latestLink = articles[0].link.replace("https", "http");
 
 		//check whether the latest link out the feed exists in our cache
-		if (!cachedLinks.includes(latestLink)) {
-			log.info("Attempting to post new link: " + latestLink);
+		if (!checkCache(latestLink)) {
+			if (Config.youtubeMode && latestLink.includes(youtubeFullUrl))
+				latestLink = convertToYoutubeShareUrl(latestLink);
+			Log.info("Attempting to post new link: " + latestLink);
 
 			//send a messsage containing the new feed link to our discord channel
 			bot.sendMessage({
@@ -105,12 +126,12 @@ function checkLinkAndPost(err, articles) {
 				message: latestLink
 			}, function (err, message) {
 				if (err) {
-					log.error("ERROR: Failed to send message: " + message.substring(0, 15) + "...", err);
+					Log.error("ERROR: Failed to send message: " + message.substring(0, 15) + "...", err);
 					//if there is an error posting the message, check if it is because the bot isn't connected
 					if (bot.connected)
-						log.info("Connectivity seems fine - I have no idea why the message didn't post");
+						Log.info("Connectivity seems fine - I have no idea why the message didn't post");
 					else {
-						log.error("Bot appears to be disconnected! Attempting to reconnect...", err);
+						Log.error("Bot appears to be disconnected! Attempting to reconnect...", err);
 
 						//attempt to reconnect
 						bot.connect();
@@ -123,7 +144,7 @@ function checkLinkAndPost(err, articles) {
 		}
 		else if (latestFeedLink != latestLink)
 			//alternatively, if we have a new link from the feed, but its been posted already, just alert the console
-			log.info("Didn't post new feed link because already detected as posted " + latestLink);
+			Log.info("Didn't post new feed link because already detected as posted " + latestLink);
 
 		//ensure our latest feed link variable is up to date, so we can track when the feed updates
 		latestFeedLink = latestLink;
@@ -133,16 +154,16 @@ function checkLinkAndPost(err, articles) {
 //gets last 100 messages and extracts any links found (for use on startup)
 function checkPreviousMessagesForLinks() {
 	var limit = 100;
-	log.info("Attempting to check past " + limit + " messages for links");
+	Log.info("Attempting to check past " + limit + " messages for links");
 
 	//get the last however many messsages from our discord channel
 	bot.getMessages({
 		channelID: Config.channelID,
 		limit: limit
 	}, function (err, messages) {
-		if (err) log.error("Error fetching discord messages.", err);
+		if (err) Log.error("Error fetching discord messages.", err);
 		else {
-			log.info("Pulled last " + messages.length + " messages, scanning for links");
+			Log.info("Pulled last " + messages.length + " messages, scanning for links");
 
 			//extract an array of strings from the array of message objects
 			var messageContents = messages.map((x) => { return x.content; }).reverse();
