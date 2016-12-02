@@ -55,3 +55,4 @@ jspm_packages
 *.tgz
 
 /botConfig.json
+/bot-config.json

@@ -41,9 +41,13 @@ function checkCache(link) {
 	return cachedLinks.includes(link);
 }
 
-function convertToYoutubeShareUrl(fullUrl){
+function convertToYoutubeShareUrl(fullUrl) {
 	var shareUrl = fullUrl.replace(youtubeFullUrl, youtubeShareUrl);
-	shareUrl.splice(0, shareUrl.indexOf("&"));
+	var ampersandIdx = shareUrl.indexOf("&");
+	if (ampersandIdx > -1)
+		return shareUrl.slice(0, ampersandIdx);
+	else
+		return shareUrl;
 }
 
 //check if we can connect to discordapp.com to authenticate the bot
@@ -112,6 +116,8 @@ function checkLinkAndPost(err, articles) {
 
 		//check whether the latest link out the feed exists in our cache
 		if (!checkCache(latestLink)) {
+			if (Config.youtubeMode && latestLink.includes(youtubeFullUrl))
+				latestLink = convertToYoutubeShareUrl(latestLink);
 			Log.info("Attempting to post new link: " + latestLink);
 
 			//send a messsage containing the new feed link to our discord channel
