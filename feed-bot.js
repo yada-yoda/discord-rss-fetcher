@@ -43,12 +43,12 @@ Dns.resolve("discordapp.com", function (err) {
 
 		//when the bot is ready, set a polling interval for the rss feed
 		bot.on("ready", function () {
-				log.info("Registered bot " + bot.username + " - (" + bot.id + ")");
+			log.info("Registered bot " + bot.username + " - (" + bot.id + ")");
 
 				//as we don't have any links cached, we need to check recent messages
-				checkPreviousMessagesForLinks();
+			checkPreviousMessagesForLinks();
 
-			logEvent("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
+			log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
 			
 			if(!timer){
 				setInterval(checkFeedAndPost, Config.pollingInterval);
