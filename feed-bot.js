@@ -45,12 +45,12 @@ Dns.resolve("discordapp.com", function (err) {
 		bot.on("ready", function () {
 			log.info("Registered bot " + bot.username + " - (" + bot.id + ")");
 
-				//as we don't have any links cached, we need to check recent messages
+			//as we don't have any links cached, we need to check recent messages
 			checkPreviousMessagesForLinks();
 
 			log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
-			
-			if(!timer){
+
+			if (!timer) {
 				setInterval(checkFeedAndPost, Config.pollingInterval);
 				timer = true;
 			}
@@ -61,7 +61,7 @@ Dns.resolve("discordapp.com", function (err) {
 			log.event("Bot was disconnected! " + code ? code : "No disconnect code provided", "Discord.io");
 			if (err) log.error("Bot disconnected!", err);
 			log.info("Trying to reconnect bot");
-			
+
 			//then actually attempt to reconnect
 			bot.connect();
 		});
@@ -98,7 +98,7 @@ function checkLinkAndPost(err, articles) {
 		//check whether the latest link out the feed exists in our cache
 		if (!cachedLinks.includes(latestLink)) {
 			log.info("Attempting to post new link: " + latestLink);
-			
+
 			//send a messsage containing the new feed link to our discord channel
 			bot.sendMessage({
 				to: Config.channelID,
@@ -117,7 +117,7 @@ function checkLinkAndPost(err, articles) {
 					}
 				}
 			});
-			
+
 			//finally make sure the link is cached, so it doesn't get posted again
 			cacheLink(latestLink);
 		}
@@ -148,7 +148,7 @@ function checkPreviousMessagesForLinks() {
 			var messageContents = messages.map((x) => { return x.content; }).reverse();
 
 			for (var messageIdx in messageContents) {
-				message = messageContents[messageIdx];
+				var message = messageContents[messageIdx];
 
 				//test if the message contains a url
 				if (linkRegExp.test(message))
