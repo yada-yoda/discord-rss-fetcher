@@ -14,9 +14,11 @@ var url = Url.parse(Config.feedUrl);
 
 //placeholder for our bot - we need to check for connectivity before assigning this though
 var bot;
+var timer = false;
 var latestFeedLink = "";
 var linkRegExp = new RegExp(["http", "https", "www"].join("|"));
 var cachedLinks = [];
+
 //caches a link so we can check again later
 function cacheLink(link) {
 	//cheaty way to get around http and https not matching
@@ -49,7 +51,11 @@ Dns.resolve("discordapp.com", function (err) {
 			checkPreviousMessagesForLinks();
 
 			logEvent("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
-			setInterval(checkFeedAndPost, Config.pollingInterval);
+			
+			if(!timer){
+				setInterval(checkFeedAndPost, Config.pollingInterval);
+				timer = true;
+			}
 		});
 
 		bot.on("disconnect", function (err, code) {
