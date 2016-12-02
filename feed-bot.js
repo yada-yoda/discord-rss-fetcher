@@ -3,7 +3,7 @@ var Url = require("url"); //for url parsing
 var Uri = require("urijs"); //for finding urls within message strings
 var Discord = require("discord.io"); //for obvious reasons
 var FeedRead = require("feed-read"); //for rss feed reading
-var BotConfig = require("./botConfig.json"); //bot config file containing bot token
+var BotConfig = require("./bot-config.json"); //bot config file containing bot token
 var Config = require("./config.json"); //config file containing other settings
 var log = require("./log.js"); //some very simple logging functions I made
 

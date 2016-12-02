@@ -17,7 +17,7 @@ Feel free to contact me with suggestions and feature requests - if you need a ne
 3. Open a terminal in cloned/extracted folder
 4. Run `npm install` and wait for it to finish
 5. Edit *config.json* to include your RSS feed and channel ID
-6. Create *botConfig.json* to include your bot token: 
+6. Create *bot-config.json* to include your bot token: 
 `{
 	"token": "abc123blahblahblahyourtokengoeshere"
 }`
