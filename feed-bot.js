@@ -1,13 +1,16 @@
+//external library imports
 var Dns = require("dns"); //for connectivity checking
 var Url = require("url"); //for url parsing
 var Uri = require("urijs"); //for finding urls within message strings
 var Discord = require("discord.io"); //for obvious reasons
 var FeedRead = require("feed-read"); //for rss feed reading
+
+//my imports
+var Log = require("./log.js"); //some very simple logging functions I made
 var BotConfig = require("./bot-config.json"); //bot config file containing bot token
 var Config = require("./config.json"); //config file containing other settings
-var Log = require("./log.js"); //some very simple logging functions I made
 
-var isTimer = false;
+var IS_FIRST_RUN = true;
 
 var Bot = {
 	bot: null,
@@ -30,17 +33,21 @@ var Bot = {
 		});
 	},
 	onReady: function () {
-		Log.info("Registered bot " + this.bot.username + " - (" + this.bot.id + ")");
+		if (IS_FIRST_RUN) {
+			IS_FIRST_RUN = false;
 
-		//as we don't have any links cached, we need to check recent messages
-		this.checkPastMessagesForLinks();
+			Log.info("Registered bot " + this.bot.username + " - (" + this.bot.id + ")");
+			Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
 
-		Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
-
-		if (!isTimer) {
+			//set up the timer to check the feed
 			setInterval(Feed.checkAndPost, Config.pollingInterval);
-			isTimer = true;
 		}
+		else {
+			Log.info("Bot reconnected!");
+		}
+
+		//we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
+		this.checkPastMessagesForLinks();
 	},
 	onDisconnect: function (err, code) {
 		//do a bunch of logging
