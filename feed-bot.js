@@ -20,15 +20,15 @@ var Bot = {
 			if (err) Log.error("CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot (you are probably not connected to the internet).", err);
 			else {
 				//if there was no error, go ahead and create and authenticate the bot
-				this.bot = new Discord.Client({
+				Bot.bot = new Discord.Client({
 					token: BotConfig.token,
 					autorun: true
 				});
 
 				//set up the bot's event handlers
-				this.bot.on("ready", this.onReady);
-				this.bot.on("disconnect", this.onDisconnect);
-				this.bot.on("message", this.onMessage);
+				Bot.bot.on("ready", Bot.onReady);
+				Bot.bot.on("disconnect", Bot.onDisconnect);
+				Bot.bot.on("message", Bot.onMessage);
 			}
 		});
 	},
@@ -36,7 +36,7 @@ var Bot = {
 		if (IS_FIRST_RUN) {
 			IS_FIRST_RUN = false;
 
-			Log.info("Registered bot " + this.bot.username + " - (" + this.bot.id + ")");
+			Log.info("Registered bot " + Bot.bot.username + " - (" + Bot.bot.id + ")");
 			Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
 
 			//set up the timer to check the feed
@@ -47,7 +47,7 @@ var Bot = {
 		}
 
 		//we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
-		this.checkPastMessagesForLinks();
+		Bot.checkPastMessagesForLinks();
 	},
 	onDisconnect: function (err, code) {
 		//do a bunch of logging
@@ -56,7 +56,7 @@ var Bot = {
 		Log.info("Trying to reconnect bot");
 
 		//then actually attempt to reconnect
-		this.bot.connect();
+		Bot.bot.connect();
 	},
 	onMessage: function (user, userID, channelID, message) {
 		//check if the message contains a link, in the right channel, and not the latest link from the rss feed
@@ -107,10 +107,10 @@ var YouTube = {
 		share: "http://youtu.be/",
 		full: "http://www.youtube.com/watch?v=",
 		convertShareToFull: function (shareUrl) {
-			return shareUrl.replace(this.share, this.full);
+			return shareUrl.replace(YouTube.share, YouTube.full);
 		},
 		convertFullToShare: function (fullUrl) {
-			var shareUrl = fullUrl.replace(this.share, this.full);
+			var shareUrl = fullUrl.replace(YouTube.share, YouTube.full);
 
 			if (shareUrl.includes("&"))
 				shareUrl = shareUrl.slice(0, fullUrl.indexOf("&"));
@@ -128,19 +128,19 @@ var Links = {
 		//cheaty way to get around http and https not matching
 		link = link.replace("https://", "http://");
 		//store the new link if not stored already
-		if (!this.cached.includes(link)) {
-			this.cached.push(link);
+		if (!Links.cached.includes(link)) {
+			Links.cached.push(link);
 			Log.info("Cached URL: " + link);
 		}
 		//get rid of the first array element if we have reached our cache limit
-		if (this.cached.length > (Config.numLinksToCache || 10))
-			this.cached.shift();
+		if (Links.cached.length > (Config.numLinksToCache || 10))
+			Links.cached.shift();
 	},
 	checkCache: function (link) {
 		if (Config.youtubeMode && link.includes(link)) {
-			return this.cached.includes(YouTube.convertFullToShare(link));
+			return Links.cached.includes(YouTube.convertFullToShare(link));
 		}
-		return this.cached.includes(link);
+		return Links.cached.includes(link);
 	},
 	validateAndPost: function (err, articles) {
 		if (err) Log.error("FEED ERROR: Error reading RSS feed.", err);
@@ -149,7 +149,7 @@ var Links = {
 			var latestLink = articles[0].link.replace("https", "http");
 
 			//check whether the latest link out the feed exists in our cache
-			if (!this.checkCache(latestLink)) {
+			if (!Links.checkCache(latestLink)) {
 				if (Config.youtubeMode && latestLink.includes(YouTube.fullUrl))
 					latestLink = YouTube.convertFullToShare(latestLink);
 				Log.info("Attempting to post new link: " + latestLink);
@@ -174,14 +174,14 @@ var Links = {
 				});
 
 				//finally make sure the link is cached, so it doesn't get posted again
-				this.cache(latestLink);
+				Links.cache(latestLink);
 			}
-			else if (this.latestFromFeed != latestLink)
+			else if (Links.latestFromFeed != latestLink)
 				//alternatively, if we have a new link from the feed, but its been posted already, just alert the console
 				Log.info("Didn't post new feed link because already detected as posted " + latestLink);
 
 			//ensure our latest feed link variable is up to date, so we can track when the feed updates
-			this.latestFromFeed = latestLink;
+			Links.latestFromFeed = latestLink;
 		}
 	}
 };
@@ -190,9 +190,14 @@ var Feed = {
 	urlObj: Url.parse(Config.feedUrl),
 	checkAndPost: function () {
 		//check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
-		Dns.resolve(this.urlObj.host, function (err) {
+		Dns.resolve(Links.urlObj.host, function (err) {
 			if (err) Log.error("CONNECTION ERROR: Cannot resolve host (you are probably not connected to the internet)", err);
 			else FeedRead(Config.feedUrl, Links.checkAndPost);
 		});
 	}
 };
+
+//IIFE to kickstart the bot when the app loads
+(function(){
+	Bot.startup();
+})();
