@@ -1,12 +1,9 @@
 # Features
 
 - Posts latest link from RSS feed into specified Discord channel
-- Doesn't post the link if it has already been posted in last 100 messages
 - Configurable polling interval
-
-# Planned features
-
-- Addition of user-defined URLs to match as 'sent' (ie if a user posts a youtu.be link, the bot will still post a youtube.com link, even if they point to the same palce - I would like to add a setting whereby you can specify alternate hosts to match)
+- Doesn't post the link if it has already been posted in last 100 messages
+- YouTube mode - detects both youtube.com and youtu.be links, and doesn't post again if *either* have already been posted (BETA)
 
 Feel free to contact me with suggestions and feature requests - if you need a new feature, just let me know and I will see what I can do! (No promises though :p)
 
