@@ -13,42 +13,48 @@ var url = Url.parse(Config.feedUrl);
 //placeholder for our bot - we need to check for connectivity before assigning this though
 var bot;
 var timer = false;
-var latestFeedLink = "";
-var linkRegExp = new RegExp(["http", "https", "www"].join("|"));
-var cachedLinks = [];
 
-var youtubeShareUrl = "http://youtu.be/";
-var youtubeFullUrl = "http://www.youtube.com/watch?v=";
+var YouTube = {
+	url: {
+		share: "http://youtu.be/",
+		full: "http://www.youtube.com/watch?v=",
+		convertShareToFull: function (shareUrl) {
+			return shareUrl.replace(this.share, this.full);
+		},
+		convertFullToShare: function (fullUrl) {
+			var shareUrl = fullUrl.replace(this.share, this.full);
 
-//caches a link so we can check again later
-function cacheLink(link) {
-	//cheaty way to get around http and https not matching
-	link = link.replace("https://", "http://");
-	//store the new link if not stored already
-	if (!cachedLinks.includes(link)) {
-		cachedLinks.push(link);
-		Log.info("Cached URL: " + link);
+			if (shareUrl.includes("&"))
+				shareUrl = shareUrl.slice(0, fullUrl.indexOf("&"));
+
+			return shareUrl;
+		}
+	},
+};
+
+var Links = {
+	regExp: new RegExp(["http", "https", "www"].join("|")),
+	cached: [],
+	latestFromFeed: "",
+	cache: function (link) {
+		//cheaty way to get around http and https not matching
+		link = link.replace("https://", "http://");
+		//store the new link if not stored already
+		if (!this.cached.includes(link)) {
+			this.cached.push(link);
+			Log.info("Cached URL: " + link);
+		}
+		//get rid of the first array element if we have reached our cache limit
+		if (this.cached.length > (Config.numLinksToCache || 10))
+			this.cached.shift();
+	},
+	checkCache: function (link) {
+		if (Config.youtubeMode && link.includes(link)) {
+			return this.cached.includes(YouTube.convertFullToShare(link));
+		}
+		return this.cached.includes(link);
 	}
-	//get rid of the first array element if we have reached our cache limit
-	if (cachedLinks.length > (Config.numLinksToCache || 10))
-		cachedLinks.shift();
-}
-
-function checkCache(link) {
-	if (Config.youtubeMode && link.includes(youtubeFullUrl)) {
-		return cachedLinks.includes(convertToYoutubeShareUrl(link));
-	}
-	return cachedLinks.includes(link);
-}
-
-function convertToYoutubeShareUrl(fullUrl) {
-	var shareUrl = fullUrl.replace(youtubeFullUrl, youtubeShareUrl);
-	var ampersandIdx = shareUrl.indexOf("&");
-	if (ampersandIdx > -1)
-		return shareUrl.slice(0, ampersandIdx);
-	else
-		return shareUrl;
-}
+};
 
 //check if we can connect to discordapp.com to authenticate the bot
 Dns.resolve("discordapp.com", function (err) {
@@ -87,11 +93,11 @@ Dns.resolve("discordapp.com", function (err) {
 
 		bot.on("message", function (user, userID, channelID, message) {
 			//check if the message contains a link, in the right channel, and not the latest link from the rss feed
-			if (channelID === Config.channelID && linkRegExp.test(message) && (message !== latestFeedLink)) {
+			if (channelID === Config.channelID && Links.regExp.test(message) && (message !== Links.latestFromFeed)) {
 				Log.event("Detected posted link in this message: " + message, "Discord.io");
 				//detect the url inside the string, and cache it
 				Uri.withinString(message, function (url) {
-					cacheLink(url);
+					Links.cache(url);
 					return url;
 				});
 			}
@@ -115,9 +121,9 @@ function checkLinkAndPost(err, articles) {
 		var latestLink = articles[0].link.replace("https", "http");
 
 		//check whether the latest link out the feed exists in our cache
-		if (!checkCache(latestLink)) {
-			if (Config.youtubeMode && latestLink.includes(youtubeFullUrl))
-				latestLink = convertToYoutubeShareUrl(latestLink);
+		if (!Links.checkCache(latestLink)) {
+			if (Config.youtubeMode && latestLink.includes(YouTube.fullUrl))
+				latestLink = YouTube.convertFullToShare(latestLink);
 			Log.info("Attempting to post new link: " + latestLink);
 
 			//send a messsage containing the new feed link to our discord channel
@@ -140,14 +146,14 @@ function checkLinkAndPost(err, articles) {
 			});
 
 			//finally make sure the link is cached, so it doesn't get posted again
-			cacheLink(latestLink);
+			Links.cache(latestLink);
 		}
-		else if (latestFeedLink != latestLink)
+		else if (Links.latestFromFeed != latestLink)
 			//alternatively, if we have a new link from the feed, but its been posted already, just alert the console
 			Log.info("Didn't post new feed link because already detected as posted " + latestLink);
 
 		//ensure our latest feed link variable is up to date, so we can track when the feed updates
-		latestFeedLink = latestLink;
+		Links.latestFromFeed = latestLink;
 	}
 }
 
@@ -172,10 +178,10 @@ function checkPreviousMessagesForLinks() {
 				var message = messageContents[messageIdx];
 
 				//test if the message contains a url
-				if (linkRegExp.test(message))
+				if (Links.regExp.test(message))
 					//detect the url inside the string, and cache it
 					Uri.withinString(message, function (url) {
-						cacheLink(url);
+						Links.cache(url);
 						return url;
 					});
 			}
