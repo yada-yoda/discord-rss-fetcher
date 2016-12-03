@@ -107,10 +107,10 @@ var YouTube = {
 		share: "http://youtu.be/",
 		full: "http://www.youtube.com/watch?v=",
 		convertShareToFull: function (shareUrl) {
-			return shareUrl.replace(YouTube.share, YouTube.full);
+			return shareUrl.replace(YouTube.url.share, YouTube.url.full);
 		},
 		convertFullToShare: function (fullUrl) {
-			var shareUrl = fullUrl.replace(YouTube.share, YouTube.full);
+			var shareUrl = fullUrl.replace(YouTube.url.full, YouTube.url.share);
 
 			if (shareUrl.includes("&"))
 				shareUrl = shareUrl.slice(0, fullUrl.indexOf("&"));
@@ -127,6 +127,11 @@ var Links = {
 	cache: function (link) {
 		//cheaty way to get around http and https not matching
 		link = link.replace("https://", "http://");
+
+		if(Config.youtubeMode && link.includes(YouTube.url.full)){
+			link = YouTube.url.convertFullToShare(link);
+		}
+
 		//store the new link if not stored already
 		if (!Links.cached.includes(link)) {
 			Links.cached.push(link);
@@ -138,7 +143,7 @@ var Links = {
 	},
 	checkCache: function (link) {
 		if (Config.youtubeMode && link.includes(link)) {
-			return Links.cached.includes(YouTube.convertFullToShare(link));
+			return Links.cached.includes(YouTube.url.convertFullToShare(link));
 		}
 		return Links.cached.includes(link);
 	},
@@ -150,8 +155,8 @@ var Links = {
 
 			//check whether the latest link out the feed exists in our cache
 			if (!Links.checkCache(latestLink)) {
-				if (Config.youtubeMode && latestLink.includes(YouTube.fullUrl))
-					latestLink = YouTube.convertFullToShare(latestLink);
+				if (Config.youtubeMode && latestLink.includes(YouTube.url.full))
+					latestLink = YouTube.url.convertFullToShare(latestLink);
 				Log.info("Attempting to post new link: " + latestLink);
 
 				//send a messsage containing the new feed link to our discord channel
@@ -190,9 +195,9 @@ var Feed = {
 	urlObj: Url.parse(Config.feedUrl),
 	checkAndPost: function () {
 		//check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
-		Dns.resolve(Links.urlObj.host, function (err) {
+		Dns.resolve(Feed.urlObj.host, function (err) {
 			if (err) Log.error("CONNECTION ERROR: Cannot resolve host (you are probably not connected to the internet)", err);
-			else FeedRead(Config.feedUrl, Links.checkAndPost);
+			else FeedRead(Config.feedUrl, Links.validateAndPost);
 		});
 	}
 };
