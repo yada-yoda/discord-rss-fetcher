@@ -68,7 +68,6 @@ var DiscordClient = {
 			});
 		}
 	},
-	//gets last 100 messages and extracts any links found (for use on startup)
 	checkPastMessagesForLinks: function () {
 		var limit = 100;
 		Log.info("Attempting to check past " + limit + " messages for links");
@@ -82,14 +81,12 @@ var DiscordClient = {
 			else {
 				Log.info("Pulled last " + messages.length + " messages, scanning for links");
 
-				//extract an array of strings from the array of message objects
-				var messageContents = messages.map((x) => { return x.content; }).reverse();
+				var messageContents = messages.map((x) => { return x.content; }).reverse(); //extract an array of strings from the array of message objects
 
 				for (var messageIdx in messageContents) {
 					var message = messageContents[messageIdx];
 
-					//test if the message contains a url
-					if (Links.messageContainsLink(message))
+					if (Links.messageContainsLink(message)) //test if the message contains a url
 						//detect the url inside the string, and cache it
 						Uri.withinString(message, function (url) {
 							Links.cache(url);
@@ -121,8 +118,7 @@ var YouTube = {
 
 var Links = {
 	standardise: function (link) {
-		//cheaty way to get around http and https not matching, and quick way to chop off stuff like &feature=youtube etc
-		return link.replace("https://", "http://").split("&")[0];
+		return link.replace("https://", "http://").split("&")[0]; //cheaty way to get around http and https not matching, and quick way to chop off stuff like &feature=youtube etc
 	},
 	messageContainsLink: function (message) {
 		var messageLower = message.toLowerCase();
@@ -157,8 +153,7 @@ var Links = {
 	validateAndPost: function (err, articles) {
 		if (err) Log.error("FEED ERROR: Error reading RSS feed.", err);
 		else {
-			//get the latest link and check if it has already been posted and cached
-			var latestLink = Links.standardise(articles[0].link);
+			var latestLink = Links.standardise(articles[0].link); //get the latest link and check if it has already been posted and cached
 
 			//check whether the latest link out the feed exists in our cache
 			if (!Links.checkCache(latestLink)) {
@@ -179,21 +174,17 @@ var Links = {
 						else {
 							Log.error("DiscordClient appears to be disconnected! Attempting to reconnect...", err);
 
-							//attempt to reconnect
-							DiscordClient.bot.connect();
+							DiscordClient.bot.connect(); //attempt to reconnect
 						}
 					}
 				});
 
-				//finally make sure the link is cached, so it doesn't get posted again
-				Links.cache(latestLink);
+				Links.cache(latestLink); //finally make sure the link is cached, so it doesn't get posted again
 			}
 			else if (Links.latestFromFeed != latestLink)
-				//alternatively, if we have a new link from the feed, but its been posted already, just alert the console
-				Log.info("Didn't post new feed link because already detected as posted " + latestLink);
+				Log.info("Didn't post new feed link because already detected as posted " + latestLink); //alternatively, if we have a new link from the feed, but its been posted already, just alert the console
 
-			//ensure our latest feed link variable is up to date, so we can track when the feed updates
-			Links.latestFromFeed = latestLink;
+			Links.latestFromFeed = latestLink; //ensure our latest feed link variable is up to date, so we can track when the feed updates
 		}
 	}
 };
@@ -201,8 +192,7 @@ var Links = {
 var Feed = {
 	urlObj: Url.parse(Config.feedUrl),
 	checkAndPost: function () {
-		//check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
-		Dns.resolve(Feed.urlObj.host, function (err) {
+		Dns.resolve(Feed.urlObj.host, function (err) { //check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
 			if (err) Log.error("CONNECTION ERROR: Cannot resolve host.", err);
 			else FeedRead(Config.feedUrl, Links.validateAndPost);
 		});
