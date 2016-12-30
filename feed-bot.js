@@ -121,8 +121,8 @@ var YouTube = {
 
 var Links = {
 	standardise: function (link) {
-		//cheaty way to get around http and https not matching
-		return link.replace("https://", "http://");
+		//cheaty way to get around http and https not matching, and quick way to chop off stuff like &feature=youtube etc
+		return link.replace("https://", "http://").split("&")[0];
 	},
 	messageContainsLink: function (message) {
 		var messageLower = message.toLowerCase();
