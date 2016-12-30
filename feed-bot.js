@@ -89,7 +89,7 @@ var DiscordClient = {
 					var message = messageContents[messageIdx];
 
 					//test if the message contains a url
-					if (Links.regExp.test(message))
+					if (Links.messageContainsLink(message))
 						//detect the url inside the string, and cache it
 						Uri.withinString(message, function (url) {
 							Links.cache(url);
@@ -126,7 +126,7 @@ var Links = {
 	},
 	messageContainsLink: function (message) {
 		var messageLower = message.toLowerCase();
-		return messageLower.includes("http") || messageLower.includes("https") || messageLower.includes("www");
+		return messageLower.includes("http://") || messageLower.includes("https://") || messageLower.includes("www.");
 	},
 	cached: [],
 	latestFromFeed: "",
