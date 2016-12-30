@@ -10,53 +10,53 @@ var Log = require("./log.js"); //some very simple logging functions I made
 var BotConfig = require("./bot-config.json"); //bot config file containing bot token
 var Config = require("./config.json"); //config file containing other settings
 
-var IS_FIRST_RUN = true;
+var isFirstRun = true;
 
-var Bot = {
+var DiscordClient = {
 	bot: null,
 	startup: function () {
 		//check if we can connect to discordapp.com to authenticate the bot
 		Dns.resolve("discordapp.com", function (err) {
-			if (err) Log.error("CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot (you are probably not connected to the internet).", err);
+			if (err) Log.error("CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot", err);
 			else {
 				//if there was no error, go ahead and create and authenticate the bot
-				Bot.bot = new Discord.Client({
+				DiscordClient.bot = new Discord.Client({
 					token: BotConfig.token,
 					autorun: true
 				});
 
 				//set up the bot's event handlers
-				Bot.bot.on("ready", Bot.onReady);
-				Bot.bot.on("disconnect", Bot.onDisconnect);
-				Bot.bot.on("message", Bot.onMessage);
+				DiscordClient.bot.on("ready", DiscordClient.onReady);
+				DiscordClient.bot.on("disconnect", DiscordClient.onDisconnect);
+				DiscordClient.bot.on("message", DiscordClient.onMessage);
 			}
 		});
 	},
 	onReady: function () {
-		if (IS_FIRST_RUN) {
-			IS_FIRST_RUN = false;
+		if (isFirstRun) {
+			isFirstRun = false;
 
-			Log.info("Registered bot " + Bot.bot.username + " - (" + Bot.bot.id + ")");
+			Log.info("Registered bot " + DiscordClient.bot.username + " - (" + DiscordClient.bot.id + ")");
 			Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
 
 			//set up the timer to check the feed
 			setInterval(Feed.checkAndPost, Config.pollingInterval);
 		}
 		else {
-			Log.info("Bot reconnected!");
+			Log.info("DiscordClient reconnected!");
 		}
 
 		//we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
-		Bot.checkPastMessagesForLinks();
+		DiscordClient.checkPastMessagesForLinks();
 	},
 	onDisconnect: function (err, code) {
 		//do a bunch of logging
-		Log.event("Bot was disconnected! " + code ? code : "No disconnect code provided", "Discord.io");
-		if (err) Log.error("Bot disconnected!", err);
+		Log.event("DiscordClient was disconnected! " + code ? code : "No disconnect code provided", "Discord.io");
+		if (err) Log.error("DiscordClient disconnected!", err);
 		Log.info("Trying to reconnect bot");
 
 		//then actually attempt to reconnect
-		Bot.bot.connect();
+		DiscordClient.bot.connect();
 	},
 	onMessage: function (user, userID, channelID, message) {
 		//check if the message contains a link, in the right channel, and not the latest link from the rss feed
@@ -75,7 +75,7 @@ var Bot = {
 		Log.info("Attempting to check past " + limit + " messages for links");
 
 		//get the last however many messsages from our discord channel
-		Bot.bot.getMessages({
+		DiscordClient.bot.getMessages({
 			channelID: Config.channelID,
 			limit: limit
 		}, function (err, messages) {
@@ -160,20 +160,20 @@ var Links = {
 				Log.info("Attempting to post new link: " + latestLink);
 
 				//send a messsage containing the new feed link to our discord channel
-				Bot.bot.sendMessage({
+				DiscordClient.bot.sendMessage({
 					to: Config.channelID,
 					message: latestLink
 				}, function (err, message) {
 					if (err) {
 						Log.error("ERROR: Failed to send message: " + message.substring(0, 15) + "...", err);
 						//if there is an error posting the message, check if it is because the bot isn't connected
-						if (Bot.bot.connected)
+						if (DiscordClient.bot.connected)
 							Log.info("Connectivity seems fine - I have no idea why the message didn't post");
 						else {
-							Log.error("Bot appears to be disconnected! Attempting to reconnect...", err);
+							Log.error("DiscordClient appears to be disconnected! Attempting to reconnect...", err);
 
 							//attempt to reconnect
-							Bot.bot.connect();
+							DiscordClient.bot.connect();
 						}
 					}
 				});
@@ -204,5 +204,5 @@ var Feed = {
 
 //IIFE to kickstart the bot when the app loads
 (function(){
-	Bot.startup();
+	DiscordClient.startup();
 })();
