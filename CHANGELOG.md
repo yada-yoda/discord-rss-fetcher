@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.1.1
 
 ### Added
 - Reconnect timer to repeatedly try reconnect at intervals
@@ -9,7 +9,7 @@
 
 - Updated support for https conversion to http to hopefully be more consistent
 
-## 1.1.0 pre
+## v1.1.0
 
 ### Added
 
