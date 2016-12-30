@@ -12,8 +12,8 @@ var Config = require("./config.json"); //config file containing other settings
 
 var DiscordClient = {
 	bot: null,
-	feedTimer = null,
-	reconnectTimer = null,
+	feedTimer: null,
+	reconnectTimer: null,
 	startup: function () {
 		//check if we can connect to discordapp.com to authenticate the bot
 		Dns.resolve("discordapp.com", function (err) {
@@ -36,13 +36,13 @@ var DiscordClient = {
 		Log.info("Registered/connected bot " + DiscordClient.bot.username + " - (" + DiscordClient.bot.id + ")");
 
 		Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
-		feedTimer = setInterval(Feed.checkAndPost, Config.pollingInterval); //set up the timer to check the feed
+		DiscordClient.feedTimer = setInterval(Feed.checkAndPost, Config.pollingInterval); //set up the timer to check the feed
 
 		//we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
 		DiscordClient.checkPastMessagesForLinks();
 	},
 	onDisconnect: function (err, code) {
-		Log.event("Bot was disconnected! " + err ? err : "" + code ? code : "No disconnect code provided", "Discord.io");;
+		Log.event("Bot was disconnected! " + err ? err : "" + code ? code : "No disconnect code provided.\nClearing the feed timer and starting reconnect timer", "Discord.io");
 
 		clearInterval(DiscordClient.feedTimer); //stop the feed timer
 
@@ -63,7 +63,7 @@ var DiscordClient = {
 
 			//extract the url from the string, and cache it
 			Uri.withinString(message, function (url) {
-				Links.cache(Links.standardise(link));
+				Links.cache(Links.standardise(url));
 				return url;
 			});
 		}
