@@ -10,10 +10,9 @@ var Log = require("./log.js"); //some very simple logging functions I made
 var BotConfig = require("./bot-config.json"); //bot config file containing bot token
 var Config = require("./config.json"); //config file containing other settings
 
-var isFirstRun = true;
-
 var DiscordClient = {
 	bot: null,
+	feedTimer = null,
 	startup: function () {
 		//check if we can connect to discordapp.com to authenticate the bot
 		Dns.resolve("discordapp.com", function (err) {
@@ -33,18 +32,10 @@ var DiscordClient = {
 		});
 	},
 	onReady: function () {
-		if (isFirstRun) {
-			isFirstRun = false;
+		Log.info("Registered/connected bot " + DiscordClient.bot.username + " - (" + DiscordClient.bot.id + ")");
 
-			Log.info("Registered bot " + DiscordClient.bot.username + " - (" + DiscordClient.bot.id + ")");
-			Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
-
-			//set up the timer to check the feed
-			setInterval(Feed.checkAndPost, Config.pollingInterval);
-		}
-		else {
-			Log.info("DiscordClient reconnected!");
-		}
+		Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
+		feedTimer = setInterval(Feed.checkAndPost, Config.pollingInterval); //set up the timer to check the feed
 
 		//we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
 		DiscordClient.checkPastMessagesForLinks();
