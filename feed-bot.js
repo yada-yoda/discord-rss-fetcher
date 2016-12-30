@@ -57,12 +57,13 @@ var DiscordClient = {
 		});
 	},
 	onMessage: function (user, userID, channelID, message) {
-		//check if the message contains a link, in the right channel, and not the latest link from the rss feed
-		if (channelID === Config.channelID && Links.regExp.test(message) && (message !== Links.latestFromFeed)) {
+		//check if the message is in the right channel, contains a link, and is not the latest link from the rss feed
+		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeed)) {
 			Log.event("Detected posted link in this message: " + message, "Discord.io");
-			//detect the url inside the string, and cache it
+
+			//extract the url from the string, and cache it
 			Uri.withinString(message, function (url) {
-				Links.cache(url);
+				Links.cache(Links.standardise(link));
 				return url;
 			});
 		}
@@ -119,14 +120,20 @@ var YouTube = {
 };
 
 var Links = {
-	regExp: new RegExp(["http", "https", "www"].join("|")),
+	standardise: function (link) {
+		//cheaty way to get around http and https not matching
+		return link.replace("https://", "http://");
+	},
+	messageContainsLink: function (message) {
+		var messageLower = message.toLowerCase();
+		return messageLower.includes("http") || messageLower.includes("https") || messageLower.includes("www");
+	},
 	cached: [],
 	latestFromFeed: "",
 	cache: function (link) {
-		//cheaty way to get around http and https not matching
-		link = link.replace("https://", "http://");
+		link = Links.standardise(link);
 
-		if(Config.youtubeMode && link.includes(YouTube.url.full)){
+		if (Config.youtubeMode && link.includes(YouTube.url.full)) {
 			link = YouTube.url.convertFullToShare(link);
 		}
 
@@ -140,7 +147,9 @@ var Links = {
 			Links.cached.shift();
 	},
 	checkCache: function (link) {
-		if (Config.youtubeMode && link.includes(link)) {
+		link = Links.standardise(link);
+
+		if (Config.youtubeMode && link.includes(YouTube.url.full)) {
 			return Links.cached.includes(YouTube.url.convertFullToShare(link));
 		}
 		return Links.cached.includes(link);
@@ -149,7 +158,7 @@ var Links = {
 		if (err) Log.error("FEED ERROR: Error reading RSS feed.", err);
 		else {
 			//get the latest link and check if it has already been posted and cached
-			var latestLink = articles[0].link.replace("https", "http");
+			var latestLink = Links.standardise(articles[0].link);
 
 			//check whether the latest link out the feed exists in our cache
 			if (!Links.checkCache(latestLink)) {
@@ -194,13 +203,13 @@ var Feed = {
 	checkAndPost: function () {
 		//check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
 		Dns.resolve(Feed.urlObj.host, function (err) {
-			if (err) Log.error("CONNECTION ERROR: Cannot resolve host (you are probably not connected to the internet)", err);
+			if (err) Log.error("CONNECTION ERROR: Cannot resolve host.", err);
 			else FeedRead(Config.feedUrl, Links.validateAndPost);
 		});
 	}
 };
 
 //IIFE to kickstart the bot when the app loads
-(function(){
+(function () {
 	DiscordClient.startup();
 })();
