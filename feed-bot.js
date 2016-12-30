@@ -136,7 +136,7 @@ var Links = {
 		}
 
 		//store the new link if not stored already
-		if (!Links.cached.includes(link)) {
+		if (!Links.checkCache(link)) {
 			Links.cached.push(link);
 			Log.info("Cached URL: " + link);
 		}
