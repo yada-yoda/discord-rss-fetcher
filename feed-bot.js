@@ -13,6 +13,7 @@ var Config = require("./config.json"); //config file containing other settings
 var DiscordClient = {
 	bot: null,
 	feedTimer = null,
+	reconnectTimer = null,
 	startup: function () {
 		//check if we can connect to discordapp.com to authenticate the bot
 		Dns.resolve("discordapp.com", function (err) {
@@ -41,13 +42,19 @@ var DiscordClient = {
 		DiscordClient.checkPastMessagesForLinks();
 	},
 	onDisconnect: function (err, code) {
-		//do a bunch of logging
-		Log.event("DiscordClient was disconnected! " + code ? code : "No disconnect code provided", "Discord.io");
-		if (err) Log.error("DiscordClient disconnected!", err);
-		Log.info("Trying to reconnect bot");
+		Log.event("Bot was disconnected! " + err ? err : "" + code ? code : "No disconnect code provided", "Discord.io");;
 
-		//then actually attempt to reconnect
-		DiscordClient.bot.connect();
+		clearInterval(DiscordClient.feedTimer); //stop the feed timer
+
+		//set up a timer to try reconnect every 5sec
+		DiscordClient.reconnectTimer = setInterval(function () {
+			try {
+				DiscordClient.bot.connect();
+			}
+			catch (ex) {
+				Log.error("Exception thrown trying to reconnect bot." + ex.message);
+			}
+		});
 	},
 	onMessage: function (user, userID, channelID, message) {
 		//check if the message contains a link, in the right channel, and not the latest link from the rss feed

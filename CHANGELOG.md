@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Reconnect timer to repeatedly try reconnect at intervals
+
 ## 1.1.0 pre
 
 ### Added
