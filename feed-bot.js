@@ -118,7 +118,9 @@ var YouTube = {
 
 var Links = {
 	standardise: function (link) {
-		return link.replace("https://", "http://").split("&")[0]; //cheaty way to get around http and https not matching, and quick way to chop off stuff like &feature=youtube etc
+		link = link.replace("https://", "http://"); //cheaty way to get around http and https not matching
+		if(Config.youtubeMode) link = link.split("&")[0]; //quick way to chop off stuff like &feature=youtube etc
+		return link;
 	},
 	messageContainsLink: function (message) {
 		var messageLower = message.toLowerCase();
