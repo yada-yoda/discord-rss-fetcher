@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.1.2
 
 ### Updated
 - Updated reconnect logic to hopefully be more stable
