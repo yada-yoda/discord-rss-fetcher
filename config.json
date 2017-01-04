@@ -1,6 +1,6 @@
 {
     "feedUrl": "https://www.youtube.com/feeds/videos.xml?user=EthosLab",
-    "channelID": "241238530376990722",
+    "channelID": "264420391282409473",
     "pollingInterval": 5000,
     "numLinksToCache": 10,
     "youtubeMode": true
