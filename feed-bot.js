@@ -17,7 +17,9 @@ var DiscordClient = {
 	startup: function () {
 		//check if we can connect to discordapp.com to authenticate the bot
 		Dns.resolve("discordapp.com", function (err) {
-			if (err) Log.error("CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot", err);
+			if (err) {
+				throw "CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot", err;
+			}
 			else {
 				//if there was no error, go ahead and create and authenticate the bot
 				DiscordClient.bot = new Discord.Client({
@@ -35,6 +37,8 @@ var DiscordClient = {
 	onReady: function () {
 		Log.info("Registered/connected bot " + DiscordClient.bot.username + " - (" + DiscordClient.bot.id + ")");
 
+		clearInterval(DiscordClient.reconnectTimer);
+
 		Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
 		DiscordClient.feedTimer = setInterval(Feed.checkAndPost, Config.pollingInterval); //set up the timer to check the feed
 
@@ -44,15 +48,13 @@ var DiscordClient = {
 	onDisconnect: function (err, code) {
 		Log.event("Bot was disconnected! " + err ? err : "" + code ? code : "No disconnect code provided.\nClearing the feed timer and starting reconnect timer", "Discord.io");
 
-		clearInterval(DiscordClient.feedTimer); //stop the feed timer
-
-		//set up a timer to try reconnect every 5sec
 		DiscordClient.reconnectTimer = setInterval(function () {
 			try {
-				DiscordClient.bot.connect();
+				//I've had enough problems with reconnecting properly so just call the startup function to reset everything when we want to reconnect
+				DiscordClient.startup();
 			}
-			catch (ex) {
-				Log.error("Exception thrown trying to reconnect bot." + ex.message);
+			catch(ex){
+				Log.error(ex);
 			}
 		});
 	},
@@ -119,7 +121,7 @@ var YouTube = {
 var Links = {
 	standardise: function (link) {
 		link = link.replace("https://", "http://"); //cheaty way to get around http and https not matching
-		if(Config.youtubeMode) link = link.split("&")[0]; //quick way to chop off stuff like &feature=youtube etc
+		if (Config.youtubeMode) link = link.split("&")[0]; //quick way to chop off stuff like &feature=youtube etc
 		return link;
 	},
 	messageContainsLink: function (message) {
