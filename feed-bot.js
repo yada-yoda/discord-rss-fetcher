@@ -12,14 +12,13 @@ var Config = require("./config.json"); //config file containing other settings
 
 var DiscordClient = {
 	bot: null,
-	feedTimer: null,
-	reconnectTimer: null,
+	feedInterval: null,
+	reconnectInterval: null,
 	startup: function () {
 		//check if we can connect to discordapp.com to authenticate the bot
 		Dns.resolve("discordapp.com", function (err) {
-			if (err) {
-				throw "CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot", err;
-			}
+			if (err)
+				Log.error("CONNECTION ERROR: Unable to locate discordapp.com to authenticate the bot", err);
 			else {
 				//if there was no error, go ahead and create and authenticate the bot
 				DiscordClient.bot = new Discord.Client({
@@ -37,26 +36,21 @@ var DiscordClient = {
 	onReady: function () {
 		Log.info("Registered/connected bot " + DiscordClient.bot.username + " - (" + DiscordClient.bot.id + ")");
 
-		clearInterval(DiscordClient.reconnectTimer);
+		clearInterval(DiscordClient.reconnectInterval);
 
 		Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
-		DiscordClient.feedTimer = setInterval(Feed.checkAndPost, Config.pollingInterval); //set up the timer to check the feed
+		DiscordClient.feedInterval = setInterval(Feed.checkAndPost, Config.pollingInterval); //set up the timer to check the feed
 
-		//we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
-		DiscordClient.checkPastMessagesForLinks();
+		DiscordClient.checkPastMessagesForLinks(); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
 	},
 	onDisconnect: function (err, code) {
-		Log.event("Bot was disconnected! " + err ? err : "" + code ? code : "No disconnect code provided.\nClearing the feed timer and starting reconnect timer", "Discord.io");
+		Log.event("Bot was disconnected! " + (err ? err : "") + (code ? code : "No disconnect code provided.") + "\nClearing the feed timer and starting reconnect timer", "Discord.io");
 
-		DiscordClient.reconnectTimer = setInterval(function () {
-			try {
-				//I've had enough problems with reconnecting properly so just call the startup function to reset everything when we want to reconnect
-				DiscordClient.startup();
-			}
-			catch(ex){
-				Log.error(ex);
-			}
-		});
+		clearInterval(DiscordClient.feedInterval)
+
+		DiscordClient.reconnectInterval = setInterval(function () {
+			DiscordClient.startup();
+		}, (Config.reconnectInterval || Config.pollingInterval));
 	},
 	onMessage: function (user, userID, channelID, message) {
 		//check if the message is in the right channel, contains a link, and is not the latest link from the rss feed

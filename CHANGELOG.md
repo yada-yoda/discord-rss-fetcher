@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Updated
+- Updated reconnect logic to hopefully be more stable
+
 ## v1.1.1
 
 ### Added
