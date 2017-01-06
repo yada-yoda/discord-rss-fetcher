@@ -50,7 +50,7 @@ var DiscordClient = {
 
 		DiscordClient.reconnectInterval = setInterval(function () {
 			DiscordClient.startup();
-		}, Config.pollingInterval);
+		}, (Config.reconnectInterval || Config.pollingInterval));
 	},
 	onMessage: function (user, userID, channelID, message) {
 		//check if the message is in the right channel, contains a link, and is not the latest link from the rss feed
