@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.2.1
+
+### Fixed
+
+- Fixed reconnect timer being set to 0 sometimes
+
 ## v1.1.2
 
 ### Updated
