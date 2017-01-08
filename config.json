@@ -3,5 +3,6 @@
     "channelID": "264420391282409473",
     "pollingInterval": 5000,
     "numLinksToCache": 10,
-    "youtubeMode": true
+    "youtubeMode": true,
+    "logRequestMessage": "!logsplease"
 }

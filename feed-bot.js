@@ -58,6 +58,12 @@ var DiscordClient = {
 				return url;
 			});
 		}
+		else if (message == Config.logRequestMessage) {
+			DiscordClient.bot.uploadFile({
+				to: channelID,
+				file: "./log"
+			});
+		}
 	},
 	checkPastMessagesForLinks: function () {
 		var limit = 100;
