@@ -1,4 +1,5 @@
 var console = require("console");
+var FileWriter = require("simple-file-writer");
 
 var latestLog = "";
 
