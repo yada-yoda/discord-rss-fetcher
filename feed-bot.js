@@ -36,7 +36,11 @@ var DiscordClient = {
 
 		DiscordClient.checkPastMessagesForLinks(); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
 
-		intervalFunc = Feed.checkAndPost;
+		intervalFunc = () => {
+			Feed.check(FeedRead(Config.feedUrl, (err, articles) => {
+				Links.validate(err, articles, DiscordClient.post);
+			}));
+		};
 	},
 	onDisconnect: function (err, code) {
 		Log.event("Bot was disconnected! " + (err ? err : "") + (code ? code : "No disconnect code provided.") + "\nClearing the feed timer and starting reconnect timer", "Discord.io");
@@ -45,16 +49,16 @@ var DiscordClient = {
 	},
 	onMessage: function (user, userID, channelID, message) {
 		//check if the message is in the right channel, contains a link, and is not the latest link from the rss feed
-		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeed)) {
+		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink
 			Log.event("Detected posted link in this message: " + message, "Discord.io");
 
-			//extract the url from the string, and cache it
-			Uri.withinString(message, function (url) {
-				Links.cache(Links.standardise(url));
-				return url;
-			});
-		}
-	},
+		//extract the url from the string, and cache it
+		Uri.withinString(message, function (url) {
+			Links.cache(Links.standardise(url));
+			return url;
+		});
+	}
+},
 	checkPastMessagesForLinks: function () {
 		var limit = 100;
 		Log.info("Attempting to check past " + limit + " messages for links");
@@ -82,6 +86,25 @@ var DiscordClient = {
 				}
 			}
 		});
+	},
+	post: function (link) {
+		//send a messsage containing the new feed link to our discord channel
+		DiscordClient.bot.sendMessage({
+			to: Config.channelID,
+			message: link
+		}, function (err, message) {
+			if (err) {
+				Log.error("ERROR: Failed to send message: " + message.substring(0, 15) + "...", err);
+				//if there is an error posting the message, check if it is because the bot isn't connected
+				if (DiscordClient.bot.connected)
+					Log.info("Connectivity seems fine - I have no idea why the message didn't post");
+				else {
+					Log.error("DiscordClient appears to be disconnected! Attempting to reconnect...", err);
+
+					DiscordClient.bot.connect(); //attempt to reconnect
+				}
+			}
+		});
 	}
 };
 
@@ -89,14 +112,13 @@ var YouTube = {
 	url: {
 		share: "http://youtu.be/",
 		full: "http://www.youtube.com/watch?v=",
-		convertShareToFull: function (shareUrl) {
+		createFullUrl: function (shareUrl) {
 			return shareUrl.replace(YouTube.url.share, YouTube.url.full);
 		},
-		convertFullToShare: function (fullUrl) {
+		createShareUrl: function (fullUrl) {
 			var shareUrl = fullUrl.replace(YouTube.url.full, YouTube.url.share);
 
-			if (shareUrl.includes("&"))
-				shareUrl = shareUrl.slice(0, fullUrl.indexOf("&"));
+			if (shareUrl.includes("&")) shareUrl = shareUrl.slice(0, fullUrl.indexOf("&"));
 
 			return shareUrl;
 		}
@@ -114,81 +136,64 @@ var Links = {
 		return messageLower.includes("http://") || messageLower.includes("https://") || messageLower.includes("www.");
 	},
 	cached: [],
-	latestFromFeed: "",
+	latestFeedLink: "",
 	cache: function (link) {
 		link = Links.standardise(link);
 
-		if (Config.youtubeMode && link.includes(YouTube.url.full)) {
-			link = YouTube.url.convertFullToShare(link);
-		}
+		if (Config.youtubeMode) link = YouTube.url.createShareUrl(link);
 
 		//store the new link if not stored already
-		if (!Links.checkCache(link)) {
+		if (!Links.isCached(link)) {
 			Links.cached.push(link);
 			Log.info("Cached URL: " + link);
 		}
-		//get rid of the first array element if we have reached our cache limit
-		if (Links.cached.length > (Config.numLinksToCache || 10))
-			Links.cached.shift();
+
+		if (Links.cached.length > (Config.numLinksToCache || 10)) Links.cached.shift(); //get rid of the first array element if we have reached our cache limit
 	},
-	checkCache: function (link) {
+	isCached: function (link) {
 		link = Links.standardise(link);
 
-		if (Config.youtubeMode && link.includes(YouTube.url.full)) {
-			return Links.cached.includes(YouTube.url.convertFullToShare(link));
-		}
+		if (Config.youtubeMode)
+			return Links.cached.includes(YouTube.url.createShareUrl(link));
+
 		return Links.cached.includes(link);
 	},
-	validateAndPost: function (err, articles) {
+	validate: function (err, articles, callback) {
 		if (err) Log.error("FEED ERROR: Error reading RSS feed.", err);
 		else {
 			var latestLink = Links.standardise(articles[0].link); //get the latest link and check if it has already been posted and cached
 
-			//check whether the latest link out the feed exists in our cache
-			if (!Links.checkCache(latestLink)) {
-				if (Config.youtubeMode && latestLink.includes(YouTube.url.full))
-					latestLink = YouTube.url.convertFullToShare(latestLink);
-				Log.info("Attempting to post new link: " + latestLink);
+			//make sure we don't spam the latest link
+			if (latestLink == Links.latestFeedLink)
+				return;
 
-				//send a messsage containing the new feed link to our discord channel
-				DiscordClient.bot.sendMessage({
-					to: Config.channelID,
-					message: latestLink
-				}, function (err, message) {
-					if (err) {
-						Log.error("ERROR: Failed to send message: " + message.substring(0, 15) + "...", err);
-						//if there is an error posting the message, check if it is because the bot isn't connected
-						if (DiscordClient.bot.connected)
-							Log.info("Connectivity seems fine - I have no idea why the message didn't post");
-						else {
-							Log.error("DiscordClient appears to be disconnected! Attempting to reconnect...", err);
-
-							DiscordClient.bot.connect(); //attempt to reconnect
-						}
-					}
-				});
-
-				Links.cache(latestLink); //finally make sure the link is cached, so it doesn't get posted again
+			//make sure the latest link hasn't been posted already
+			if (Links.isCached(latestLink)) {
+				Log.info("Didn't post new feed link because already detected as posted " + latestLink);
+				return;
 			}
-			else if (Links.latestFromFeed != latestLink)
-				Log.info("Didn't post new feed link because already detected as posted " + latestLink); //alternatively, if we have a new link from the feed, but its been posted already, just alert the console
 
-			Links.latestFromFeed = latestLink; //ensure our latest feed link variable is up to date, so we can track when the feed updates
+			if (Config.youtubeMode) latestLink = YouTube.url.createShareUrl(latestLink);
+
+			callback(latestLink);
+
+			Links.cache(latestLink); //make sure the link is cached, so it doesn't get posted again
+			Links.latestFeedLink = latestLink; //ensure our latest feed link variable is up to date, so we can track when the feed updates
 		}
 	}
 };
 
 var Feed = {
 	urlObj: Url.parse(Config.feedUrl),
-	checkAndPost: function () {
+	check: function (callback) {
 		Dns.resolve(Feed.urlObj.host, function (err) { //check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
 			if (err) Log.error("CONNECTION ERROR: Cannot resolve host.", err);
-			else FeedRead(Config.feedUrl, Links.validateAndPost);
+			else callback();
 		});
 	}
 };
 
-var intervalFunc = () => {}; //do nothing by default
+var intervalFunc = () => { }; //do nothing by default
 
 //IIFE to kickstart the bot when the app loads
 (function () {
