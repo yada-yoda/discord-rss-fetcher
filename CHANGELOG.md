@@ -4,6 +4,7 @@
 
 ### Added
 
+- The ability for users to 'subscribe' so they are tagged whenever a new link is posted
 - Logging to a file
 - Ability for user to request an upload of the logs file
 
