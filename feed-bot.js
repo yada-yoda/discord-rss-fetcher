@@ -49,14 +49,15 @@ var DiscordClient = {
 	},
 	onMessage: function (user, userID, channelID, message) {
 		//check if the message is in the right channel, contains a link, and is not the latest link from the rss feed
-		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink))
+		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink)) {
 			Log.event("Detected posted link in this message: " + message, "Discord.io");
 
-		//extract the url from the string, and cache it
-		Uri.withinString(message, function (url) {
-			Links.cache(Links.standardise(url));
-			return url;
-		});
+			//extract the url from the string, and cache it
+			Uri.withinString(message, function (url) {
+				Links.cache(Links.standardise(url));
+				return url;
+			});
+		}
 	},
 	checkPastMessagesForLinks: function () {
 		var limit = 100;
@@ -170,7 +171,7 @@ var Links = {
 
 				Links.cache(latestLink); //make sure the link is cached, so it doesn't get posted again
 			}
-			
+
 			Links.latestFeedLink = latestLink; //ensure our latest feed link variable is up to date, so we can track when the feed updates
 		}
 	}
