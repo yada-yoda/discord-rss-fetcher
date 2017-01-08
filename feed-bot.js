@@ -106,10 +106,14 @@ var DiscordClient = {
 		});
 	},
 	post: function (link) {
+		var tags = "";
+		for (var userID in Subscriptions.subscribers)
+			tags += "<@" + Subscriptions.subscribers[userID] + "> ";
+
 		//send a messsage containing the new feed link to our discord channel
 		DiscordClient.bot.sendMessage({
 			to: Config.channelID,
-			message: link
+			message: tags + link
 		}, function (err, message) {
 			if (err) {
 				Log.error("ERROR: Failed to send message: " + message.substring(0, 15) + "...", err);
@@ -122,20 +126,20 @@ var DiscordClient = {
 
 var Subscriptions = {
 	subscribers: [],
-	parse: function(){
+	parse: function () {
 		JsonFile.readFile("./subscribers.json", (err, obj) => {
-			if(err) Log.error("Unable to parse json subscribers file", err);
+			if (err) Log.error("Unable to parse json subscribers file", err);
 			this.subscribers = obj || [];
 		});
 	},
 	subscribe: function (userID, user) {
 		this.subscribers.push(userID);
-		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if(err) Log.error("Unable to write subscribers to json file", err); });
+		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if (err) Log.error("Unable to write subscribers to json file", err); });
 		Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
 	},
 	unsubscribe: function (userID, user) {
 		this.subscribers.splice(this.subscribers.indexOf(userID));
-		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if(err) Log.error("Unable to write subscribers to json file", err); });
+		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if (err) Log.error("Unable to write subscribers to json file", err); });
 		Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
 	}
 };
