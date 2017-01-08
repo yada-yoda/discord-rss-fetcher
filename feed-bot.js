@@ -131,12 +131,12 @@ var Subscriptions = {
 	subscribe: function (userID, user) {
 		this.subscribers.push(userID);
 		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if(err) Log.error("Unable to write subscribers to json file", err); });
-		Log.event("Subscribed user " + (user ? user + "(" + user + ")" : userID));
+		Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
 	},
 	unsubscribe: function (userID, user) {
 		this.subscribers.splice(this.subscribers.indexOf(userID));
 		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if(err) Log.error("Unable to write subscribers to json file", err); });
-		Log.event("Unsubscribed user " + (user ? user + "(" + user + ")" : userID));
+		Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
 	}
 };
 
