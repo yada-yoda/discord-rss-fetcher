@@ -49,7 +49,7 @@ var DiscordClient = {
 	},
 	onMessage: function (user, userID, channelID, message) {
 		//check if the message is in the right channel, contains a link, and is not the latest link from the rss feed
-		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink
+		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink))
 			Log.event("Detected posted link in this message: " + message, "Discord.io");
 
 		//extract the url from the string, and cache it
@@ -57,8 +57,7 @@ var DiscordClient = {
 			Links.cache(Links.standardise(url));
 			return url;
 		});
-	}
-},
+	},
 	checkPastMessagesForLinks: function () {
 		var limit = 100;
 		Log.info("Attempting to check past " + limit + " messages for links");
@@ -148,7 +147,7 @@ var Links = {
 			Log.info("Cached URL: " + link);
 		}
 
-		if (Links.cached.length > (Config.numLinksToCache || 10)) Links.cached.shift(); //get rid of the first array element if we have reached our cache limit
+		if (Links.cached.length > Config.numLinksToCache) Links.cached.shift(); //get rid of the first array element if we have reached our cache limit
 	},
 	isCached: function (link) {
 		link = Links.standardise(link);
