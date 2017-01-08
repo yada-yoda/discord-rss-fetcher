@@ -4,6 +4,7 @@ var Url = require("url"); //for url parsing
 var Uri = require("urijs"); //for finding urls within message strings
 var Discord = require("discord.io"); //for obvious reasons
 var FeedRead = require("feed-read"); //for rss feed reading
+var JsonFile = require("jsonfile"); //reading/writing json
 
 //my imports
 var Log = require("./log.js"); //some very simple logging functions I made
