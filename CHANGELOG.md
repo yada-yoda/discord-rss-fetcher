@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.1
+
+### Fixed
+
+- Fixed multiple users being unsubscribed when one user unsubscribes
+
 ## v1.2.0
 
 ### Added

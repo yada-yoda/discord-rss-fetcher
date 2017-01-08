@@ -161,7 +161,7 @@ var Subscriptions = {
 	},
 	unsubscribe: function (channelID, userID, user) {
 		if (this.subscribers.indexOf(userID) > -1) {
-			this.subscribers.splice(this.subscribers.indexOf(userID));
+			this.subscribers.splice(this.subscribers.indexOf(userID), 1);
 			this.writeToFile();
 			Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
 
