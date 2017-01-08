@@ -5,7 +5,7 @@ var FileWriter = require("simple-file-writer"); //file writer for logging
 //my imports
 var Config = require("./config.json"); //config file containing other settings
 
-var logWriter = new FileWriter(Config.logFileName);
+var logWriter = new FileWriter(Config.logFile);
 var latestLog = "";
 
 function log(message) {

@@ -71,7 +71,7 @@ var DiscordClient = {
 					case Config.logRequestMessage:
 						DiscordClient.bot.uploadFile({
 							to: channelID,
-							file: Config.logFileName
+							file: Config.logFile
 						}, (err, message) => {
 							if (err) Log.error("Failed to upload log file: " + message, err);
 							else Log.event("Uploaded log file for user " + user + "(" + userID + ")");
@@ -119,7 +119,7 @@ var DiscordClient = {
 			message: tags + link
 		}, function (err, message) {
 			if (err) {
-				Log.error("ERROR: Failed to send message: " + message.substring(0, 15) + "...", err);
+				Log.error("ERROR: Failed to send message" + message ? message : "", err);
 				//if there is an error posting the message, check if it is because the bot isn't connected
 				if (!DiscordClient.bot.connected) DiscordClient.onDisconnect();
 			}
