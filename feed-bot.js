@@ -95,13 +95,7 @@ var DiscordClient = {
 			if (err) {
 				Log.error("ERROR: Failed to send message: " + message.substring(0, 15) + "...", err);
 				//if there is an error posting the message, check if it is because the bot isn't connected
-				if (DiscordClient.bot.connected)
-					Log.info("Connectivity seems fine - I have no idea why the message didn't post");
-				else {
-					Log.error("DiscordClient appears to be disconnected! Attempting to reconnect...", err);
-
-					DiscordClient.bot.connect(); //attempt to reconnect
-				}
+				if (!DiscordClient.bot.connected) DiscordClient.onDisconnect();
 			}
 		});
 	}
@@ -160,7 +154,8 @@ var Links = {
 	validate: function (err, articles, callback) {
 		if (err) Log.error("FEED ERROR: Error reading RSS feed.", err);
 		else {
-			var latestLink = Links.standardise(Config.youtubeMode ? YouTube.url.createShareUrl(articles[0].link) : articles[0].link); //get the latest link and convert to share url if youtube mode
+			var latestLink = Links.standardise(articles[0].link);
+			if (Config.youtubeMode) latestLink = YouTube.createShareUrl(latestLink);
 
 			//make sure we don't spam the latest link
 			if (latestLink == Links.latestFeedLink)
