@@ -49,22 +49,30 @@ var DiscordClient = {
 		intervalFunc = DiscordClient.startup; //reassign the interval function to try restart the bot every 5 sec
 	},
 	onMessage: function (user, userID, channelID, message) {
-		//check if the message is in the right channel, contains a link, and is not the latest link from the rss feed
-		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink)) {
-			Log.event("Detected posted link in this message: " + message, "Discord.io");
+		if (channelID === Config.channelID) {
+			//contains a link, and is not the latest link from the rss feed
+			if (Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink)) {
+				Log.event("Detected posted link in this message: " + message, "Discord.io");
 
-			//extract the url from the string, and cache it
-			Uri.withinString(message, function (url) {
-				Links.cache(Links.standardise(url));
-				return url;
-			});
+				//extract the url from the string, and cache it
+				Uri.withinString(message, function (url) {
+					Links.cache(Links.standardise(url));
+					return url;
+				});
+			}
+			else if (message == Config.subscribeRequestMessage) {
+				Subscriptions.subscribe(userID, user);
+			}
+			else if (message == Config.unsubscribeRequestMessage) {
+				Subscriptions.unsubscribe(userID, user);
+			}
 		}
 		else if (message == Config.logRequestMessage) {
 			DiscordClient.bot.uploadFile({
 				to: channelID,
 				file: "./log"
 			}, (err, message) => {
-				if(err) Log.error("Failed to upload log file: " + message, err);
+				if (err) Log.error("Failed to upload log file: " + message, err);
 				else Log.event("Uploaded log file for user " + user + "(" + userID + ")");
 			});
 		}
@@ -109,6 +117,26 @@ var DiscordClient = {
 				if (!DiscordClient.bot.connected) DiscordClient.onDisconnect();
 			}
 		});
+	}
+};
+
+var Subscriptions = {
+	subscribers: [],
+	parse: function(){
+		JsonFile.readFile("./subscribers.json", (err, obj) => {
+			if(err) Log.error("Unable to parse json subscribers file", err);
+			this.subscribers = obj || [];
+		});
+	},
+	subscribe: function (userID, user) {
+		this.subscribers.push(userID);
+		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if(err) Log.error("Unable to write subscribers to json file", err); });
+		Log.event("Subscribed user " + (user ? user + "(" + user + ")" : userID));
+	},
+	unsubscribe: function (userID, user) {
+		this.subscribers.splice(this.subscribers.indexOf(userID));
+		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if(err) Log.error("Unable to write subscribers to json file", err); });
+		Log.event("Unsubscribed user " + (user ? user + "(" + user + ")" : userID));
 	}
 };
 
@@ -201,6 +229,7 @@ var intervalFunc = () => { }; //do nothing by default
 
 //IIFE to kickstart the bot when the app loads
 (function () {
+	Subscriptions.parse();
 	DiscordClient.startup();
 	setInterval(() => { intervalFunc(); }, Config.pollingInterval);
 })();

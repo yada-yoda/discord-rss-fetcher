@@ -4,5 +4,7 @@
     "pollingInterval": 5000,
     "numLinksToCache": 10,
     "youtubeMode": true,
-    "logRequestMessage": "!logsplease"
+    "logRequestMessage": "!logsplease",
+    "subscribeRequestMessage": "!subscribe",
+    "unsubscribeRequestMessage": "!unsubscribe"
 }
