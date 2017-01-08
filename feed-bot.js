@@ -62,6 +62,9 @@ var DiscordClient = {
 			DiscordClient.bot.uploadFile({
 				to: channelID,
 				file: "./log"
+			}, (err, message) => {
+				if(err) Log.error("Failed to upload log file: " + message, err);
+				else Log.event("Uploaded log file for user " + user + "(" + userID + ")");
 			});
 		}
 	},
