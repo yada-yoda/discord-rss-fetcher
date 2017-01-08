@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.2.0
+
+### Added
+
+- Chat message/command to request a list of subscribed users
+- The ability for users to 'subscribe' so they are tagged whenever a new link is posted
+- Logging to a file
+- Ability for user to request an upload of the logs file
+
+### Updated
+
+- Added basic spam reduction when logging so the same message won't get logged multiple times in a row
+- Refactored a bunch of code to improve efficiency
+- Updated timer logic to only ever use a single timer, and share it between posting and reconnecting
+
 ## v1.1.2
 
 ### Updated
