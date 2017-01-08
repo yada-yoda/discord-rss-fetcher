@@ -8,6 +8,7 @@
     "subscribeRequestMessage": "!subscribe",
     "unsubscribeRequestMessage": "!unsubscribe",
     "subscribersListRequestMessage": "!sublist",
+    "helpRequestMessage": "!help",
     "logFile": "./log",
     "subscribersFile": "./subscribers.json"
 }

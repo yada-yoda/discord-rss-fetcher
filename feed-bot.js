@@ -73,6 +73,12 @@ var DiscordClient = {
 							to: Config.channelID,
 							message: DiscordClient.bot.fixMessage("<@" + Subscriptions.subscribers.join("> <@") + ">")
 						});
+						break;
+					case Config.helpRequestMessage:
+						DiscordClient.bot.sendMessage({
+							to: Config.channelID,
+							message: Config.subscribeRequestMessage + ", " + Config.unsubscribeRequestMessage + ", " + Config.subscribersListRequestMessage
+						});
 				}
 			}
 		}
