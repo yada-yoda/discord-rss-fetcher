@@ -4,6 +4,7 @@
 
 ### Updated
 
+- Added basic spam reduction when logging so the same message won't get logged multiple times in a row
 - Refactored a bunch of code to improve efficiency
 - Updated timer logic to only ever use a single timer, and share it between posting and reconnecting
 
