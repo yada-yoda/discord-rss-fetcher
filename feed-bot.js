@@ -60,14 +60,14 @@ var DiscordClient = {
 					return url;
 				});
 			}
-			else if (message == Config.subscribeRequestMessage) {
+			else if (message === Config.subscribeRequestMessage) {
 				Subscriptions.subscribe(userID, user);
 			}
-			else if (message == Config.unsubscribeRequestMessage) {
+			else if (message === Config.unsubscribeRequestMessage) {
 				Subscriptions.unsubscribe(userID, user);
 			}
 		}
-		else if (message == Config.logRequestMessage) {
+		else if (message === Config.logRequestMessage) {
 			DiscordClient.bot.uploadFile({
 				to: channelID,
 				file: "./log"
@@ -201,7 +201,7 @@ var Links = {
 			if (Config.youtubeMode) latestLink = YouTube.url.createShareUrl(latestLink);
 
 			//make sure we don't spam the latest link
-			if (latestLink == Links.latestFeedLink)
+			if (latestLink === Links.latestFeedLink)
 				return;
 
 			//make sure the latest link hasn't been posted already
