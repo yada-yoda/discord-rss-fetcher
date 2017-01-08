@@ -19,6 +19,7 @@
   "dependencies": {
     "discord.io": "^2.2.4",
     "feed-read": "0.0.1",
+    "simple-file-writer": "^2.0.0",
     "urijs": "^1.18.2"
   }
 }

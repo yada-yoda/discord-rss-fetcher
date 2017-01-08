@@ -1,4 +1,7 @@
 var console = require("console");
+var FileWriter = require("simple-file-writer");
+
+var logWriter = new FileWriter("./log");
 
 var latestLog = "";
 
@@ -7,7 +10,10 @@ function log(message) {
 		latestLog = message; //spam reduction
 
 		//attach a formatted date string to the beginning of everything we log
-		console.log(new Date().toLocaleString() + " " + message);
+		var dateMessage = new Date().toLocaleString() + " " + message;
+
+		console.log(dateMessage);
+		logWriter.write(dateMessage + "\n");
 	}
 }
 
