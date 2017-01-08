@@ -6,5 +6,7 @@
     "youtubeMode": true,
     "logRequestMessage": "!logsplease",
     "subscribeRequestMessage": "!subscribe",
-    "unsubscribeRequestMessage": "!unsubscribe"
+    "unsubscribeRequestMessage": "!unsubscribe",
+    "logFile": "./log",
+    "subscribersFile": "./subscribers.json"
 }

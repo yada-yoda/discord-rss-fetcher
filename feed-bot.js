@@ -60,21 +60,24 @@ var DiscordClient = {
 					return url;
 				});
 			}
-			else if (message === Config.subscribeRequestMessage) {
-				Subscriptions.subscribe(userID, user);
+			else {
+				switch (message) {
+					case Config.subscribeRequestMessage:
+						Subscriptions.subscribe(userID, user);
+						break;
+					case Config.unsubscribeRequestMessage:
+						Subscriptions.unsubscribe(userID, user);
+						break;
+					case Config.logRequestMessage:
+						DiscordClient.bot.uploadFile({
+							to: channelID,
+							file: Config.logFileName
+						}, (err, message) => {
+							if (err) Log.error("Failed to upload log file: " + message, err);
+							else Log.event("Uploaded log file for user " + user + "(" + userID + ")");
+						});
+				}
 			}
-			else if (message === Config.unsubscribeRequestMessage) {
-				Subscriptions.unsubscribe(userID, user);
-			}
-		}
-		else if (message === Config.logRequestMessage) {
-			DiscordClient.bot.uploadFile({
-				to: channelID,
-				file: "./log"
-			}, (err, message) => {
-				if (err) Log.error("Failed to upload log file: " + message, err);
-				else Log.event("Uploaded log file for user " + user + "(" + userID + ")");
-			});
 		}
 	},
 	checkPastMessagesForLinks: function () {
@@ -127,20 +130,23 @@ var DiscordClient = {
 var Subscriptions = {
 	subscribers: [],
 	parse: function () {
-		JsonFile.readFile("./subscribers.json", (err, obj) => {
+		JsonFile.readFile(Config.subscribersFile, (err, obj) => {
 			if (err) Log.error("Unable to parse json subscribers file", err);
 			this.subscribers = obj || [];
 		});
 	},
 	subscribe: function (userID, user) {
 		this.subscribers.push(userID);
-		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if (err) Log.error("Unable to write subscribers to json file", err); });
+		this.writeToFile();
 		Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
 	},
 	unsubscribe: function (userID, user) {
 		this.subscribers.splice(this.subscribers.indexOf(userID));
-		JsonFile.writeFile("./subscribers.json", this.subscribers, (err) => { if (err) Log.error("Unable to write subscribers to json file", err); });
+		this.writeToFile();
 		Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
+	},
+	writeToFile: function () {
+		JsonFile.writeFile(Config.subscribersFile, this.subscribers, (err) => { if (err) Log.error("Unable to write subscribers to json file", err); });
 	}
 };
 
