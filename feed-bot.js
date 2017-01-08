@@ -12,8 +12,6 @@ var Config = require("./config.json"); //config file containing other settings
 
 var DiscordClient = {
 	bot: null,
-	feedInterval: null,
-	reconnectInterval: null,
 	startup: function () {
 		//check if we can connect to discordapp.com to authenticate the bot
 		Dns.resolve("discordapp.com", function (err) {
@@ -36,21 +34,14 @@ var DiscordClient = {
 	onReady: function () {
 		Log.info("Registered/connected bot " + DiscordClient.bot.username + " - (" + DiscordClient.bot.id + ")");
 
-		clearInterval(DiscordClient.reconnectInterval);
-
-		Log.info("Setting up timer to check feed every " + Config.pollingInterval + " milliseconds");
-		DiscordClient.feedInterval = setInterval(Feed.checkAndPost, Config.pollingInterval); //set up the timer to check the feed
-
 		DiscordClient.checkPastMessagesForLinks(); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
+
+		intervalFunc = Feed.checkAndPost;
 	},
 	onDisconnect: function (err, code) {
 		Log.event("Bot was disconnected! " + (err ? err : "") + (code ? code : "No disconnect code provided.") + "\nClearing the feed timer and starting reconnect timer", "Discord.io");
 
-		clearInterval(DiscordClient.feedInterval)
-
-		DiscordClient.reconnectInterval = setInterval(function () {
-			DiscordClient.startup();
-		}, (Config.reconnectInterval || Config.pollingInterval));
+		intervalFunc = DiscordClient.startup; //reassign the interval function to try restart the bot every 5 sec
 	},
 	onMessage: function (user, userID, channelID, message) {
 		//check if the message is in the right channel, contains a link, and is not the latest link from the rss feed
@@ -197,7 +188,10 @@ var Feed = {
 	}
 };
 
+var intervalFunc = () => {}; //do nothing by default
+
 //IIFE to kickstart the bot when the app loads
 (function () {
 	DiscordClient.startup();
+	setInterval(intervalFunc, Config.pollingInterval);
 })();
