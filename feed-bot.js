@@ -63,21 +63,27 @@ var DiscordClient = {
 			else {
 				switch (message) {
 					case Config.subscribeRequestMessage:
-						Subscriptions.subscribe(userID, user);
+						Subscriptions.subscribe(channelID, userID, user);
 						break;
 					case Config.unsubscribeRequestMessage:
-						Subscriptions.unsubscribe(userID, user);
+						Subscriptions.unsubscribe(channelID, userID, user);
 						break;
-					case Config.logRequestMessage:
-						DiscordClient.bot.uploadFile({
-							to: channelID,
-							file: Config.logFile
-						}, (err, message) => {
-							if (err) Log.error("Failed to upload log file: " + message, err);
-							else Log.event("Uploaded log file for user " + user + "(" + userID + ")");
+					case Config.subscribersListRequestMessage:
+						DiscordClient.bot.sendMessage({
+							to: Config.channelID,
+							message: DiscordClient.bot.fixMessage("<@" + Subscriptions.subscribers.join("> <@") + ">")
 						});
 				}
 			}
+		}
+		else if (message === Config.logRequestMessage) {
+			DiscordClient.bot.uploadFile({
+				to: channelID,
+				file: Config.logFile
+			}, (err, message) => {
+				if (err) Log.error("Failed to upload log file: " + message, err);
+				else Log.event("Uploaded log file for user " + user + "(" + userID + ")");
+			});
 		}
 	},
 	checkPastMessagesForLinks: function () {
@@ -135,18 +141,28 @@ var Subscriptions = {
 			this.subscribers = obj || [];
 		});
 	},
-	subscribe: function (userID, user) {
+	subscribe: function (channelID, userID, user) {
 		if (this.subscribers.indexOf(userID) === -1) {
 			this.subscribers.push(userID); //subscribe the user if they aren't already subscribed
 			this.writeToFile();
 			Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
+
+			DiscordClient.bot.sendMessage({
+				to: channelID,
+				message: "You have successfully subscribed"
+			});
 		}
 	},
-	unsubscribe: function (userID, user) {
+	unsubscribe: function (channelID, userID, user) {
 		if (this.subscribers.indexOf(userID) > -1) {
 			this.subscribers.splice(this.subscribers.indexOf(userID));
 			this.writeToFile();
 			Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
+
+			DiscordClient.bot.sendMessage({
+				to: channelID,
+				message: "You have successfully unsubscribed"
+			});
 		}
 	},
 	writeToFile: function () {

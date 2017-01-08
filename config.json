@@ -7,6 +7,7 @@
     "logRequestMessage": "!logsplease",
     "subscribeRequestMessage": "!subscribe",
     "unsubscribeRequestMessage": "!unsubscribe",
+    "subscribersListRequestMessage": "!sublist",
     "logFile": "./log",
     "subscribersFile": "./subscribers.json"
 }
