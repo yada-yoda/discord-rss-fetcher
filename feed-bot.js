@@ -136,14 +136,18 @@ var Subscriptions = {
 		});
 	},
 	subscribe: function (userID, user) {
-		this.subscribers.push(userID);
-		this.writeToFile();
-		Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
+		if (this.subscribers.indexOf(userID) === -1) {
+			this.subscribers.push(userID); //subscribe the user if they aren't already subscribed
+			this.writeToFile();
+			Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
+		}
 	},
 	unsubscribe: function (userID, user) {
-		this.subscribers.splice(this.subscribers.indexOf(userID));
-		this.writeToFile();
-		Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
+		if (this.subscribers.indexOf(userID) > -1) {
+			this.subscribers.splice(this.subscribers.indexOf(userID));
+			this.writeToFile();
+			Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
+		}
 	},
 	writeToFile: function () {
 		JsonFile.writeFile(Config.subscribersFile, this.subscribers, (err) => { if (err) Log.error("Unable to write subscribers to json file", err); });
