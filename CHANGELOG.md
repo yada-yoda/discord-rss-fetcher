@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Updated
+
+- Refactored a bunch of code to improve efficiency
+- Updated timer logic to only ever use a single timer, and share it between posting and reconnecting
+
 ## v1.1.2
 
 ### Updated
