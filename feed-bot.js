@@ -37,9 +37,9 @@ var DiscordClient = {
 		DiscordClient.checkPastMessagesForLinks(); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
 
 		intervalFunc = () => {
-			Feed.check(FeedRead(Config.feedUrl, (err, articles) => {
+			Feed.check((err, articles) => {
 				Links.validate(err, articles, DiscordClient.post);
-			}));
+			});
 		};
 	},
 	onDisconnect: function (err, code) {
@@ -160,7 +160,7 @@ var Links = {
 	validate: function (err, articles, callback) {
 		if (err) Log.error("FEED ERROR: Error reading RSS feed.", err);
 		else {
-			var latestLink = Links.standardise(articles[0].link); //get the latest link and check if it has already been posted and cached
+			var latestLink = Links.standardise(Config.youtubeMode ? YouTube.url.createShareUrl(articles[0].link) : articles[0].link); //get the latest link and convert to share url if youtube mode
 
 			//make sure we don't spam the latest link
 			if (latestLink == Links.latestFeedLink)
@@ -171,8 +171,6 @@ var Links = {
 				Log.info("Didn't post new feed link because already detected as posted " + latestLink);
 				return;
 			}
-
-			if (Config.youtubeMode) latestLink = YouTube.url.createShareUrl(latestLink);
 
 			callback(latestLink);
 
@@ -187,7 +185,7 @@ var Feed = {
 	check: function (callback) {
 		Dns.resolve(Feed.urlObj.host, function (err) { //check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
 			if (err) Log.error("CONNECTION ERROR: Cannot resolve host.", err);
-			else callback();
+			else FeedRead(Config.feedUrl, callback);
 		});
 	}
 };
@@ -197,5 +195,5 @@ var intervalFunc = () => { }; //do nothing by default
 //IIFE to kickstart the bot when the app loads
 (function () {
 	DiscordClient.startup();
-	setInterval(intervalFunc, Config.pollingInterval);
+	setInterval(() => { intervalFunc(); }, Config.pollingInterval);
 })();
