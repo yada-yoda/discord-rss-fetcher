@@ -155,7 +155,7 @@ var Links = {
 		if (err) Log.error("FEED ERROR: Error reading RSS feed.", err);
 		else {
 			var latestLink = Links.standardise(articles[0].link);
-			if (Config.youtubeMode) latestLink = YouTube.createShareUrl(latestLink);
+			if (Config.youtubeMode) latestLink = YouTube.url.createShareUrl(latestLink);
 
 			//make sure we don't spam the latest link
 			if (latestLink == Links.latestFeedLink)
@@ -164,12 +164,13 @@ var Links = {
 			//make sure the latest link hasn't been posted already
 			if (Links.isCached(latestLink)) {
 				Log.info("Didn't post new feed link because already detected as posted " + latestLink);
-				return;
 			}
+			else {
+				callback(latestLink);
 
-			callback(latestLink);
-
-			Links.cache(latestLink); //make sure the link is cached, so it doesn't get posted again
+				Links.cache(latestLink); //make sure the link is cached, so it doesn't get posted again
+			}
+			
 			Links.latestFeedLink = latestLink; //ensure our latest feed link variable is up to date, so we can track when the feed updates
 		}
 	}
