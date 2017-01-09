@@ -4,11 +4,19 @@
     "pollingInterval": 5000,
     "numLinksToCache": 10,
     "youtubeMode": true,
-    "logRequestMessage": "!logsplease",
-    "subscribeRequestMessage": "!subscribe",
-    "unsubscribeRequestMessage": "!unsubscribe",
-    "subscribersListRequestMessage": "!sublist",
-    "helpRequestMessage": "!help",
     "logFile": "./log",
-    "subscribersFile": "./subscribers.json"
+    "subscribersFile": "./subscribers.json",
+    "userCommands": {
+        "subscribe": "!subscribe",
+        "unsubscribe": "!unsubscribe",
+        "subscribersList": "!sublist",
+        "help": "!help"
+    },
+    "developerCommands": {
+        "logUpload": "!logsplease",
+        "cacheList": "!cacheList"
+    },
+    "developers":[
+        "117966411548196870"
+    ]
 }

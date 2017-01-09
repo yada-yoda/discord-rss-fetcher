@@ -61,35 +61,16 @@ var DiscordClient = {
 				});
 			}
 			else {
-				switch (message) {
-					case Config.subscribeRequestMessage:
-						Subscriptions.subscribe(channelID, userID, user);
-						break;
-					case Config.unsubscribeRequestMessage:
-						Subscriptions.unsubscribe(channelID, userID, user);
-						break;
-					case Config.subscribersListRequestMessage:
-						DiscordClient.bot.sendMessage({
-							to: Config.channelID,
-							message: DiscordClient.bot.fixMessage("<@" + Subscriptions.subscribers.join("> <@") + ">")
-						});
-						break;
-					case Config.helpRequestMessage:
-						DiscordClient.bot.sendMessage({
-							to: Config.channelID,
-							message: Config.subscribeRequestMessage + ", " + Config.unsubscribeRequestMessage + ", " + Config.subscribersListRequestMessage
-						});
+				//iterate over all of our message triggers to see if the message sent requires any action
+				for (var i = 0; i < DiscordClient.messageTriggers.length; i++) {
+					var messageTrigger = DiscordClient.messageTriggers[i];
+					if (message === messageTrigger.message) {
+						//check if its locked to a channel or to a specific user
+						if ((messageTrigger.channelID && messageTrigger.channelID === channelID) || (messageTrigger.userIDs && messageTrigger.userIDs.includes(userID)))
+							messageTrigger.action(user, userID, channelID, message);
+					}
 				}
 			}
-		}
-		else if (message === Config.logRequestMessage) {
-			DiscordClient.bot.uploadFile({
-				to: channelID,
-				file: Config.logFile
-			}, (err, message) => {
-				if (err) Log.error("Failed to upload log file: " + message, err);
-				else Log.event("Uploaded log file for user " + user + "(" + userID + ")");
-			});
 		}
 	},
 	checkPastMessagesForLinks: function () {
@@ -121,22 +102,65 @@ var DiscordClient = {
 		});
 	},
 	post: function (link) {
-		var tags = "";
-		for (var userID in Subscriptions.subscribers)
-			tags += "<@" + Subscriptions.subscribers[userID] + "> ";
-
 		//send a messsage containing the new feed link to our discord channel
 		DiscordClient.bot.sendMessage({
 			to: Config.channelID,
-			message: tags + link
-		}, function (err, message) {
-			if (err) {
-				Log.error("ERROR: Failed to send message" + message ? message : "", err);
-				//if there is an error posting the message, check if it is because the bot isn't connected
-				if (!DiscordClient.bot.connected) DiscordClient.onDisconnect();
-			}
+			message: "<@" + Subscriptions.subscribers.join("> <@") + ">" + link
 		});
-	}
+	},
+	//actions to perform when certain messages are detected, along with channel or user requirements
+	messageTriggers: [
+		{
+			message: Config.userCommands.subscribe,
+			action: (user, userID, channelID, message) => { Subscriptions.subscribe(channelID, userID, user); },
+			channelID: Config.channelID
+		},
+		{
+			message: Config.userCommands.unsubscribe,
+			action: (user, userID, channelID, message) => { Subscriptions.unsubscribe(channelID, userID, user); },
+			channelID: Config.channelID
+		},
+		{
+			message: Config.userCommands.subscribersList,
+			action: (user, userID, channelID, message) => {
+				DiscordClient.bot.sendMessage({
+					to: Config.channelID,
+					message: DiscordClient.bot.fixMessage("<@" + Subscriptions.subscribers.join("> <@") + ">")
+				});
+			},
+			channelID: Config.channelID
+		},
+		{
+			message: Config.userCommands.help,
+			action: (user, userID, channelID, message) => {
+				DiscordClient.bot.sendMessage({
+					to: Config.channelID,
+					message: Config.userCommands.join(" + ")
+				});
+			},
+			channelID: Config.channelID
+		},
+		{
+			message: Config.developerCommands.logUpload,
+			action: (user, userID, channelID, message) => {
+				DiscordClient.bot.uploadFile({
+					to: channelID,
+					file: Config.logFile
+				});
+			},
+			userIDs: Config.developers
+		},
+		{
+			message: Config.developerCommands.cacheList,
+			action: (user, userID, channelID, message) => {
+				DiscordClient.bot.sendMessage({
+					to: channelID,
+					message: Links.cached.join(", ")
+				});
+			},
+			userIDs: Config.developers
+		}
+	]
 };
 
 var Subscriptions = {
