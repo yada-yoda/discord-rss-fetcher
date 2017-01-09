@@ -113,21 +113,22 @@ var DiscordClient = {
 	messageTriggers: [
 		{
 			message: Config.userCommands.subscribe,
-			action: (user, userID, channelID, message) => { Subscriptions.subscribe(user, userID, channelID, message); },
+			action: (user, userID, channelID, message) => { if (Config.allowSubscriptions) Subscriptions.subscribe(user, userID, channelID, message); },
 			channelID: Config.channelID
 		},
 		{
 			message: Config.userCommands.unsubscribe,
-			action: (user, userID, channelID, message) => { Subscriptions.unsubscribe(user, userID, channelID, message); },
+			action: (user, userID, channelID, message) => { if (Config.allowSubscriptions) Subscriptions.unsubscribe(user, userID, channelID, message); },
 			channelID: Config.channelID
 		},
 		{
 			message: Config.userCommands.subscribersList,
 			action: (user, userID, channelID, message) => {
-				DiscordClient.bot.sendMessage({
-					to: Config.channelID,
-					message: DiscordClient.bot.fixMessage("<@" + Subscriptions.subscribers.join("> <@") + ">")
-				}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
+				if (Config.allowSubscriptions)
+					DiscordClient.bot.sendMessage({
+						to: Config.channelID,
+						message: DiscordClient.bot.fixMessage("<@" + Subscriptions.subscribers.join("> <@") + ">")
+					}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
 			},
 			channelID: Config.channelID
 		},

@@ -5,6 +5,7 @@
     "numLinksToCache": 10,
     "messageDeleteDelay": 10000,
     "youtubeMode": true,
+    "allowSubscriptions": true,
     "logFile": "./log",
     "subscribersFile": "./subscribers.json",
     "userCommands": {
