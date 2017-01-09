@@ -106,7 +106,7 @@ var DiscordClient = {
 		//send a messsage containing the new feed link to our discord channel
 		DiscordClient.bot.sendMessage({
 			to: Config.channelID,
-			message: "<@" + Subscriptions.subscribers.join("> <@") + ">" + link
+			message: "<@" + Config.subscribersRole + ">" + link
 		});
 	},
 	//actions to perform when certain messages are detected, along with channel or user requirements
@@ -124,7 +124,7 @@ var DiscordClient = {
 		{
 			message: Config.userCommands.subscribersList,
 			action: (user, userID, channelID, message) => {
-				if (Config.allowSubscriptions)
+				if (Config.allowSubscriptions && Config.legacySubscriptions)
 					DiscordClient.bot.sendMessage({
 						to: Config.channelID,
 						message: DiscordClient.bot.fixMessage("<@" + Subscriptions.subscribers.join("> <@") + ">")
@@ -166,39 +166,62 @@ var DiscordClient = {
 };
 
 var Subscriptions = {
-	subscribers: [],
 	parse: function () {
-		JsonFile.readFile(Config.subscribersFile, (err, obj) => {
+		JsonFile.readFile(Config.legacySubscribersFile, (err, obj) => {
 			if (err) Log.error("Unable to parse json subscribers file", err);
 			this.subscribers = obj || [];
 		});
 	},
 	subscribe: function (user, userID, channelID, message) {
-		if (this.subscribers.indexOf(userID) === -1) {
-			this.subscribers.push(userID); //subscribe the user if they aren't already subscribed
-			this.writeToFile();
-			Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
-
-			DiscordClient.bot.sendMessage({
-				to: channelID,
-				message: "You have successfully subscribed"
-			}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
+		if (Config.legacySubscriptions)
+			this.legacy.subscribe();
+		else {
+			DiscordClient.bot.addToRole({
+				userID: userID,
+				roleID: Config.subscribersRoleID
+			});
 		}
+
+		Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
+
+		DiscordClient.bot.sendMessage({
+			to: channelID,
+			message: "You have successfully subscribed"
+		}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
 	},
 	unsubscribe: function (user, userID, channelID, message) {
-		if (this.subscribers.indexOf(userID) > -1) {
-			this.subscribers.splice(this.subscribers.indexOf(userID), 1);
-			this.writeToFile();
-			Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
+		if (Config.legacySubscriptions)
+			this.legacy.unsubscribe();
+		else
+			DiscordClient.bot.removeFromRole({
+				userID: userID,
+				roleID: Config.subscribersRoleID
+			});
 
-			DiscordClient.bot.sendMessage({
-				to: channelID,
-				message: "You have successfully unsubscribed"
-			}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
-		}
+		Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
+
+		DiscordClient.bot.sendMessage({
+			to: channelID,
+			message: "You have successfully unsubscribed"
+		}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
 	},
-	writeToFile: function () {
-		JsonFile.writeFile(Config.subscribersFile, this.subscribers, (err) => { if (err) Log.error("Unable to write subscribers to json file", err); });
+	legacy: {
+		subscribers: [],
+		subscribe: function (user, userID, channelID, message) {
+			if (this.subscribers.indexOf(userID) === -1) {
+				this.subscribers.push(userID); //subscribe the user if they aren't already subscribed
+				this.writeToFile();
+			}
+		},
+		unsubscribe: function (user, userID, channelID, message) {
+			if (this.subscribers.indexOf(userID) > -1) {
+				this.subscribers.splice(this.subscribers.indexOf(userID), 1);
+				this.writeToFile();
+			}
+		},
+		writeToFile: function () {
+			JsonFile.writeFile(Config.legacySubscribersFile, this.subscribers, (err) => { if (err) Log.error("Unable to write subscribers to json file", err); });
+		},
 	}
 };
 

@@ -6,8 +6,10 @@
     "messageDeleteDelay": 10000,
     "youtubeMode": true,
     "allowSubscriptions": true,
+    "legacySubscriptions": false,
+    "subscribersRoleID": "268153160273625088",
+    "legacySubscribersFile": "./subscribers.json",
     "logFile": "./log",
-    "subscribersFile": "./subscribers.json",
     "userCommands": {
         "subscribe": "!subscribe",
         "unsubscribe": "!unsubscribe",
@@ -18,7 +20,7 @@
         "logUpload": "!logsplease",
         "cacheList": "!cacheList"
     },
-    "developers":[
+    "developers": [
         "117966411548196870"
     ]
 }
