@@ -37,6 +37,7 @@ var DiscordClient = {
 
 		DiscordClient.checkPastMessagesForLinks(); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
 
+		//set the interval function to check the feed
 		intervalFunc = () => {
 			Feed.check((err, articles) => {
 				Links.validate(err, articles, DiscordClient.post);
@@ -112,12 +113,12 @@ var DiscordClient = {
 	messageTriggers: [
 		{
 			message: Config.userCommands.subscribe,
-			action: (user, userID, channelID, message) => { Subscriptions.subscribe(channelID, userID, user); },
+			action: (user, userID, channelID, message) => { Subscriptions.subscribe(user, userID, channelID, message); },
 			channelID: Config.channelID
 		},
 		{
 			message: Config.userCommands.unsubscribe,
-			action: (user, userID, channelID, message) => { Subscriptions.unsubscribe(channelID, userID, user); },
+			action: (user, userID, channelID, message) => { Subscriptions.unsubscribe(user, userID, channelID, message); },
 			channelID: Config.channelID
 		},
 		{
@@ -126,7 +127,7 @@ var DiscordClient = {
 				DiscordClient.bot.sendMessage({
 					to: Config.channelID,
 					message: DiscordClient.bot.fixMessage("<@" + Subscriptions.subscribers.join("> <@") + ">")
-				});
+				}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
 			},
 			channelID: Config.channelID
 		},
@@ -171,7 +172,7 @@ var Subscriptions = {
 			this.subscribers = obj || [];
 		});
 	},
-	subscribe: function (channelID, userID, user) {
+	subscribe: function (user, userID, channelID, message) {
 		if (this.subscribers.indexOf(userID) === -1) {
 			this.subscribers.push(userID); //subscribe the user if they aren't already subscribed
 			this.writeToFile();
@@ -180,10 +181,10 @@ var Subscriptions = {
 			DiscordClient.bot.sendMessage({
 				to: channelID,
 				message: "You have successfully subscribed"
-			});
+			}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
 		}
 	},
-	unsubscribe: function (channelID, userID, user) {
+	unsubscribe: function (user, userID, channelID, message) {
 		if (this.subscribers.indexOf(userID) > -1) {
 			this.subscribers.splice(this.subscribers.indexOf(userID), 1);
 			this.writeToFile();
@@ -192,7 +193,7 @@ var Subscriptions = {
 			DiscordClient.bot.sendMessage({
 				to: channelID,
 				message: "You have successfully unsubscribed"
-			});
+			}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
 		}
 	},
 	writeToFile: function () {
