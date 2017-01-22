@@ -184,7 +184,7 @@ var Subscriptions = {
 	},
 
 	mention: function () {
-		return "<@" + Config.subscribersRole + "> ";
+		return "<@&" + Config.subscribersRoleID + "> ";
 	}
 };
 
@@ -277,7 +277,6 @@ var intervalFunc = () => { }; //do nothing by default
 
 //IIFE to kickstart the bot when the app loads
 (function () {
-	Subscriptions.parse();
 	DiscordClient.startup();
 	setInterval(() => { intervalFunc(); }, Config.pollingInterval);
 })();

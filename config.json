@@ -6,12 +6,11 @@
     "messageDeleteDelay": 10000,
     "youtubeMode": true,
     "allowSubscriptions": true,
-    "subscribersRoleID": "268153160273625088",
+    "subscribersRoleID": "268152490002874368",
     "logFile": "./log",
     "userCommands": {
         "subscribe": "!subscribe",
         "unsubscribe": "!unsubscribe",
-        "subscribersList": "!sublist",
         "help": "!help"
     },
     "developerCommands": {
