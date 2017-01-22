@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.3.0
+
+### Added
+
+- Deletion of "You have successfully subscribed" messages after a short delay (configurable)
+- 'Developer' commands that can only be accessed by specified users
+- !cacheList developer command to view the cached URLs
+
+### Updated
+- !logsplease is now a developer command
+- Subscriptions are now done using a role
+    - !subscribe and !unsibscribe add and remove the user from the role
+    - !sublist command is now removed
+    - The role is mentioned when the link is posted, rather than a long chain of user IDs
+
 ## v1.2.1
 
 ### Fixed
