@@ -4,8 +4,8 @@
 ; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
 ;
 [subrepo]
-	remote = https://github.com/benji7425/discord-feed-bot.wiki.git
+	remote = git@github.com:benji7425/discord-feed-bot.wiki.git
 	branch = master
-	commit = 8e3da371ddf5c1835a9c32eca4209d00c6f17148
-	parent = ee7648bc810dc8b1efb38d59aae489269d8a3246
+	commit = f70e48b91074ad051eec48679d013409a79ed53e
+	parent = 21bc8bdaeb42f8eca6218fbe1910ddcc75d56c3c
 	cmdver = 0.3.1
