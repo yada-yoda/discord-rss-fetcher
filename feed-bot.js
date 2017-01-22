@@ -157,8 +157,12 @@ var DiscordClient = {
 var Subscriptions = {
 	subscribe: function (user, userID, channelID, message) {
 		DiscordClient.bot.addToRole({
+			serverID: Config.serverID,
 			userID: userID,
 			roleID: Config.subscribersRoleID
+		}, (err, response) => {
+			if (err) Log.raw(err);
+			Log.info(response);
 		});
 
 		Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
@@ -166,13 +170,17 @@ var Subscriptions = {
 		DiscordClient.bot.sendMessage({
 			to: channelID,
 			message: "You have successfully subscribed"
-		}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
+		}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); }); //delete the subscription confirmation message after a delay
 	},
 
 	unsubscribe: function (user, userID, channelID, message) {
 		DiscordClient.bot.removeFromRole({
+			serverID: Config.serverID,
 			userID: userID,
 			roleID: Config.subscribersRoleID
+		}, (err, response) => {
+			if (err) Log.raw(err);
+			Log.info(response);
 		});
 
 		Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
@@ -180,7 +188,7 @@ var Subscriptions = {
 		DiscordClient.bot.sendMessage({
 			to: channelID,
 			message: "You have successfully unsubscribed"
-		}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); });
+		}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); }); //delete the un-subscription confirmation message after a delay
 	},
 
 	mention: function () {
