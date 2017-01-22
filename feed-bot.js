@@ -61,15 +61,15 @@ var DiscordClient = {
 					return url;
 				});
 			}
-			else {
-				//iterate over all of our message triggers to see if the message sent requires any action
-				for (var i = 0; i < DiscordClient.messageTriggers.length; i++) {
-					var messageTrigger = DiscordClient.messageTriggers[i];
-					if (message === messageTrigger.message) {
-						//check if its locked to a channel or to a specific user
-						if ((messageTrigger.channelID && messageTrigger.channelID === channelID) || (messageTrigger.userIDs && messageTrigger.userIDs.includes(userID)))
-							messageTrigger.action(user, userID, channelID, message);
-					}
+		}
+		else {
+			//iterate over all of our message triggers to see if the message sent requires any action
+			for (var i = 0; i < DiscordClient.messageTriggers.length; i++) {
+				var messageTrigger = DiscordClient.messageTriggers[i];
+				if (message === messageTrigger.message) {
+					//check if its locked to a channel or to a specific user
+					if ((messageTrigger.channelID && messageTrigger.channelID === channelID) || (messageTrigger.userIDs && messageTrigger.userIDs.includes(userID)))
+						messageTrigger.action(user, userID, channelID, message);
 				}
 			}
 		}
