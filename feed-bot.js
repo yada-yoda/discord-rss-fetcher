@@ -37,6 +37,7 @@ var DiscordClient = {
 
 		DiscordClient.checkPastMessagesForLinks(); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
 
+		//set the interval function to check the feed
 		intervalFunc = () => {
 			Feed.check((err, articles) => {
 				Links.validate(err, articles, DiscordClient.post);
@@ -61,35 +62,16 @@ var DiscordClient = {
 				});
 			}
 			else {
-				switch (message) {
-					case Config.subscribeRequestMessage:
-						Subscriptions.subscribe(channelID, userID, user);
-						break;
-					case Config.unsubscribeRequestMessage:
-						Subscriptions.unsubscribe(channelID, userID, user);
-						break;
-					case Config.subscribersListRequestMessage:
-						DiscordClient.bot.sendMessage({
-							to: Config.channelID,
-							message: DiscordClient.bot.fixMessage("<@" + Subscriptions.subscribers.join("> <@") + ">")
-						});
-						break;
-					case Config.helpRequestMessage:
-						DiscordClient.bot.sendMessage({
-							to: Config.channelID,
-							message: Config.subscribeRequestMessage + ", " + Config.unsubscribeRequestMessage + ", " + Config.subscribersListRequestMessage
-						});
+				//iterate over all of our message triggers to see if the message sent requires any action
+				for (var i = 0; i < DiscordClient.messageTriggers.length; i++) {
+					var messageTrigger = DiscordClient.messageTriggers[i];
+					if (message === messageTrigger.message) {
+						//check if its locked to a channel or to a specific user
+						if ((messageTrigger.channelID && messageTrigger.channelID === channelID) || (messageTrigger.userIDs && messageTrigger.userIDs.includes(userID)))
+							messageTrigger.action(user, userID, channelID, message);
+					}
 				}
 			}
-		}
-		else if (message === Config.logRequestMessage) {
-			DiscordClient.bot.uploadFile({
-				to: channelID,
-				file: Config.logFile
-			}, (err, message) => {
-				if (err) Log.error("Failed to upload log file: " + message, err);
-				else Log.event("Uploaded log file for user " + user + "(" + userID + ")");
-			});
 		}
 	},
 	checkPastMessagesForLinks: function () {
@@ -121,58 +103,100 @@ var DiscordClient = {
 		});
 	},
 	post: function (link) {
-		var tags = "";
-		for (var userID in Subscriptions.subscribers)
-			tags += "<@" + Subscriptions.subscribers[userID] + "> ";
-
 		//send a messsage containing the new feed link to our discord channel
 		DiscordClient.bot.sendMessage({
 			to: Config.channelID,
-			message: tags + link
-		}, function (err, message) {
-			if (err) {
-				Log.error("ERROR: Failed to send message" + message ? message : "", err);
-				//if there is an error posting the message, check if it is because the bot isn't connected
-				if (!DiscordClient.bot.connected) DiscordClient.onDisconnect();
-			}
+			message: Subscriptions.mention() + link
 		});
-	}
+	},
+	//actions to perform when certain messages are detected, along with channel or user requirements
+	messageTriggers: [
+		{
+			message: Config.userCommands.subscribe,
+			action: (user, userID, channelID, message) => { if (Config.allowSubscriptions) Subscriptions.subscribe(user, userID, channelID, message); },
+			channelID: Config.channelID
+		},
+		{
+			message: Config.userCommands.unsubscribe,
+			action: (user, userID, channelID, message) => { if (Config.allowSubscriptions) Subscriptions.unsubscribe(user, userID, channelID, message); },
+			channelID: Config.channelID
+		},
+		{
+			message: Config.userCommands.help,
+			action: (user, userID, channelID, message) => {
+				DiscordClient.bot.sendMessage({
+					to: Config.channelID,
+					message: Config.userCommands.join(" + ")
+				});
+			},
+			channelID: Config.channelID
+		},
+		{
+			message: Config.developerCommands.logUpload,
+			action: (user, userID, channelID, message) => {
+				DiscordClient.bot.uploadFile({
+					to: channelID,
+					file: Config.logFile
+				});
+			},
+			userIDs: Config.developers
+		},
+		{
+			message: Config.developerCommands.cacheList,
+			action: (user, userID, channelID, message) => {
+				DiscordClient.bot.sendMessage({
+					to: channelID,
+					message: Links.cached.join(", ")
+				});
+			},
+			userIDs: Config.developers
+		}
+	]
 };
 
 var Subscriptions = {
-	subscribers: [],
-	parse: function () {
-		JsonFile.readFile(Config.subscribersFile, (err, obj) => {
-			if (err) Log.error("Unable to parse json subscribers file", err);
-			this.subscribers = obj || [];
-		});
-	},
-	subscribe: function (channelID, userID, user) {
-		if (this.subscribers.indexOf(userID) === -1) {
-			this.subscribers.push(userID); //subscribe the user if they aren't already subscribed
-			this.writeToFile();
-			Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
+	subscribe: function (user, userID, channelID, message) {
+		DiscordClient.bot.addToRole({
+			serverID: Config.serverID,
+			userID: userID,
+			roleID: Config.subscribersRoleID
+		},
+			(err) => {
+				if (err) Log.raw(err); //log the error if there is an error
+				else { //else go ahead and confirm subscription
+					Log.event("Subscribed user " + (user ? user + "(" + userID + ")" : userID));
 
-			DiscordClient.bot.sendMessage({
-				to: channelID,
-				message: "You have successfully subscribed"
+					DiscordClient.bot.sendMessage({
+						to: channelID,
+						message: "You have successfully subscribed"
+					}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); }); //delete the subscription confirmation message after a delay
+				}
 			});
-		}
-	},
-	unsubscribe: function (channelID, userID, user) {
-		if (this.subscribers.indexOf(userID) > -1) {
-			this.subscribers.splice(this.subscribers.indexOf(userID), 1);
-			this.writeToFile();
-			Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
 
-			DiscordClient.bot.sendMessage({
-				to: channelID,
-				message: "You have successfully unsubscribed"
-			});
-		}
+
 	},
-	writeToFile: function () {
-		JsonFile.writeFile(Config.subscribersFile, this.subscribers, (err) => { if (err) Log.error("Unable to write subscribers to json file", err); });
+
+	unsubscribe: function (user, userID, channelID, message) {
+		DiscordClient.bot.removeFromRole({
+			serverID: Config.serverID,
+			userID: userID,
+			roleID: Config.subscribersRoleID
+		},
+			(err) => {
+				if (err) Log.raw(err); //log the error if there is an error
+				else { //else go ahead and confirm un-subscription
+					Log.event("Unsubscribed user " + (user ? user + "(" + userID + ")" : userID));
+
+					DiscordClient.bot.sendMessage({
+						to: channelID,
+						message: "You have successfully unsubscribed"
+					}, (err, response) => { setTimeout(() => { DiscordClient.bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); }); //delete the un-subscription confirmation message after a delay
+				}
+			});
+	},
+
+	mention: function () {
+		return Config.allowSubscriptions ? "<@&" + Config.subscribersRoleID + "> " : "";
 	}
 };
 
@@ -265,7 +289,6 @@ var intervalFunc = () => { }; //do nothing by default
 
 //IIFE to kickstart the bot when the app loads
 (function () {
-	Subscriptions.parse();
 	DiscordClient.startup();
 	setInterval(() => { intervalFunc(); }, Config.pollingInterval);
 })();
