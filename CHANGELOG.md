@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.1
+
+### Fixed
+
+- Developer commands can now be used from any channel or PM
+
 ## v1.3.0
 
 ### Added
