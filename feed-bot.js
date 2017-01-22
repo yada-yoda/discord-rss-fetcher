@@ -196,7 +196,7 @@ var Subscriptions = {
 	},
 
 	mention: function () {
-		return "<@&" + Config.subscribersRoleID + "> ";
+		return Config.allowSubscriptions ? "<@&" + Config.subscribersRoleID + "> " : "";
 	}
 };
 
