@@ -20,6 +20,10 @@ function log(message) {
 	}
 }
 
+function logRaw(obj) {
+	Console.log(obj);
+}
+
 module.exports = {
 	info: function (message) {
 		if (message)
@@ -36,5 +40,8 @@ module.exports = {
 			//log the message, attach innerEx information if it was passed
 			log("[ERROR] " + message + (innerEx ? ". Inner exception details: " + (innerEx.message || innerEx) : ""));
 		}
+	},
+	raw: function (obj) {
+		if (obj) logRaw(obj);
 	}
 };
