@@ -50,29 +50,28 @@ var DiscordClient = {
 		intervalFunc = DiscordClient.startup; //reassign the interval function to try restart the bot every 5 sec
 	},
 	onMessage: function (user, userID, channelID, message) {
-		if (channelID === Config.channelID) {
-			//contains a link, and is not the latest link from the rss feed
-			if (Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink)) {
-				Log.event("Detected posted link in this message: " + message, "Discord.io");
+		//contains a link, and is not the latest link from the rss feed
+		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink)) {
+			Log.event("Detected posted link in this message: " + message, "Discord.io");
 
-				//extract the url from the string, and cache it
-				Uri.withinString(message, function (url) {
-					Links.cache(Links.standardise(url));
-					return url;
-				});
-			}
-			else {
-				//iterate over all of our message triggers to see if the message sent requires any action
-				for (var i = 0; i < DiscordClient.messageTriggers.length; i++) {
-					var messageTrigger = DiscordClient.messageTriggers[i];
-					if (message === messageTrigger.message) {
-						//check if its locked to a channel or to a specific user
-						if ((messageTrigger.channelID && messageTrigger.channelID === channelID) || (messageTrigger.userIDs && messageTrigger.userIDs.includes(userID)))
-							messageTrigger.action(user, userID, channelID, message);
-					}
+			//extract the url from the string, and cache it
+			Uri.withinString(message, function (url) {
+				Links.cache(Links.standardise(url));
+				return url;
+			});
+		}
+		else {
+			//iterate over all of our message triggers to see if the message sent requires any action
+			for (var i = 0; i < DiscordClient.messageTriggers.length; i++) {
+				var messageTrigger = DiscordClient.messageTriggers[i];
+				if (message === messageTrigger.message) {
+					//check if its locked to a channel or to a specific user
+					if ((messageTrigger.channelID && messageTrigger.channelID === channelID) || (messageTrigger.userIDs && messageTrigger.userIDs.includes(userID)))
+						messageTrigger.action(user, userID, channelID, message);
 				}
 			}
 		}
+
 	},
 	checkPastMessagesForLinks: function () {
 		var limit = 100;
