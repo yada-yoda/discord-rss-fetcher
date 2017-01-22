@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.2
+
+### Fixed
+
+- Fixed list posting channel messages being ignored
+
 ## v1.3.1
 
 ### Fixed
