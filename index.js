@@ -54,7 +54,7 @@ module.exports = {
 			action: (bot, user, userID, channelID, message) => {
 				bot.sendMessage({
 					to: Config.channelID,
-					message: Config.userCommands.join(" + ")
+					message: "Available commands: " + getValues(Config.userCommands).join(", ")
 				});
 			},
 			channelIDs: [Config.channelID]
@@ -251,6 +251,14 @@ var Feed = {
 			else FeedRead(Config.feedUrl, callback);
 		});
 	}
+};
+
+var getValues = function (obj) {
+	var values = [];
+	for (var value in obj)
+		if (obj.hasOwnProperty(value))
+			values.push(obj[value]);
+	return values;
 };
 
 var intervalFunc = () => { }; //do nothing by default
