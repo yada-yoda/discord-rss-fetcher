@@ -15,8 +15,7 @@
         "help": "!help"
     },
     "developerCommands": {
-        "logUpload": "!logsplease",
-        "cacheList": "!cacheList"
+        "cacheList": "!cached"
     },
     "developers": [
         "117966411548196870"
