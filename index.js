@@ -16,7 +16,7 @@ module.exports = {
 		//set the interval function to check the feed
 		intervalFunc = () => {
 			Feed.check((err, articles) => {
-				Links.validate(err, articles, Actions.post);
+				Links.validate(err, articles, (latestLink) => Actions.post(bot, latestLink));
 			});
 		};
 
