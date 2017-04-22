@@ -14,7 +14,7 @@ var EventHandlers = {
 
 		for (let i = 0, len = BotModules.length; i < len; i++) {
 			let botModule = BotModules[i];
-			if (botModule.onReady) botModule.onReady();
+			if (botModule.onReady) botModule.onReady(bot);
 		}
 	},
 	onDisconnect: (err, code) => {

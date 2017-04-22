@@ -10,8 +10,8 @@ var Console = require("console");
 var Config = require("./config.json"); //config file containing other settings
 
 module.exports = {
-	onReady: () => {
-		Actions.checkPastMessagesForLinks(); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
+	onReady: (bot) => {
+		Actions.checkPastMessagesForLinks(bot); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
 
 		//set the interval function to check the feed
 		intervalFunc = () => {
