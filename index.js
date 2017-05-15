@@ -234,10 +234,7 @@ var Links = {
 				return;
 
 			//make sure the latest link hasn't been posted already
-			if (Links.isCached(latestLink)) {
-				Console.info("Didn't post new feed link because already detected as posted " + latestLink);
-			}
-			else {
+			if (!Links.isCached(latestLink)) {
 				callback(latestLink);
 
 				Links.cache(latestLink); //make sure the link is cached, so it doesn't get posted again
