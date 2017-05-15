@@ -1,23 +1,26 @@
 {
-    "feedUrl": "https://www.youtube.com/feeds/videos.xml?user=EthosLab",
-    "channelID": "264420391282409473",
-    "serverID": "264420391282409473",
-    "pollingInterval": 5000,
-    "numLinksToCache": 10,
-    "messageDeleteDelay": 10000,
-    "youtubeMode": true,
-    "allowSubscriptions": true,
-    "subscribersRoleID": "272788856447959040",
-    "logFile": "./log",
-    "userCommands": {
-        "subscribe": "!subscribe",
-        "unsubscribe": "!unsubscribe",
-        "help": "!help"
-    },
-    "developerCommands": {
-        "cacheList": "!cached"
-    },
-    "developers": [
-        "117966411548196870"
-    ]
+	"feedUrls": [
+		"https://www.youtube.com/feeds/videos.xml?user=EthosLab",
+		"https://www.youtube.com/feeds/videos.xml?user=VintageBeef"
+	],
+	"channelID": "264420391282409473",
+	"serverID": "264420391282409473",
+	"pollingInterval": 5000,
+	"numLinksToCache": 10,
+	"messageDeleteDelay": 10000,
+	"youtubeMode": true,
+	"allowSubscriptions": true,
+	"subscribersRoleID": "272788856447959040",
+	"logFile": "./log",
+	"userCommands": {
+		"subscribe": "!subscribe",
+		"unsubscribe": "!unsubscribe",
+		"help": "!help"
+	},
+	"developerCommands": {
+		"cacheList": "!cached"
+	},
+	"developers": [
+		"117966411548196870"
+	]
 }

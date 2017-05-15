@@ -15,9 +15,14 @@ module.exports = {
 
 		//set the interval function to check the feed
 		intervalFunc = () => {
-			Feed.check((err, articles) => {
+			var callback = (err, articles) => {
 				Links.validate(err, articles, (latestLink) => Actions.post(bot, latestLink));
-			});
+			};
+
+			if (Config.feedUrls.length > 1)
+				Feed.checkMultiple(Config.feedUrls, callback);
+			else
+				Feed.check(Config.feedUrls[0], callback);
 		};
 
 		setInterval(() => { intervalFunc(); }, Config.pollingInterval);
@@ -229,10 +234,7 @@ var Links = {
 				return;
 
 			//make sure the latest link hasn't been posted already
-			if (Links.isCached(latestLink)) {
-				Console.info("Didn't post new feed link because already detected as posted " + latestLink);
-			}
-			else {
+			if (!Links.isCached(latestLink)) {
 				callback(latestLink);
 
 				Links.cache(latestLink); //make sure the link is cached, so it doesn't get posted again
@@ -244,11 +246,18 @@ var Links = {
 };
 
 var Feed = {
-	urlObj: Url.parse(Config.feedUrl),
-	check: function (callback) {
-		Dns.resolve(Feed.urlObj.host, function (err) { //check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
+	check: function (feedUrl, callback) {
+		Dns.resolve(Url.parse(feedUrl).host, function (err) { //check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
 			if (err) Console.error("CONNECTION ERROR: Cannot resolve host.", err);
-			else FeedRead(Config.feedUrl, callback);
+			else FeedRead(feedUrl, callback);
+		});
+	},
+	checkMultiple: function (feedUrls, individualCallback) {
+		feedUrls.forEach((url) => {
+			Dns.resolve(Url.parse(url).host, (err) => {
+				if (err) Console.error("CONNECTION ERROR: Cannot resolve host.", err);
+				else FeedRead(url, individualCallback);
+			});
 		});
 	}
 };
