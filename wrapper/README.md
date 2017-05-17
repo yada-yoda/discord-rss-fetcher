@@ -3,7 +3,8 @@
 The purpose of this is to act as a shell for other bot modules, so that a single bot user account can be used for a multi-function bot.
 
 ## Setup
-- Fork/clone/merge this repo into a new one
+- Clone this as a submodule/subtree/subrepo into another repo as "wrapper" (or a folder name of your choice)
+- Use *app/index.js* as your bot entry point, or change the reference in this index.js
 - `npm install --save discord.io`
 - `npm shrinkwrap --dev`
 - `shrinkpack .`
@@ -15,7 +16,7 @@ Interfacing with each bot module is done by the properties in its module.exports
 
 | property     | property type | parameters                            | description                                                                                                                          |
 |--------------|---------------|---------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| onReady      | method        | none                                  | called on the bot ready event                                                                                                        |
+| onReady      | method        | bot                                   | called on the bot ready event                                                                                                        |
 | onDisconnect | method        | none                                  | called when the bot disconnects                                                                                                      |
 | onMessage    | method        | bot, user, userID, channelID, message | called when the bot receives a message - identical to the 'action' property of a command, but triggered on every message (see below) |
 | commands     | array         | N/A                                   | commands a user can invoke - like the onMessage event, but only triggered on expected commands (see below)                           |
@@ -25,13 +26,22 @@ Interfacing with each bot module is done by the properties in its module.exports
 A command object contains a command, and an action to invoke if the message contains that command. Each command object needs a certain set of properties:
 
 
-| property   | optional? | value                    | description                                                                                        |
-|------------|-----------|--------------------------|----------------------------------------------------------------------------------------------------|
-| command    | required  | string                   | Command to look for in the message                                                                 |
-| type       | required  | "equals" or "startsWith" | Describes whether we are looking for the message to be the exact command, or just to start with it |
-| action     | required  | function                 | Callback to invoke if the command is matched (see below)                                           |
-| channelIDs | optional  | array of strings         | If this property is present, the command will only be triggered if sent in one of these channels   |
-| userIDs    | optional  | array of strings         | If this property is present, the command will only be triggered if made by one of these users      |
+| property   | optional? | value                    | description                                                                                               |
+|------------|-----------|--------------------------|-----------------------------------------------------------------------------------------------------------|
+| command    | required  | string                   | Command to look for in the message                                                                        |
+| type       | required  | "equals" or "startsWith" | Describes whether we are looking for the message to be the exact command, or just to start with it        |
+| action     | required  | function                 | Callback to invoke if the command is matched (see below)                                                  |
+| channelIDs | optional  | array of strings         | If this property is present, the command will only be triggered if sent in one of these channels          |
+| roleIDs    | optional  | array of strings         | If this property is present, the command will only be triggered if send by a user with one of these roles |
+| userIDs    | optional  | array of strings         | If this property is present, the command will only be triggered if sent by one of these users             |
+
+**Permission heirarchy**
+channelIDs > roleIDs > userIDs  
+
+Examples of commands that *won't* be triggered:
+- channelIDs *contains* the channel, but userIDs *doesn't* - channelID check will pass, userID check subsequently won't
+- channelIDs *doesn't contain* the channel, roleIDs or userIDs *contain* the user - channelID check will block the command, regardless of other permissions
+- channelIDs *contains* the channel, roleIDs *doesn't* contain the user's roles, userIDs *contains* the user - channelID check will pass, roleID check will block
 
 
 #### Actions
