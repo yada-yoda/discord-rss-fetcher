@@ -4,7 +4,7 @@ const Console = require("console");
 //external module imports
 var Discord = require("discord.io");
 
-var BotModules = [require("../index.js")];
+var BotModules = [require("../app/index.js")];
 
 var bot;
 
@@ -35,9 +35,7 @@ var EventHandlers = {
 				for (let j = 0, jLen = botModule.commands.length; j < jLen; j++) {
 					let messageTrigger = botModule.commands[j];
 
-					if ((!messageTrigger.channelIDs && !messageTrigger.userIDs) //if we have neither channel nor user restraint, pass
-						|| (messageTrigger.channelIDs && messageTrigger.channelIDs.includes(channelID)) //otherwise, if we have a channel constraint, pass if we're allowed to respond in this channel
-						|| (messageTrigger.userIDs && messageTrigger.userIDs.includes(userID))) //otherwise, if we have a user constraint, pass if we're allowed to respond to this user
+					if (commandIsAllowed(messageTrigger, user, userID, channelID))
 						switch (messageTrigger.type) {
 							case "startsWith":
 								if (message.startsWith(messageTrigger.command))
@@ -53,6 +51,34 @@ var EventHandlers = {
 			if (botModule.onMessage) botModule.onMessage(bot, user, userID, channelID, message);
 		}
 	}
+};
+
+var commandIsAllowed = (messageTrigger, user, userID, channelID) => {
+	//if we aren't allowed this command in this channel, disallow the command
+	if (messageTrigger.channelIDs && !messageTrigger.channelIDs.includes(channelID))
+		return false;
+
+	if (messageTrigger.roleIDs) { //check if we have a role constraint
+		var userHasPermissiveRole = false;
+
+		messageTrigger.roleIDs.forEach((element) => { //iterate over all the allowed role IDs
+			if (userHasRole(userID, channelID, element)) userHasPermissiveRole = true; //check if the user has this role
+		});
+
+		if (!userHasPermissiveRole) return false; //disallow the command if the user doesn't have one of these role IDs
+	}
+
+	//if this user isn't allowed, disallow the command
+	if (messageTrigger.userIDs && !messageTrigger.userIDs.includes(userID))
+		return false;
+
+	//if we haven't returned false by now, then the command is allowed
+	return true;
+};
+
+var userHasRole = (userID, channelID, roleID) => {
+	var userRoles = bot.servers[bot.channels[channelID].guild_id].members[userID].roles;
+	return userRoles.includes(roleID);
 };
 
 (() => {
