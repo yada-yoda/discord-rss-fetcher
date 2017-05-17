@@ -11,8 +11,6 @@
 	"youtubeMode": true,
 	"allowSubscriptions": true,
 	"userCommands": {
-		"subscribe": "!subscribe",
-		"unsubscribe": "!unsubscribe",
 		"help": "!help"
 	},
 	"developerCommands": {
