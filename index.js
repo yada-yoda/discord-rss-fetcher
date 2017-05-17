@@ -3,7 +3,6 @@ var Dns = require("dns"); //for connectivity checking
 var Url = require("url"); //for url parsing
 var Uri = require("urijs"); //for finding urls within message strings
 var FeedRead = require("feed-read"); //for rss feed reading
-var JsonFile = require("jsonfile"); //reading/writing json
 var Console = require("console");
 
 //my imports
@@ -15,14 +14,9 @@ module.exports = {
 
 		//set the interval function to check the feed
 		intervalFunc = () => {
-			var callback = (err, articles) => {
-				Links.validate(err, articles, (latestLink) => Actions.post(bot, latestLink));
-			};
+			var callback = (err, articles, feed) => Links.validate(err, articles, (latestLink) => Actions.post(bot, latestLink, feed.roleID));
 
-			if (Config.feedUrls.length > 1)
-				Feed.checkMultiple(Config.feedUrls, callback);
-			else
-				Feed.check(Config.feedUrls[0], callback);
+			Feed.checkFeeds(Config.feeds, callback);
 		};
 
 		setInterval(() => { intervalFunc(); }, Config.pollingInterval);
@@ -90,11 +84,11 @@ module.exports = {
 };
 
 var Actions = {
-	post: (bot, link) => {
+	post: (bot, link, roleID) => {
 		//send a messsage containing the new feed link to our discord channel
 		bot.sendMessage({
 			to: Config.channelID,
-			message: Subscriptions.mention() + link
+			message: ((roleID !== "" && roleID !== undefined) ? "<@&" + roleID + ">" : "") + " " + link
 		});
 	},
 	checkPastMessagesForLinks: (bot) => {
@@ -130,7 +124,7 @@ var Actions = {
 var Subscriptions = {
 	subscribe: function (bot, user, userID, channelID, message) {
 		bot.addToRole({
-			serverID: Config.serverID,
+			serverID: bot.channels[Config.channelID].guild_id,
 			userID: userID,
 			roleID: Config.subscribersRoleID
 		},
@@ -151,7 +145,7 @@ var Subscriptions = {
 
 	unsubscribe: function (bot, user, userID, channelID, message) {
 		bot.removeFromRole({
-			serverID: Config.serverID,
+			serverID: bot.channels[Config.channelID].guild_id,
 			userID: userID,
 			roleID: Config.subscribersRoleID
 		},
@@ -166,10 +160,6 @@ var Subscriptions = {
 					}, (err, response) => { setTimeout(() => { bot.deleteMessage({ channelID: channelID, messageID: response.id }); }, Config.messageDeleteDelay); }); //delete the un-subscription confirmation message after a delay
 				}
 			});
-	},
-
-	mention: function () {
-		return Config.allowSubscriptions ? "<@&" + Config.subscribersRoleID + "> " : "";
 	}
 };
 
@@ -246,17 +236,11 @@ var Links = {
 };
 
 var Feed = {
-	check: function (feedUrl, callback) {
-		Dns.resolve(Url.parse(feedUrl).host, function (err) { //check that we have an internet connection (well not exactly - check that we have a connection to the host of the feedUrl)
-			if (err) Console.error("CONNECTION ERROR: Cannot resolve host.", err);
-			else FeedRead(feedUrl, callback);
-		});
-	},
-	checkMultiple: function (feedUrls, individualCallback) {
-		feedUrls.forEach((url) => {
-			Dns.resolve(Url.parse(url).host, (err) => {
+	checkFeeds: function (feeds, individualCallback) {
+		feeds.forEach((feed) => {
+			Dns.resolve(Url.parse(feed.url).host, (err) => {
 				if (err) Console.error("CONNECTION ERROR: Cannot resolve host.", err);
-				else FeedRead(url, individualCallback);
+				else FeedRead(feed.url, (err, articles) => individualCallback(err, articles, feed));
 			});
 		});
 	}
