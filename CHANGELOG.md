@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+## Added
+
+- Support for posting links from multiple feeds
+- Tagging of separate roles for each feed being checked
+
 ## v1.3.2
 
 ### Fixed
