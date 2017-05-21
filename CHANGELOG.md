@@ -1,11 +1,19 @@
 # Changelog
 
-## Unreleased
+## v1.4.0
 
 ## Added
 
 - Support for posting links from multiple feeds
 - Tagging of separate roles for each feed being checked
+
+## Updated
+
+- Updated bot connection code to use my discord-bot-wrapper
+
+## Removed
+
+- !logsplease command removed as the OTT logging was just being annoying
 
 ## v1.3.2
 
