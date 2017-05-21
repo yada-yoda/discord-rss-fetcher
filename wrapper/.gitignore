@@ -2,8 +2,6 @@
 
 token.json
 
-# Created by https://www.gitignore.io/api/node
-
 ### Node ###
 # Logs
 logs
@@ -35,6 +33,7 @@ coverage
 build/Release
 
 # Dependency directories
+node_cache
 node_modules
 jspm_packages
 
@@ -52,8 +51,3 @@ jspm_packages
 
 # Yarn Integrity file
 .yarn-integrity
-
-
-# End of https://www.gitignore.io/api/node
-
-# Project-specific cache for use with shrinkpack - https://github.com/JamieMason/shrinkpack

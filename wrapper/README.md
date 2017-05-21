@@ -2,13 +2,21 @@
 
 The purpose of this is to act as a shell for other bot modules, so that a single bot user account can be used for a multi-function bot.
 
-## Setup
-- Clone this as a submodule/subtree/subrepo into another repo as "wrapper" (or a folder name of your choice)
-- Use *app/index.js* as your bot entry point, or change the reference in this index.js
-- `npm install --save discord.io`
-- `npm shrinkwrap --dev`
-- `shrinkpack .`
+## Usage
+
+### As a project base
+- Fork/clone/merge this repo into a new one
+- Run `npm init` to re-initialise as the new repo
+- Run `npm install`
 - Create *token.json* with your discord token: `{ "token": "1234567890" }`
+- Add your modules and reference them in `var BotModules = [];`  
+	for example: `var BotModules = [require("my-module")];`
+
+### As a wrapper
+- Use [git subrepo](https://github.com/ingydotnet/git-subrepo) to clone this into a folder called *wrapper* in your parent project
+- Update your parent project's `start` script to run `node wrapper/index.js`
+- Add a reference to your parent project's main file in `var BotModules = [];`  
+	for example: `var BotModules = [require("../app/index.js")];`
 
 ## Creating a bot module
 
