@@ -5,25 +5,27 @@ var Uri = require("urijs"); //for finding urls within message strings
 var FeedRead = require("feed-read"); //for rss feed reading
 var Console = require("console");
 
-//my imports
-var Config = require("./config.json"); //config file containing other settings
+var config;
 
-module.exports = {
-	onReady: (bot) => {
+module.exports = (_config) => {
+	config = _config || require("./config.json");
+
+	this.onReady = (bot) => {
 		Actions.checkPastMessagesForLinks(bot); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
 
 		//set the interval function to check the feed
 		intervalFunc = () => {
 			var callback = (err, articles, feed) => Links.validate(err, articles, (latestLink) => Actions.post(bot, latestLink, feed.roleID));
 
-			Feed.checkFeeds(Config.feeds, callback);
+			Feed.checkFeeds(config.feeds, callback);
 		};
 
-		setInterval(() => { intervalFunc(); }, Config.pollingInterval);
-	},
-	onMessage: function (bot, user, userID, channelID, message) {
+		setInterval(() => { intervalFunc(); }, config.pollingInterval);
+	};
+
+	this.onMessage = (bot, user, userID, channelID, message) => {
 		//contains a link, and is not the latest link from the rss feed
-		if (channelID === Config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink)) {
+		if (channelID === config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink)) {
 			Console.info("Detected posted link in this message: " + message, "Discord.io");
 
 			//extract the url from the string, and cache it
@@ -33,32 +35,33 @@ module.exports = {
 			});
 		}
 
-	},
-	commands: [
+	};
+
+	this.commands = [
 		{
-			command: Config.userCommands.help,
+			command: config.userCommands.help,
 			type: "equals",
 			action: (bot, user, userID, channelID, message) => {
 				bot.sendMessage({
-					to: Config.channelID,
-					message: "Available commands: " + getValues(Config.userCommands).join(", ")
+					to: config.channelID,
+					message: "Available commands: " + getValues(config.userCommands).join(", ")
 				});
 			},
-			channelIDs: [Config.channelID]
+			channelIDs: [config.channelID]
 		},
 		{
-			command: Config.developerCommands.logUpload,
+			command: config.developerCommands.logUpload,
 			type: "equals",
 			action: (bot, user, userID, channelID, message) => {
 				bot.uploadFile({
 					to: channelID,
-					file: Config.logFile
+					file: config.logFile
 				});
 			},
-			userIDs: Config.developers
+			userIDs: config.developers
 		},
 		{
-			command: Config.developerCommands.cacheList,
+			command: config.developerCommands.cacheList,
 			type: "equals",
 			action: (bot, user, userID, channelID, message) => {
 				bot.sendMessage({
@@ -66,16 +69,18 @@ module.exports = {
 					message: Links.cached.join(", ")
 				});
 			},
-			userIDs: Config.developers
+			userIDs: config.developers
 		}
-	]
+	];
+
+	return this;
 };
 
 var Actions = {
 	post: (bot, link, roleID) => {
 		//send a messsage containing the new feed link to our discord channel
 		bot.sendMessage({
-			to: Config.channelID,
+			to: config.channelID,
 			message: ((roleID !== "" && roleID !== undefined) ? "<@&" + roleID + ">" : "") + " " + link
 		});
 	},
@@ -85,7 +90,7 @@ var Actions = {
 
 		//get the last however many messsages from our discord channel
 		bot.getMessages({
-			channelID: Config.channelID,
+			channelID: config.channelID,
 			limit: limit
 		}, function (err, messages) {
 			if (err) Console.error("Error fetching discord messages.", err);
@@ -129,7 +134,7 @@ var YouTube = {
 var Links = {
 	standardise: function (link) {
 		link = link.replace("https://", "http://"); //cheaty way to get around http and https not matching
-		if (Config.youtubeMode) link = link.split("&")[0]; //quick way to chop off stuff like &feature=youtube etc
+		if (config.youtubeMode) link = link.split("&")[0]; //quick way to chop off stuff like &feature=youtube etc
 		return link;
 	},
 	messageContainsLink: function (message) {
@@ -141,7 +146,7 @@ var Links = {
 	cache: function (link) {
 		link = Links.standardise(link);
 
-		if (Config.youtubeMode) link = YouTube.url.createShareUrl(link);
+		if (config.youtubeMode) link = YouTube.url.createShareUrl(link);
 
 		//store the new link if not stored already
 		if (!Links.isCached(link)) {
@@ -149,12 +154,12 @@ var Links = {
 			Console.info("Cached URL: " + link);
 		}
 
-		if (Links.cached.length > Config.numLinksToCache) Links.cached.shift(); //get rid of the first array element if we have reached our cache limit
+		if (Links.cached.length > config.numLinksToCache) Links.cached.shift(); //get rid of the first array element if we have reached our cache limit
 	},
 	isCached: function (link) {
 		link = Links.standardise(link);
 
-		if (Config.youtubeMode)
+		if (config.youtubeMode)
 			return Links.cached.includes(YouTube.url.createShareUrl(link));
 
 		return Links.cached.includes(link);
@@ -163,7 +168,7 @@ var Links = {
 		if (err) Console.error("FEED ERROR: Error reading RSS feed.", err);
 		else {
 			var latestLink = Links.standardise(articles[0].link);
-			if (Config.youtubeMode) latestLink = YouTube.url.createShareUrl(latestLink);
+			if (config.youtubeMode) latestLink = YouTube.url.createShareUrl(latestLink);
 
 			//make sure we don't spam the latest link
 			if (latestLink === Links.latestFeedLink)
