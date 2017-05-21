@@ -1,7 +1,7 @@
 {
-  "name": "discord-feed-bot",
+  "name": "discord-bot-feed-linker",
   "version": "1.4.0",
-  "description": "discord-feed-bot",
+  "description": "discord-bot-feed-linker",
   "main": "app/index.js",
   "scripts": {
     "start": "node index.js",
