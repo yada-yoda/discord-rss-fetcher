@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/benji7425/discord-bot-feed-linker/issues"
   },
-  "homepage": "https://github.com/benji7425/discord-bot-feed-linker#readme"
+  "homepage": "https://github.com/benji7425/discord-bot-feed-linker#readme",
+  "dependencies": {
+    "discord.js": "11.1.0"
+  }
 }
