@@ -8,14 +8,12 @@ module.exports = class GuildData {
 	}
 
 	cachePastPostedLinks() {
-		let i = 0;
-		const recurse = () => {
-			this.feeds[i++].cachePastPostedLinks(this)
-				.catch(Util.dateError)
-				.then(recurse);
-			if (i > this.feeds.length)
-				return Promise.resolve();
-		};
+		const promises = [];
+		
+		this.feeds.forEach(feed => {
+			promises.push(feed.cachePastPostedLinks(this).catch(Util.dateError));
+		});
 
+		return Promise.all(promises);
 	}
 };
