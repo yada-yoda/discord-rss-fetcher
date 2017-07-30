@@ -1,9 +1,9 @@
 module.exports = class FeedData {
-	constructor({ link, channelName, roleID, cachedLinks }) {
+	constructor({ link, channelName, roleName, cachedLinks }) {
 		this.link = link;
 		this.channelName = channelName;
-		this.roleID = roleID;
-		this.cachedLinks = cachedLinks;
+		this.roleName = roleName;
+		this.cachedLinks = cachedLinks | [];
 	}
 
 	/**
