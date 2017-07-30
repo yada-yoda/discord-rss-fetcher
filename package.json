@@ -21,6 +21,7 @@
     "discordjs-util": "git+https://github.com/benji7425/discordjs-util.git",
     "dns": "0.2.2",
     "feed-read": "0.0.1",
+    "jsonfile": "3.0.1",
     "urijs": "1.18.10"
   }
 }

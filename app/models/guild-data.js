@@ -1,8 +1,19 @@
-const Feed = require("./feed.js");
+const FeedData = require("./feed-data.js");
+const Util = require("discordjs-util");
 
 module.exports = class GuildData {
-	constructor({id, feeds}) {
+	constructor({ id, feeds }) {
 		this.id = id;
-		this.feeds = feeds.filter(feed => new Feed(feed));
+		this.feeds = feeds.filter(feed => new FeedData(feed));
+	}
+
+	cachePastPostedLinks() {
+		const promises = [];
+		
+		this.feeds.forEach(feed => {
+			promises.push(feed.cachePastPostedLinks(this).catch(Util.dateError));
+		});
+
+		return Promise.all(promises);
 	}
 };
