@@ -1,18 +1,20 @@
 const Discord = require("discord.js");
-const Util = require("discordjs-util");
+const DiscordUtil = require("discordjs-util");
 
 const client = new Discord.Client();
 
 process.on("uncaughtException", (err) => {
-	Util.dateError(err);
+	DiscordUtil.dateError("Uncaught exception!", err);
 });
 
 client.login(require("./token.json").token);
 
 client.on("ready", () => {
+	DiscordUtil.dateLog("Registered bot " + client.user.username);
 	require("./app/index.js")(client);
+	client.user.setGame("benji7425.github.io");
 });
 
 client.on("disconnect", eventData => {
-	Util.dateError(eventData.code, eventData.reason);
+	DiscordUtil.dateError("Bot was disconnected!", eventData.code, eventData.reason);
 });
