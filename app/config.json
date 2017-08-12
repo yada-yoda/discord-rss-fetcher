@@ -1,6 +1,7 @@
 {
 	"saveIntervalSec": 60,
 	"commands": {
-		"version": "version"
+		"version": "version",
+		"addFeed": "add-feed"
 	}
 }
