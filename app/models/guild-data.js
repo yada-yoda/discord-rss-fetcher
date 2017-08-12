@@ -9,11 +9,15 @@ module.exports = class GuildData {
 
 	cachePastPostedLinks() {
 		const promises = [];
-		
+
 		this.feeds.forEach(feed => {
 			promises.push(feed.cachePastPostedLinks(this).catch(Util.dateError));
 		});
 
 		return Promise.all(promises);
+	}
+
+	checkFeeds() {
+		this.feeds.forEach(feed => feed.check());
 	}
 };

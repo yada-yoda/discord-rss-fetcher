@@ -20,8 +20,13 @@ module.exports = (client) => {
 	const guildsData = FileSystem.existsSync(SAVE_FILE) ? fromJSON(JsonFile.readFileSync(SAVE_FILE)) : {};
 	setInterval(() => writeFile(guildsData), config.saveIntervalSec * 1000);
 
-	parseLinksInAllGuilds(client.guilds, guildsData).then(writeFile(guildsData));
+	parseLinksInGuilds(client.guilds, guildsData).then(writeFile(guildsData));
 
+	//set up an interval to check all the feeds
+	checkFeedsInGuilds(guildsData);
+	setInterval(() => checkFeedsInGuilds(guildsData), config.feedCheckIntervalSec * 1000);
+
+	//set up an on message handler to detect when links are posted
 	client.on("message", message => {
 		if (message.author.id !== client.user.id) { //check the bot isn't triggering itself
 			if (message.channel.type === "dm")
@@ -69,11 +74,14 @@ function addFeed(client, guildsData, message) {
 			}
 			else
 				responseMessage.reply("Your feed has not been saved, please add it again with the correct details");
-
 		});
 }
 
-function parseLinksInAllGuilds(guilds, guildsData) {
+function checkFeedsInGuilds(guildsData) {
+	guildsData.forEach(guild => guild.checkFeeds());
+}
+
+function parseLinksInGuilds(guilds, guildsData) {
 	const promises = [];
 	for (let guild of guilds) {
 		const guildData = guildsData[guild.id];
