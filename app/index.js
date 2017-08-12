@@ -61,7 +61,12 @@ const HandleMessage = {
 };
 
 function addFeed(client, guildsData, message) {
-	const feedData = createNewFeed(message); //create a new feed data instance from the data in our message
+	const parameters = message.content.split(" "); //expect !addfeed <url> <channelName> <roleName>
+	const feedData = new FeedData({
+		link: parameters[1],
+		channelName: parameters[2],
+		roleName: parameters[3]
+	});
 
 	//ask the user if they're happy with the details they set up, save if yes, don't if no
 	DiscordUtil.ask(client, message.channel, message.member, "Are you happy with this? " + feedData)
@@ -69,7 +74,10 @@ function addFeed(client, guildsData, message) {
 
 			//if they responded yes, save the feed and let them know, else tell them to start again
 			if (message.content.toLowerCase() === "yes") {
-				saveFeed(guildsData, message.guild.id, feedData);
+				if (!guildsData[message.guild.id])
+					guildsData[message.guild.id] = new GuildData({ id: message.guild.id, feeds: [] });
+
+				guildsData[message.guild.id].feeds.push(feedData);
 				responseMessage.reply("Your new feed has been saved!");
 			}
 			else
@@ -78,7 +86,7 @@ function addFeed(client, guildsData, message) {
 }
 
 function checkFeedsInGuilds(guildsData) {
-	guildsData.forEach(guild => guild.checkFeeds());
+	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds());
 }
 
 function parseLinksInGuilds(guilds, guildsData) {
@@ -89,34 +97,6 @@ function parseLinksInGuilds(guilds, guildsData) {
 			promises.push(guildData.cachePastPostedLinks());
 	}
 	return Promise.all(promises);
-}
-
-/**
- * Create a new feed from the message object where the user is setting it up
- * @param {Discord.Message} message 
- * @returns {FeedData} Newly created feed data object
- */
-function createNewFeed(message) {
-	const parameters = message.content.split(" "); //expect !addfeed <url> <channelName> <roleName>
-	const feedData = new FeedData({
-		link: parameters[1],
-		channelName: parameters[2],
-		roleName: parameters[3]
-	});
-	return feedData;
-}
-
-/**
- * Saves a passed feed data object into the passed guildsData object, for the specified guild
- * @param {object} guildsData 
- * @param {string} guildID 
- * @param {FeedData} feedData 
- */
-function saveFeed(guildsData, guildID, feedData) {
-	if (!guildsData[guildID])
-		guildsData[guildID] = new GuildData({ id: guildID, feeds: [] });
-
-	guildsData[guildID].feeds.push(feedData);
 }
 
 function writeFile(guildsData) {
