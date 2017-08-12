@@ -2,9 +2,10 @@
   "name": "discord-bot-feed-linker",
   "version": "2.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+	"test": "echo \"Error: no test specified\" && exit 1",
+	"start": "node wrapper.js"
   },
   "repository": {
     "type": "git",

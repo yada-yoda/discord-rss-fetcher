@@ -2,51 +2,76 @@
 const FileSystem = require("fs");
 
 //external lib imports
-const JSONFile = require("jsonfile");
+const JsonFile = require("jsonfile");
 
 //my imports
-const Util = require("discordjs-util");
+const DiscordUtil = require("discordjs-util");
 
 //app component imports
 const GuildData = require("./models/guild-data.js");
 const FeedData = require("./models/feed-data.js");
 
+//global vars
 const SAVE_FILE = "./guilds.json";
 
-//acts as on ready function
 module.exports = (client) => {
 	const config = require("./config.json");
-	const guildsData = FileSystem.existsSync(SAVE_FILE) ? parseJSON(JSONFile.readFileSync(SAVE_FILE)) : {}; //pull saved data from file
+
+	const guildsData = FileSystem.existsSync(SAVE_FILE) ? fromJSON(JsonFile.readFileSync(SAVE_FILE)) : {};
+	setInterval(() => writeFile(guildsData), config.saveIntervalSec * 1000);
 
 	parseLinksInAllGuilds(client.guilds, guildsData).then(writeFile(guildsData));
 
-	//set up an interval to check all the feeds
-
-	//set up an on message handler to detect when links are posted
 	client.on("message", message => {
-		if (message.member.id !== client.user.id) { //make sure the bot ignores itself
-
-			//check if the user is admin and is invoking the add feed command
-			if (message.member.permissions.has("ADMINISTRATOR") && message.content.startsWith(config.commands.setup)) {
-				const feedData = createNewFeed(message); //create a new feed data instance from the data in our message
-
-				//ask the user if they're happy with the details they set up, save if yes, don't if no
-				Util.ask(client, message.channel, message.member, "Are you happy with this? " + feedData)
-					.then(responseMessage => {
-
-						//if they responded yes, save the feed and let them know, else tell them to start again
-						if (message.content.toLowerCase() === "yes") {
-							saveFeed(guildsData, message.guild.id, feedData);
-							responseMessage.reply("Your new feed has been saved!");
-						}
-						else
-							responseMessage.reply("Your feed has not been saved, please add it again with the correct details");
-
-					});
-			}
+		if (message.author.id !== client.user.id) { //check the bot isn't triggering itself
+			if (message.channel.type === "dm")
+				HandleMessage.DM(client, config, message);
+			else if (message.channel.type === "text" && message.member)
+				HandleMessage.Text(client, config, message, guildsData);
 		}
 	});
 };
+
+const HandleMessage = {
+	DM: (client, config, message) => {
+		message.reply("This bot does not have any handling for direct messages. To learn more or get help please visit http://benji7425.github.io, or join my Discord server here: https://discord.gg/SSkbwSJ");
+	},
+	Text: (client, config, message, guildsData) => {
+		//handle admins invoking commands
+		if (message.content.startsWith(message.guild.me.toString()) //user is @mention-ing the bot
+			&& message.member.permissions.has("ADMINISTRATOR")) //user has admin perms
+		{
+			const params = message.content.split(" "); //split the message at the spaces
+			switch (params[1]) {
+				//add handling for different commands here
+				case config.commands.version:
+					message.reply("v" + require("../package.json").version);
+					break;
+				case config.commands.addFeed:
+					addFeed(client, guildsData, message);
+					break;
+			}
+		}
+	}
+};
+
+function addFeed(client, guildsData, message) {
+	const feedData = createNewFeed(message); //create a new feed data instance from the data in our message
+
+	//ask the user if they're happy with the details they set up, save if yes, don't if no
+	DiscordUtil.ask(client, message.channel, message.member, "Are you happy with this? " + feedData)
+		.then(responseMessage => {
+
+			//if they responded yes, save the feed and let them know, else tell them to start again
+			if (message.content.toLowerCase() === "yes") {
+				saveFeed(guildsData, message.guild.id, feedData);
+				responseMessage.reply("Your new feed has been saved!");
+			}
+			else
+				responseMessage.reply("Your feed has not been saved, please add it again with the correct details");
+
+		});
+}
 
 function parseLinksInAllGuilds(guilds, guildsData) {
 	const promises = [];
@@ -80,17 +105,17 @@ function createNewFeed(message) {
  * @param {FeedData} feedData 
  */
 function saveFeed(guildsData, guildID, feedData) {
-	if(!guildsData[guildID])
+	if (!guildsData[guildID])
 		guildsData[guildID] = new GuildData({ id: guildID, feeds: [] });
 
 	guildsData[guildID].feeds.push(feedData);
 }
 
-function parseJSON(json) {
-	const guildIDs = Object.keys(json);
-	guildIDs.forEach(guildID => { guildIDs[guildID] = new GuildData(guildIDs[guildID]); });
+function writeFile(guildsData) {
+	JsonFile.writeFile(SAVE_FILE, guildsData, err => { if (err) DiscordUtil.dateError("Error writing file", err); });
 }
 
-function writeFile(guildsData) {
-	JSONFile.write(SAVE_FILE, guildsData, err => { if (err) Util.dateError(err); });
+function fromJSON(json) {
+	const guildIDs = Object.keys(json);
+	guildIDs.forEach(guildID => { guildIDs[guildID] = new GuildData(guildIDs[guildID]); });
 }
