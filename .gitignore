@@ -1,7 +1,6 @@
-# Project specific
-
-token.json
+### Discord bots ####
 guilds.json
+token.json
 log
 
 ### Node ###

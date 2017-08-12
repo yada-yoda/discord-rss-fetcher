@@ -1,0 +1,6 @@
+{
+	"saveIntervalSec": 60,
+	"commands": {
+		"version": "version"
+	}
+}
