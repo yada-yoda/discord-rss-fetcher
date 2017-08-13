@@ -3,6 +3,7 @@ const FileSystem = require("fs");
 
 //external lib imports
 const JsonFile = require("jsonfile");
+const Url = require("url");
 
 //my imports
 const DiscordUtil = require("discordjs-util");
@@ -23,8 +24,8 @@ module.exports = (client) => {
 	parseLinksInGuilds(client.guilds, guildsData).then(writeFile(guildsData));
 
 	//set up an interval to check all the feeds
-	checkFeedsInGuilds(guildsData);
-	setInterval(() => checkFeedsInGuilds(guildsData), config.feedCheckIntervalSec * 1000);
+	checkFeedsInGuilds(client.guilds, guildsData);
+	setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), config.feedCheckIntervalSec * 1000);
 
 	//set up an on message handler to detect when links are posted
 	client.on("message", message => {
@@ -63,12 +64,17 @@ const HandleMessage = {
 function addFeed(client, guildsData, message) {
 	const parameters = message.content.split(" "); //expect !addfeed <url> <channelName> <roleName>
 
-	const feedUrl = parameters[2], channelName = message.mentions.channels.first().name, roleName = parameters[4];
+	const channel = message.mentions.channels.first();
+	if(!channel)
+		return message.reply("Please tag a channel with #channel-name");
 
-	if (!feedUrl || !channelName) {
-		message.reply("Please supply all the needed fields in this format:\n add-feed url channel-name role-name");
-		return;
-	}
+	const feedUrl = parameters[2], channelName = channel.name, roleName = parameters[4];
+
+	if (!Url.parse(feedUrl).host)
+		return message.reply("Please supply a valid url");
+
+	if (!feedUrl || !channelName)
+		return message.reply("Please supply all the needed fields in this format:\n add-feed url channel-name role-name");
 
 	const feedData = new FeedData({
 		url: feedUrl,
@@ -94,8 +100,8 @@ function addFeed(client, guildsData, message) {
 		});
 }
 
-function checkFeedsInGuilds(guildsData) {
-	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds());
+function checkFeedsInGuilds(guilds, guildsData) {
+	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds(guilds));
 }
 
 function parseLinksInGuilds(guilds, guildsData) {

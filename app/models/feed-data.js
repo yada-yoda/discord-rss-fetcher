@@ -11,7 +11,7 @@ module.exports = class FeedData {
 		this.url = url;
 		this.channelName = channelName;
 		this.roleName = roleName;
-		this.cachedLinks = cachedLinks | [];
+		this.cachedLinks = cachedLinks || [];
 	}
 
 	/**
@@ -33,7 +33,7 @@ module.exports = class FeedData {
 	}
 
 	check(guild) {
-		Dns.resolve(Url.parse(this.url).host, err => { //check we can resolve the host, so we can throw an appropriate error if it fails
+		Dns.resolve(Url.parse(this.url).host || "", err => { //check we can resolve the host, so we can throw an appropriate error if it fails
 			if (err)
 				DiscordUtil.dateError("Connection Error: Can't resolve host", err); //log our error if we can't resolve the host
 			else
@@ -41,24 +41,22 @@ module.exports = class FeedData {
 					if (err)
 						DiscordUtil.dateError(err);
 					else {
-						let latest = articles[0]; //extract the latest link
+						let latest = articles[0].link; //extract the latest link
 						latest = normaliseUrl(latest); //standardise it a bit
 
 						//if we don't have it cached already, cache it and callback
 						if (!this.cachedLinks.includes(latest)) {
 							this.cachedLinks.push(latest);
-							post(guild, latest);
+
+							const channel = guild.channels.find(ch => ch.type === "text" && ch.name.toLowerCase() === this.channelName.toLowerCase());
+							const role = guild.roles.find(role => role.name.toLowerCase() === this.roleName.toLowerCase());
+							channel.send(role + " " + latest);
 						}
 					}
 				});
 		});
 	}
 };
-
-function post(guild, url){
-	const channel = guild.channels.first(ch => ch.type === "text" && ch.name.toLower() === this.channelName.toLower());
-	channel.send(url);
-}
 
 function normaliseUrl(url) {
 	url = url.replace("https://", "http://"); //cheaty way to get around http and https not matching
