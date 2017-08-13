@@ -18,6 +18,6 @@ module.exports = class GuildData {
 	}
 
 	checkFeeds() {
-		this.feeds.forEach(feed => feed.check());
+		// this.feeds.forEach(feed => feed.check());
 	}
 };

@@ -62,22 +62,31 @@ const HandleMessage = {
 
 function addFeed(client, guildsData, message) {
 	const parameters = message.content.split(" "); //expect !addfeed <url> <channelName> <roleName>
+
+	const feedUrl = parameters[2], channelName = message.mentions.channels.first().name, roleName = parameters[4];
+
+	if (!feedUrl || !channelName) {
+		message.reply("Please supply all the needed fields in this format:\n add-feed url channel-name role-name");
+		return;
+	}
+
 	const feedData = new FeedData({
-		link: parameters[1],
-		channelName: parameters[2],
-		roleName: parameters[3]
+		url: feedUrl,
+		channelName: channelName,
+		roleName: roleName
 	});
 
 	//ask the user if they're happy with the details they set up, save if yes, don't if no
-	DiscordUtil.ask(client, message.channel, message.member, "Are you happy with this? " + feedData)
+	DiscordUtil.ask(client, message.channel, message.member, "Are you happy with this?\n ```JavaScript\n" + JSON.stringify(feedData, null, "\n") + "```")
 		.then(responseMessage => {
 
 			//if they responded yes, save the feed and let them know, else tell them to start again
-			if (message.content.toLowerCase() === "yes") {
+			if (responseMessage.content.toLowerCase() === "yes") {
 				if (!guildsData[message.guild.id])
 					guildsData[message.guild.id] = new GuildData({ id: message.guild.id, feeds: [] });
 
 				guildsData[message.guild.id].feeds.push(feedData);
+				writeFile(guildsData);
 				responseMessage.reply("Your new feed has been saved!");
 			}
 			else
@@ -104,6 +113,7 @@ function writeFile(guildsData) {
 }
 
 function fromJSON(json) {
-	const guildIDs = Object.keys(json);
-	guildIDs.forEach(guildID => { guildIDs[guildID] = new GuildData(guildIDs[guildID]); });
+	const guildsData = Object.keys(json);
+	guildsData.forEach(guildID => { json[guildID] = new GuildData(json[guildID]); });
+	return json;
 }

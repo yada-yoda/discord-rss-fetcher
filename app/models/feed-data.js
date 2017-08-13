@@ -7,8 +7,8 @@ const Url = require("url");
 const FeedRead = require("feed-read");
 
 module.exports = class FeedData {
-	constructor({ link, channelName, roleName, cachedLinks }) {
-		this.link = link;
+	constructor({ url, channelName, roleName, cachedLinks }) {
+		this.url = url;
 		this.channelName = channelName;
 		this.roleName = roleName;
 		this.cachedLinks = cachedLinks | [];
@@ -33,11 +33,11 @@ module.exports = class FeedData {
 	}
 
 	check(guild) {
-		Dns.resolve(Url.parse(this.link).host, err => { //check we can resolve the host, so we can throw an appropriate error if it fails
+		Dns.resolve(Url.parse(this.url).host, err => { //check we can resolve the host, so we can throw an appropriate error if it fails
 			if (err)
 				DiscordUtil.dateError("Connection Error: Can't resolve host", err); //log our error if we can't resolve the host
 			else
-				FeedRead(this.link, (err, articles) => { //check the feed
+				FeedRead(this.url, (err, articles) => { //check the feed
 					if (err)
 						DiscordUtil.dateError(err);
 					else {
@@ -55,9 +55,9 @@ module.exports = class FeedData {
 	}
 };
 
-function post(guild, link){
+function post(guild, url){
 	const channel = guild.channels.first(ch => ch.type === "text" && ch.name.toLower() === this.channelName.toLower());
-	channel.send(link);
+	channel.send(url);
 }
 
 function normaliseUrl(url) {
