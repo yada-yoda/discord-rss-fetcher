@@ -4,8 +4,8 @@
   "description": "",
   "main": "app/index.js",
   "scripts": {
-	"test": "echo \"Error: no test specified\" && exit 1",
-	"start": "node wrapper.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node wrapper.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
     "discordjs-util": "git+https://github.com/benji7425/discordjs-util.git",
     "dns": "0.2.2",
     "feed-read": "0.0.1",
-    "jsonfile": "3.0.1",
-    "urijs": "1.18.10"
+    "get-urls": "7.0.0",
+    "jsonfile": "3.0.1"
   }
 }

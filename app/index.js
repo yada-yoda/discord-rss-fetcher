@@ -2,7 +2,9 @@
 const FileSystem = require("fs");
 
 //external lib imports
-const JsonFile = require("jsonfile");
+const JsonFile = require("jsonfile"); //for saving to/from JSON
+const Url = require("url"); //for url parsing
+const GetUrls = require("get-urls"); //for extracting urls from messages
 
 //my imports
 const DiscordUtil = require("discordjs-util");
@@ -20,8 +22,13 @@ module.exports = (client) => {
 	const guildsData = FileSystem.existsSync(SAVE_FILE) ? fromJSON(JsonFile.readFileSync(SAVE_FILE)) : {};
 	setInterval(() => writeFile(guildsData), config.saveIntervalSec * 1000);
 
-	parseLinksInAllGuilds(client.guilds, guildsData).then(writeFile(guildsData));
+	parseLinksInGuilds(client.guilds, guildsData).then(writeFile(guildsData));
 
+	//set up an interval to check all the feeds
+	checkFeedsInGuilds(client.guilds, guildsData);
+	setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), config.feedCheckIntervalSec * 1000);
+
+	//set up an on message handler to detect when links are posted
 	client.on("message", message => {
 		if (message.author.id !== client.user.id) { //check the bot isn't triggering itself
 			if (message.channel.type === "dm")
@@ -56,24 +63,45 @@ const HandleMessage = {
 };
 
 function addFeed(client, guildsData, message) {
-	const feedData = createNewFeed(message); //create a new feed data instance from the data in our message
+	const parameters = message.content.split(" "); //expect !addfeed <url> <channelName> <roleName>
+
+	const feedUrl = [...GetUrls(message.content)][0];
+	const channel = message.mentions.channels.first();
+
+	if (!feedUrl || !channel)
+		return message.reply("Please provide both a channel and an RSS feed URL. You can optionally @mention a role also.");
+
+	const role = message.mentions.roles.first();
+
+	const feedData = new FeedData({
+		url: feedUrl,
+		channelName: channel.name,
+		roleName: role.name
+	});
 
 	//ask the user if they're happy with the details they set up, save if yes, don't if no
-	DiscordUtil.ask(client, message.channel, message.member, "Are you happy with this? " + feedData)
+	DiscordUtil.ask(client, message.channel, message.member, "Are you happy with this?\n ```JavaScript\n" + JSON.stringify(feedData, null, "\n") + "```")
 		.then(responseMessage => {
 
 			//if they responded yes, save the feed and let them know, else tell them to start again
-			if (message.content.toLowerCase() === "yes") {
-				saveFeed(guildsData, message.guild.id, feedData);
+			if (responseMessage.content.toLowerCase() === "yes") {
+				if (!guildsData[message.guild.id])
+					guildsData[message.guild.id] = new GuildData({ id: message.guild.id, feeds: [] });
+
+				guildsData[message.guild.id].feeds.push(feedData);
+				writeFile(guildsData);
 				responseMessage.reply("Your new feed has been saved!");
 			}
 			else
 				responseMessage.reply("Your feed has not been saved, please add it again with the correct details");
-
 		});
 }
 
-function parseLinksInAllGuilds(guilds, guildsData) {
+function checkFeedsInGuilds(guilds, guildsData) {
+	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds(guilds));
+}
+
+function parseLinksInGuilds(guilds, guildsData) {
 	const promises = [];
 	for (let guild of guilds) {
 		const guildData = guildsData[guild.id];
@@ -83,39 +111,12 @@ function parseLinksInAllGuilds(guilds, guildsData) {
 	return Promise.all(promises);
 }
 
-/**
- * Create a new feed from the message object where the user is setting it up
- * @param {Discord.Message} message 
- * @returns {FeedData} Newly created feed data object
- */
-function createNewFeed(message) {
-	const parameters = message.content.split(" "); //expect !addfeed <url> <channelName> <roleName>
-	const feedData = new FeedData({
-		link: parameters[1],
-		channelName: parameters[2],
-		roleName: parameters[3]
-	});
-	return feedData;
-}
-
-/**
- * Saves a passed feed data object into the passed guildsData object, for the specified guild
- * @param {object} guildsData 
- * @param {string} guildID 
- * @param {FeedData} feedData 
- */
-function saveFeed(guildsData, guildID, feedData) {
-	if (!guildsData[guildID])
-		guildsData[guildID] = new GuildData({ id: guildID, feeds: [] });
-
-	guildsData[guildID].feeds.push(feedData);
-}
-
 function writeFile(guildsData) {
 	JsonFile.writeFile(SAVE_FILE, guildsData, err => { if (err) DiscordUtil.dateError("Error writing file", err); });
 }
 
 function fromJSON(json) {
-	const guildIDs = Object.keys(json);
-	guildIDs.forEach(guildID => { guildIDs[guildID] = new GuildData(guildIDs[guildID]); });
+	const guildsData = Object.keys(json);
+	guildsData.forEach(guildID => { json[guildID] = new GuildData(json[guildID]); });
+	return json;
 }

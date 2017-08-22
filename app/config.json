@@ -1,5 +1,6 @@
 {
 	"saveIntervalSec": 60,
+	"feedCheckIntervalSec": 30,
 	"commands": {
 		"version": "version",
 		"addFeed": "add-feed"
