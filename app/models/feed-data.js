@@ -2,9 +2,9 @@
 const DiscordUtil = require("discordjs-util");
 
 //external lib imports
-const Dns = require("dns");
-const Url = require("url");
-const FeedRead = require("feed-read");
+const Dns = require("dns"); //for host resolution checking
+const Url = require("url"); //for url parsing
+const FeedRead = require("feed-read"); //for extracing new links from RSS feeds
 
 module.exports = class FeedData {
 	constructor({ url, channelName, roleName, cachedLinks }) {

@@ -2,8 +2,9 @@
 const FileSystem = require("fs");
 
 //external lib imports
-const JsonFile = require("jsonfile");
-const Url = require("url");
+const JsonFile = require("jsonfile"); //for saving to/from JSON
+const Url = require("url"); //for url parsing
+const GetUrls = require("get-urls"); //for extracting urls from messages
 
 //my imports
 const DiscordUtil = require("discordjs-util");
@@ -64,22 +65,18 @@ const HandleMessage = {
 function addFeed(client, guildsData, message) {
 	const parameters = message.content.split(" "); //expect !addfeed <url> <channelName> <roleName>
 
+	const feedUrl = [...GetUrls(message.content)][0];
 	const channel = message.mentions.channels.first();
-	if(!channel)
-		return message.reply("Please tag a channel with #channel-name");
 
-	const feedUrl = parameters[2], channelName = channel.name, roleName = parameters[4];
+	if (!feedUrl || !channel)
+		return message.reply("Please provide both a channel and an RSS feed URL. You can optionally @mention a role also.");
 
-	if (!Url.parse(feedUrl).host)
-		return message.reply("Please supply a valid url");
-
-	if (!feedUrl || !channelName)
-		return message.reply("Please supply all the needed fields in this format:\n add-feed url channel-name role-name");
+	const role = message.mentions.roles.first();
 
 	const feedData = new FeedData({
 		url: feedUrl,
-		channelName: channelName,
-		roleName: roleName
+		channelName: channel.name,
+		roleName: role.name
 	});
 
 	//ask the user if they're happy with the details they set up, save if yes, don't if no
