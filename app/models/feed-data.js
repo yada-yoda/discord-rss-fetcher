@@ -37,7 +37,7 @@ module.exports = class FeedData {
 		return new Promise((resolve, reject) => {
 			channel.fetchMessages({ limit: 100 })
 				.then(messages => {
-					messages.forEach(m => this.cachedLinks.push(...GetUrls(m.content))); //push all the links in each message into our links array
+					new Map([...messages].reverse()).forEach(m => this.cachedLinks.push(...GetUrls(m.content))); //push all the links in each message into our links array
 					resolve(this);
 				})
 				.catch(reject);
@@ -62,7 +62,7 @@ module.exports = class FeedData {
 
 							const channel = guild.channels.find(ch => ch.type === "text" && ch.name.toLowerCase() === this.channelName.toLowerCase());
 							const role = this.roleName ? guild.roles.find(role => role.name.toLowerCase() === this.roleName.toLowerCase()) : null;
-							channel.send(role ? role + " " : "" + latest);
+							channel.send((role ? role + " " : "") + latest);
 						}
 					}
 				});
