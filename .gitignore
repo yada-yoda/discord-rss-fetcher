@@ -1,14 +1,7 @@
+### Discord bots ####
+guilds.json
+token.json
 log
-subscribers.json
-
-# Created by https://www.gitignore.io/api/visualstudiocode,node
-
-### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-
 
 ### Node ###
 # Logs
@@ -42,6 +35,7 @@ build/Release
 
 # Dependency directories
 node_modules
+node_cache
 jspm_packages
 
 # Optional npm cache directory
@@ -56,5 +50,8 @@ jspm_packages
 # Output of 'npm pack'
 *.tgz
 
-/botConfig.json
-/bot-config.json
+# Yarn Integrity file
+.yarn-integrity
+
+
+# End of https://www.gitignore.io/api/node

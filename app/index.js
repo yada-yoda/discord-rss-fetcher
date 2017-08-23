@@ -1,208 +1,152 @@
-//external library imports
-var Dns = require("dns"); //for connectivity checking
-var Url = require("url"); //for url parsing
-var Uri = require("urijs"); //for finding urls within message strings
-var FeedRead = require("feed-read"); //for rss feed reading
-var Console = require("console");
+//node imports
+const FileSystem = require("fs");
 
-var config;
+//external lib imports
+const JsonFile = require("jsonfile"); //for saving to/from JSON
+const Url = require("url"); //for url parsing
+const GetUrls = require("get-urls"); //for extracting urls from messages
 
-module.exports = (_config) => {
-	config = _config || require("./config.json");
+//my imports
+const DiscordUtil = require("discordjs-util");
 
-	this.onReady = (bot) => {
-		Actions.checkPastMessagesForLinks(bot); //we need to check past messages for links on startup, but also on reconnect because we don't know what has happened during the downtime
+//app component imports
+const GuildData = require("./models/guild-data.js");
+const FeedData = require("./models/feed-data.js");
 
-		//set the interval function to check the feed
-		intervalFunc = () => {
-			var callback = (err, articles, feed) => Links.validate(err, articles, (latestLink) => Actions.post(bot, latestLink, feed.roleID));
+//global vars
+const SAVE_FILE = "./guilds.json";
 
-			Feed.checkFeeds(config.feeds, callback);
-		};
+module.exports = (client) => {
+	const config = require("./config.json");
 
-		setInterval(() => { intervalFunc(); }, config.pollingInterval);
-	};
+	const guildsData = FileSystem.existsSync(SAVE_FILE) ? fromJSON(JsonFile.readFileSync(SAVE_FILE)) : {};
+	setInterval(() => writeFile(guildsData), config.saveIntervalSec * 1000);
 
-	this.onMessage = (bot, user, userID, channelID, message) => {
-		//contains a link, and is not the latest link from the rss feed
-		if (channelID === config.channelID && Links.messageContainsLink(message) && (message !== Links.latestFromFeedlatestFeedLink)) {
-			Console.info("Detected posted link in this message: " + message, "Discord.io");
+	parseLinksInGuilds(client.guilds, guildsData).then(() => writeFile(guildsData))
+		.then(() => checkFeedsInGuilds(client.guilds, guildsData))
+		.then(() => setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), config.feedCheckIntervalSec * 1000)); //set up an interval to check all the feeds
 
-			//extract the url from the string, and cache it
-			Uri.withinString(message, function (url) {
-				Links.cache(Links.standardise(url));
-				return url;
+	//set up an on message handler to detect when links are posted
+	client.on("message", message => {
+		if (message.author.id !== client.user.id) { //check the bot isn't triggering itself
+			if (message.channel.type === "dm")
+				HandleMessage.dm(client, config, message);
+			else if (message.channel.type === "text" && message.member)
+				HandleMessage.text(client, config, message, guildsData);
+		}
+	});
+};
+
+const HandleMessage = {
+	dm: (client, config, message) => {
+		message.reply("This bot does not have any handling for direct messages. To learn more or get help please visit http://benji7425.github.io, or join my Discord server here: https://discord.gg/SSkbwSJ");
+	},
+	text: (client, config, message, guildsData) => {
+		//handle admins invoking commands
+		if (message.content.startsWith(message.guild.me.toString()) //user is @mention-ing the bot
+			&& message.member.permissions.has("ADMINISTRATOR")) //user has admin perms
+		{
+			const params = message.content.split(" "); //split the message at the spaces
+			switch (params[1]) {
+				//add handling for different commands here
+				case config.commands.version:
+					message.reply("v" + require("../package.json").version);
+					break;
+				case config.commands.addFeed:
+					addFeed(client, guildsData, message, config.maxCacheSize);
+					break;
+				case config.commands.removeFeed:
+					removeFeed(client, guildsData, message);
+					break;
+				case config.commands.viewFeeds:
+					viewFeeds(client, guildsData[message.guild.id], message);
+					break;
+			}
+		}
+		else if (guildsData[message.guild.id]) {
+			guildsData[message.guild.id].feeds.forEach(feedData => {
+				if (message.channel.name === feedData.channelName)
+					feedData.cachedLinks.push(...GetUrls(message.content)); //spread the urlSet returned by GetUrls into the cache array
 			});
 		}
-
-	};
-
-	this.commands = [
-		{
-			command: config.userCommands.help,
-			type: "equals",
-			action: (bot, user, userID, channelID, message) => {
-				bot.sendMessage({
-					to: config.channelID,
-					message: "Available commands: " + getValues(config.userCommands).join(", ")
-				});
-			},
-			channelIDs: [config.channelID]
-		},
-		{
-			command: config.developerCommands.logUpload,
-			type: "equals",
-			action: (bot, user, userID, channelID, message) => {
-				bot.uploadFile({
-					to: channelID,
-					file: config.logFile
-				});
-			},
-			userIDs: config.developers
-		},
-		{
-			command: config.developerCommands.cacheList,
-			type: "equals",
-			action: (bot, user, userID, channelID, message) => {
-				bot.sendMessage({
-					to: channelID,
-					message: Links.cached.join(", ")
-				});
-			},
-			userIDs: config.developers
-		}
-	];
-
-	return this;
+	}
 };
 
-var Actions = {
-	post: (bot, link, roleID) => {
-		//send a messsage containing the new feed link to our discord channel
-		bot.sendMessage({
-			to: config.channelID,
-			message: ((roleID !== "" && roleID !== undefined) ? "<@&" + roleID + ">" : "") + " " + link
-		});
-	},
-	checkPastMessagesForLinks: (bot) => {
-		var limit = 100;
-		Console.info("Attempting to check past " + limit + " messages for links");
+function addFeed(client, guildsData, message, maxCacheSize) {
+	const feedUrl = [...GetUrls(message.content)][0];
+	const channel = message.mentions.channels.first();
 
-		//get the last however many messsages from our discord channel
-		bot.getMessages({
-			channelID: config.channelID,
-			limit: limit
-		}, function (err, messages) {
-			if (err) Console.error("Error fetching discord messages.", err);
-			else {
-				Console.info("Pulled last " + messages.length + " messages, scanning for links");
+	if (!feedUrl || !channel)
+		return message.reply("Please provide both a channel and an RSS feed URL. You can optionally @mention a role also.");
 
-				var messageContents = messages.map((x) => { return x.content; }).reverse(); //extract an array of strings from the array of message objects
+	const role = message.mentions.roles.first();
 
-				for (var messageIdx in messageContents) {
-					var message = messageContents[messageIdx];
+	const feedData = new FeedData({
+		url: feedUrl,
+		channelName: channel.name,
+		roleName: role ? role.name : null,
+		maxCacheSize: maxCacheSize
+	});
 
-					if (Links.messageContainsLink(message)) //test if the message contains a url
-						//detect the url inside the string, and cache it
-						Uri.withinString(message, function (url) {
-							Links.cache(url);
-							return url;
-						});
-				}
+	//ask the user if they're happy with the details they set up, save if yes, don't if no
+	DiscordUtil.ask(client, message.channel, message.member, "Are you happy with this?\n" + feedData.toString())
+		.then(responseMessage => {
+
+			//if they responded yes, save the feed and let them know, else tell them to start again
+			if (responseMessage.content.toLowerCase() === "yes") {
+				if (!guildsData[message.guild.id])
+					guildsData[message.guild.id] = new GuildData({ id: message.guild.id, feeds: [] });
+
+				guildsData[message.guild.id].feeds.push(feedData);
+				writeFile(guildsData);
+				responseMessage.reply("Your new feed has been saved!");
 			}
+			else
+				responseMessage.reply("Your feed has not been saved, please add it again with the correct details");
 		});
-	},
-};
+}
 
-var YouTube = {
-	url: {
-		share: "http://youtu.be/",
-		full: "http://www.youtube.com/watch?v=",
-		createFullUrl: function (shareUrl) {
-			return shareUrl.replace(YouTube.url.share, YouTube.url.full);
-		},
-		createShareUrl: function (fullUrl) {
-			var shareUrl = fullUrl.replace(YouTube.url.full, YouTube.url.share);
-
-			if (shareUrl.includes("&")) shareUrl = shareUrl.slice(0, fullUrl.indexOf("&"));
-
-			return shareUrl;
-		}
-	},
-};
-
-var Links = {
-	standardise: function (link) {
-		link = link.replace("https://", "http://"); //cheaty way to get around http and https not matching
-		if (config.youtubeMode) link = link.split("&")[0]; //quick way to chop off stuff like &feature=youtube etc
-		return link;
-	},
-	messageContainsLink: function (message) {
-		var messageLower = message.toLowerCase();
-		return messageLower.includes("http://") || messageLower.includes("https://") || messageLower.includes("www.");
-	},
-	cached: [],
-	latestFeedLink: "",
-	cache: function (link) {
-		link = Links.standardise(link);
-
-		if (config.youtubeMode) link = YouTube.url.createShareUrl(link);
-
-		//store the new link if not stored already
-		if (!Links.isCached(link)) {
-			Links.cached.push(link);
-			Console.info("Cached URL: " + link);
-		}
-
-		if (Links.cached.length > config.numLinksToCache) Links.cached.shift(); //get rid of the first array element if we have reached our cache limit
-	},
-	isCached: function (link) {
-		link = Links.standardise(link);
-
-		if (config.youtubeMode)
-			return Links.cached.includes(YouTube.url.createShareUrl(link));
-
-		return Links.cached.includes(link);
-	},
-	validate: function (err, articles, callback) {
-		if (err) Console.error("FEED ERROR: Error reading RSS feed.", err);
+function removeFeed(client, guildsData, message) {
+	const parameters = message.content.split(" ");
+	if (parameters.length !== 3)
+		message.reply(`Please use the command as such:\n\`\`\` @${client.user.username} remove-feed feedid\`\`\``);
+	else {
+		const guildData = guildsData[message.guild.id];
+		const idx = guildData.feeds.findIndex(feed => feed.id === parameters[2]);
+		if (!Number.isInteger(idx))
+			message.reply("Can't find feed with id " + parameters[2]);
 		else {
-			var latestLink = Links.standardise(articles[0].link);
-			if (config.youtubeMode) latestLink = YouTube.url.createShareUrl(latestLink);
-
-			//make sure we don't spam the latest link
-			if (latestLink === Links.latestFeedLink)
-				return;
-
-			//make sure the latest link hasn't been posted already
-			if (!Links.isCached(latestLink)) {
-				callback(latestLink);
-
-				Links.cache(latestLink); //make sure the link is cached, so it doesn't get posted again
-			}
-
-			Links.latestFeedLink = latestLink; //ensure our latest feed link variable is up to date, so we can track when the feed updates
+			guildData.feeds.splice(idx, 1);
+			writeFile(guildsData);
+			message.reply("Feed removed!");
 		}
 	}
-};
+}
 
-var Feed = {
-	checkFeeds: function (feeds, individualCallback) {
-		feeds.forEach((feed) => {
-			Dns.resolve(Url.parse(feed.url).host, (err) => {
-				if (err) Console.error("CONNECTION ERROR: Cannot resolve host.", err);
-				else FeedRead(feed.url, (err, articles) => individualCallback(err, articles, feed));
-			});
-		});
+function viewFeeds(client, guildData, message) {
+	message.reply(guildData.feeds.map(f => f.toString()).join("\n"));
+}
+
+function checkFeedsInGuilds(guilds, guildsData) {
+	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds(guilds));
+}
+
+function parseLinksInGuilds(guilds, guildsData) {
+	const promises = [];
+	for (let guildId of guilds.keys()) {
+		const guildData = guildsData[guildId];
+		if (guildData)
+			promises.push(guildData.cachePastPostedLinks(guilds.get(guildId)));
 	}
-};
+	return Promise.all(promises);
+}
 
-var getValues = function (obj) {
-	var values = [];
-	for (var value in obj)
-		if (obj.hasOwnProperty(value))
-			values.push(obj[value]);
-	return values;
-};
+function writeFile(guildsData) {
+	JsonFile.writeFile(SAVE_FILE, guildsData, err => { if (err) DiscordUtil.dateError("Error writing file", err); });
+}
 
-var intervalFunc = () => { }; //do nothing by default
+function fromJSON(json) {
+	const guildsData = Object.keys(json);
+	guildsData.forEach(guildID => { json[guildID] = new GuildData(json[guildID]); });
+	return json;
+}

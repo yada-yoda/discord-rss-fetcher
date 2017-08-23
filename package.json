@@ -1,27 +1,29 @@
 {
   "name": "discord-bot-feed-linker",
-  "version": "1.4.0",
-  "description": "discord-bot-feed-linker",
+  "version": "2.0.0",
+  "description": "",
   "main": "app/index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node wrapper.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/benji7425/discord-feed-bot.git"
+    "url": "git+https://github.com/benji7425/discord-bot-feed-linker.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/benji7425/discord-feed-bot/issues"
+    "url": "https://github.com/benji7425/discord-bot-feed-linker/issues"
   },
-  "homepage": "https://github.com/benji7425/discord-feed-bot#readme",
+  "homepage": "https://github.com/benji7425/discord-bot-feed-linker#readme",
   "dependencies": {
-    "discord.io": "2.5.1",
+    "discord.js": "11.1.0",
+    "discordjs-util": "git+https://github.com/benji7425/discordjs-util.git",
+    "dns": "0.2.2",
     "feed-read": "0.0.1",
-    "simple-file-writer": "^2.0.0",
-    "jsonfile": "^2.4.0",
-    "urijs": "^1.18.2"
+    "get-urls": "7.0.0",
+    "jsonfile": "3.0.1",
+    "shortid": "2.2.8"
   }
 }

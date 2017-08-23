@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.0.0-b1
+
+### Added
+- Multi-guild support
+- In-chat commands for setup and configuration
+	- Add a new feed
+	- View a list of feeds
+	- Remove an existing feed
+
+### Updated
+- Now uses discord.js instead of discord.io
+- YouTube links automatically handled; no more separate "YouTube mode" config item
+
 ## v1.4.0
 
 ### Added
