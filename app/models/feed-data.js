@@ -57,8 +57,8 @@ module.exports = class FeedData {
 							this.cachedLinks.push(latest);
 
 							const channel = guild.channels.find(ch => ch.type === "text" && ch.name.toLowerCase() === this.channelName.toLowerCase());
-							const role = guild.roles.find(role => role.name.toLowerCase() === this.roleName.toLowerCase());
-							channel.send(role + " " + latest);
+							const role = this.roleName ? guild.roles.find(role => role.name.toLowerCase() === this.roleName.toLowerCase()) : null;
+							channel.send(role ? role + " " : "" + latest);
 						}
 					}
 				});
