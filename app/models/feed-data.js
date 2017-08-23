@@ -5,6 +5,7 @@ const DiscordUtil = require("discordjs-util");
 const Dns = require("dns"); //for host resolution checking
 const Url = require("url"); //for url parsing
 const FeedRead = require("feed-read"); //for extracing new links from RSS feeds
+const GetUrls = require("get-urls"); //for extracting urls from messages
 
 module.exports = class FeedData {
 	constructor({ url, channelName, roleName, cachedLinks }) {
@@ -12,6 +13,13 @@ module.exports = class FeedData {
 		this.channelName = channelName;
 		this.roleName = roleName;
 		this.cachedLinks = cachedLinks || [];
+
+		this.cachedLinks.push = (...elements) => {
+			const unique = elements
+				.map(el => normaliseUrl(el)) //normalise all the urls
+				.filter(el => !this.cachedLinks.includes(el)); //filter out any already cached
+			Array.prototype.push.apply(this.cachedLinks, unique); 
+		};
 	}
 
 	/**
@@ -25,7 +33,7 @@ module.exports = class FeedData {
 		return new Promise((resolve, reject) => {
 			channel.fetchMessages({ limit: 100 })
 				.then(messages => {
-					messages.forEach(m => Array.prototype.push.apply(this.cachedLinks, getUrls(m))); //push all the links in each message into our links array
+					messages.forEach(m => this.cachedLinks.push(...GetUrls(m.content))); //push all the links in each message into our links array
 					resolve(this);
 				})
 				.catch(reject);
@@ -64,7 +72,7 @@ function normaliseUrl(url) {
 	if (Url.parse(url).host.includes("youtu")) //detect youtu.be and youtube.com - yes I know it's hacky
 		url = url.split("&")[0]; //quick way to chop off stuff like &feature=youtube
 
-	url = url.replace("http://www.youtube.com/watch?v=", "http://youtu.be/"); //turn full url into share url
+	url = url.replace(/(www.)?youtube.com\/watch\?v=/, "youtu.be/"); //turn full url into share url
 
 	return url;
 }

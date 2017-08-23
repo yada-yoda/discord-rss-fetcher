@@ -7,11 +7,11 @@ module.exports = class GuildData {
 		this.feeds = feeds.map(feed => new FeedData(feed));
 	}
 
-	cachePastPostedLinks() {
+	cachePastPostedLinks(guild) {
 		const promises = [];
 
 		this.feeds.forEach(feed => {
-			promises.push(feed.cachePastPostedLinks(this).catch(Util.dateError));
+			promises.push(feed.updatePastPostedLinks(guild).catch(Util.dateError));
 		});
 
 		return Promise.all(promises);

@@ -22,11 +22,9 @@ module.exports = (client) => {
 	const guildsData = FileSystem.existsSync(SAVE_FILE) ? fromJSON(JsonFile.readFileSync(SAVE_FILE)) : {};
 	setInterval(() => writeFile(guildsData), config.saveIntervalSec * 1000);
 
-	parseLinksInGuilds(client.guilds, guildsData).then(writeFile(guildsData));
-
-	//set up an interval to check all the feeds
-	checkFeedsInGuilds(client.guilds, guildsData);
-	setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), config.feedCheckIntervalSec * 1000);
+	parseLinksInGuilds(client.guilds, guildsData).then(() => writeFile(guildsData))
+		.then(() => checkFeedsInGuilds(client.guilds, guildsData))
+		.then(() => setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), config.feedCheckIntervalSec * 1000)); //set up an interval to check all the feeds
 
 	//set up an on message handler to detect when links are posted
 	client.on("message", message => {
@@ -59,6 +57,12 @@ const HandleMessage = {
 					break;
 			}
 		}
+		else if (guildsData[message.guild.id]) {
+			guildsData[message.guild.id].feeds.forEach(feedData => {
+				if (message.channel.name === feedData.channelName)
+					feedData.cachedLinks.push(...GetUrls(message.content)); //spread the urlSet returned by GetUrls into the cache array
+			});
+		}
 	}
 };
 
@@ -76,7 +80,7 @@ function addFeed(client, guildsData, message) {
 	const feedData = new FeedData({
 		url: feedUrl,
 		channelName: channel.name,
-		roleName: role.name
+		roleName: role ? role.name : null
 	});
 
 	//ask the user if they're happy with the details they set up, save if yes, don't if no
@@ -103,10 +107,10 @@ function checkFeedsInGuilds(guilds, guildsData) {
 
 function parseLinksInGuilds(guilds, guildsData) {
 	const promises = [];
-	for (let guild of guilds) {
-		const guildData = guildsData[guild.id];
+	for (let guildId of guilds.keys()) {
+		const guildData = guildsData[guildId];
 		if (guildData)
-			promises.push(guildData.cachePastPostedLinks());
+			promises.push(guildData.cachePastPostedLinks(guilds.get(guildId)));
 	}
 	return Promise.all(promises);
 }
