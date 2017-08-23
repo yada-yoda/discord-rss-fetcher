@@ -4,6 +4,7 @@
 	"maxCacheSize": 10,
 	"commands": {
 		"version": "version",
-		"addFeed": "add-feed"
+		"addFeed": "add-feed",
+		"viewFeeds": "view-feeds"
 	}
 }

@@ -21,7 +21,7 @@ module.exports = class FeedData {
 				.filter(el => !this.cachedLinks.includes(el)); //filter out any already cached
 			Array.prototype.push.apply(this.cachedLinks, unique);
 
-			if(this.cachedLinks.length > this.maxCacheSize)
+			if (this.cachedLinks.length > this.maxCacheSize)
 				this.cachedLinks.splice(0, this.cachedLinks.length - this.maxCacheSize); //remove the # of elements above the max from the beginning
 		};
 	}
@@ -67,6 +67,11 @@ module.exports = class FeedData {
 					}
 				});
 		});
+	}
+
+	toString() {
+		const blacklist = ["cachedLinks", "maxCacheSize"];
+		return `\`\`\`JavaScript\n ${JSON.stringify(this, (k, v) => !blacklist.includes(k) ? v : undefined, "\t")} \`\`\``;
 	}
 };
 

@@ -30,18 +30,18 @@ module.exports = (client) => {
 	client.on("message", message => {
 		if (message.author.id !== client.user.id) { //check the bot isn't triggering itself
 			if (message.channel.type === "dm")
-				HandleMessage.DM(client, config, message);
+				HandleMessage.dm(client, config, message);
 			else if (message.channel.type === "text" && message.member)
-				HandleMessage.Text(client, config, message, guildsData);
+				HandleMessage.text(client, config, message, guildsData);
 		}
 	});
 };
 
 const HandleMessage = {
-	DM: (client, config, message) => {
+	dm: (client, config, message) => {
 		message.reply("This bot does not have any handling for direct messages. To learn more or get help please visit http://benji7425.github.io, or join my Discord server here: https://discord.gg/SSkbwSJ");
 	},
-	Text: (client, config, message, guildsData) => {
+	text: (client, config, message, guildsData) => {
 		//handle admins invoking commands
 		if (message.content.startsWith(message.guild.me.toString()) //user is @mention-ing the bot
 			&& message.member.permissions.has("ADMINISTRATOR")) //user has admin perms
@@ -55,6 +55,9 @@ const HandleMessage = {
 				case config.commands.addFeed:
 					addFeed(client, guildsData, message, config.maxCacheSize);
 					break;
+				case config.commands.viewFeeds:
+					viewFeeds(client, guildsData, message);
+					break;
 			}
 		}
 		else if (guildsData[message.guild.id]) {
@@ -67,8 +70,6 @@ const HandleMessage = {
 };
 
 function addFeed(client, guildsData, message, maxCacheSize) {
-	const parameters = message.content.split(" "); //expect !addfeed <url> <channelName> <roleName>
-
 	const feedUrl = [...GetUrls(message.content)][0];
 	const channel = message.mentions.channels.first();
 
@@ -100,6 +101,11 @@ function addFeed(client, guildsData, message, maxCacheSize) {
 			else
 				responseMessage.reply("Your feed has not been saved, please add it again with the correct details");
 		});
+}
+
+function viewFeeds(client, guildsData, message){
+	const guildData = guildsData[message.guild.id];
+	message.reply(guildData.feeds.map(f => f.toString()).join("\n"));
 }
 
 function checkFeedsInGuilds(guilds, guildsData) {
