@@ -23,6 +23,7 @@
     "dns": "0.2.2",
     "feed-read": "0.0.1",
     "get-urls": "7.0.0",
-    "jsonfile": "3.0.1"
+    "jsonfile": "3.0.1",
+    "shortid": "2.2.8"
   }
 }

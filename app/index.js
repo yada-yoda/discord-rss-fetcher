@@ -55,8 +55,11 @@ const HandleMessage = {
 				case config.commands.addFeed:
 					addFeed(client, guildsData, message, config.maxCacheSize);
 					break;
+				case config.commands.removeFeed:
+					removeFeed(client, guildsData, message);
+					break;
 				case config.commands.viewFeeds:
-					viewFeeds(client, guildsData, message);
+					viewFeeds(client, guildsData[message.guild.id], message);
 					break;
 			}
 		}
@@ -86,7 +89,7 @@ function addFeed(client, guildsData, message, maxCacheSize) {
 	});
 
 	//ask the user if they're happy with the details they set up, save if yes, don't if no
-	DiscordUtil.ask(client, message.channel, message.member, "Are you happy with this?\n ```JavaScript\n" + JSON.stringify(feedData, null, "\n") + "```")
+	DiscordUtil.ask(client, message.channel, message.member, "Are you happy with this?\n" + feedData.toString())
 		.then(responseMessage => {
 
 			//if they responded yes, save the feed and let them know, else tell them to start again
@@ -103,8 +106,24 @@ function addFeed(client, guildsData, message, maxCacheSize) {
 		});
 }
 
-function viewFeeds(client, guildsData, message){
-	const guildData = guildsData[message.guild.id];
+function removeFeed(client, guildsData, message) {
+	const parameters = message.content.split(" ");
+	if (parameters.length !== 3)
+		message.reply(`Please use the command as such:\n\`\`\` @${client.user.username} remove-feed feedid\`\`\``);
+	else {
+		const guildData = guildsData[message.guild.id];
+		const idx = guildData.feeds.findIndex(feed => feed.id === parameters[2]);
+		if (!Number.isInteger(idx))
+			message.reply("Can't find feed with id " + parameters[2]);
+		else {
+			guildData.feeds.splice(idx, 1);
+			writeFile(guildsData);
+			message.reply("Feed removed!");
+		}
+	}
+}
+
+function viewFeeds(client, guildData, message) {
 	message.reply(guildData.feeds.map(f => f.toString()).join("\n"));
 }
 

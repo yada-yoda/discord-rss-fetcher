@@ -5,6 +5,7 @@
 	"commands": {
 		"version": "version",
 		"addFeed": "add-feed",
+		"removeFeed": "remove-feed",
 		"viewFeeds": "view-feeds"
 	}
 }

@@ -6,9 +6,11 @@ const Dns = require("dns"); //for host resolution checking
 const Url = require("url"); //for url parsing
 const FeedRead = require("feed-read"); //for extracing new links from RSS feeds
 const GetUrls = require("get-urls"); //for extracting urls from messages
+const ShortID = require("shortid"); //to provide ids for each feed, allowing guilds to remove them
 
 module.exports = class FeedData {
-	constructor({ url, channelName, roleName, cachedLinks, maxCacheSize }) {
+	constructor({ id, url, channelName, roleName, cachedLinks, maxCacheSize }) {
+		this.id = id || ShortID.generate();
 		this.url = url;
 		this.channelName = channelName;
 		this.roleName = roleName;
@@ -84,8 +86,4 @@ function normaliseUrl(url) {
 	url = url.replace(/(www.)?youtube.com\/watch\?v=/, "youtu.be/"); //turn full url into share url
 
 	return url;
-}
-
-function getUrls(str) {
-	return str.match(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig);
 }
