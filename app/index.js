@@ -53,7 +53,7 @@ const HandleMessage = {
 					message.reply("v" + require("../package.json").version);
 					break;
 				case config.commands.addFeed:
-					addFeed(client, guildsData, message);
+					addFeed(client, guildsData, message, config.maxCacheSize);
 					break;
 			}
 		}
@@ -66,7 +66,7 @@ const HandleMessage = {
 	}
 };
 
-function addFeed(client, guildsData, message) {
+function addFeed(client, guildsData, message, maxCacheSize) {
 	const parameters = message.content.split(" "); //expect !addfeed <url> <channelName> <roleName>
 
 	const feedUrl = [...GetUrls(message.content)][0];
@@ -80,7 +80,8 @@ function addFeed(client, guildsData, message) {
 	const feedData = new FeedData({
 		url: feedUrl,
 		channelName: channel.name,
-		roleName: role ? role.name : null
+		roleName: role ? role.name : null,
+		maxCacheSize: maxCacheSize
 	});
 
 	//ask the user if they're happy with the details they set up, save if yes, don't if no

@@ -8,17 +8,21 @@ const FeedRead = require("feed-read"); //for extracing new links from RSS feeds
 const GetUrls = require("get-urls"); //for extracting urls from messages
 
 module.exports = class FeedData {
-	constructor({ url, channelName, roleName, cachedLinks }) {
+	constructor({ url, channelName, roleName, cachedLinks, maxCacheSize }) {
 		this.url = url;
 		this.channelName = channelName;
 		this.roleName = roleName;
 		this.cachedLinks = cachedLinks || [];
+		this.maxCacheSize = maxCacheSize || 10;
 
 		this.cachedLinks.push = (...elements) => {
 			const unique = elements
 				.map(el => normaliseUrl(el)) //normalise all the urls
 				.filter(el => !this.cachedLinks.includes(el)); //filter out any already cached
-			Array.prototype.push.apply(this.cachedLinks, unique); 
+			Array.prototype.push.apply(this.cachedLinks, unique);
+
+			if(this.cachedLinks.length > this.maxCacheSize)
+				this.cachedLinks.splice(0, this.cachedLinks.length - this.maxCacheSize); //remove the # of elements above the max from the beginning
 		};
 	}
 
