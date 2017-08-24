@@ -16,8 +16,8 @@ const FeedData = require("./models/feed-data.js");
 //global vars
 const SAVE_FILE = "./guilds.json";
 
-module.exports = (client) => {
-	const config = require("./config.json");
+module.exports = (client, config) => {
+	config = config || require("./config.json");
 
 	const guildsData = FileSystem.existsSync(SAVE_FILE) ? fromJSON(JsonFile.readFileSync(SAVE_FILE)) : {};
 	setInterval(() => writeFile(guildsData), config.saveIntervalSec * 1000);
