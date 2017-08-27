@@ -1,11 +1,18 @@
 {
-	"saveIntervalSec": 60,
 	"feedCheckIntervalSec": 30,
 	"maxCacheSize": 10,
+	"generic": {
+		"saveFile": "./guilds.json",
+		"saveIntervalSec": 60,
+		"defaultDMResponse": "This bot does not have any handling for direct messages. To learn more or get help please visit http://benji7425.github.io, or join my Discord server here: https://discord.gg/SSkbwSJ"
+	},
 	"commands": {
-		"version": "version",
-		"addFeed": "add-feed",
-		"removeFeed": "remove-feed",
-		"viewFeeds": "view-feeds"
+		"admin": {
+			"version": "version",
+			"addFeed": "add-feed",
+			"removeFeed": "remove-feed",
+			"viewFeeds": "view-feeds"
+		},
+		"anyone": {}
 	}
 }

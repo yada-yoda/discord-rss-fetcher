@@ -14,13 +14,13 @@ const GuildData = require("./models/guild-data.js");
 const FeedData = require("./models/feed-data.js");
 
 //global vars
-const SAVE_FILE = "./guilds.json";
+let writeFile = null;
 
-module.exports = (client, config) => {
-	config = config || require("./config.json");
-
-	const guildsData = FileSystem.existsSync(SAVE_FILE) ? fromJSON(JsonFile.readFileSync(SAVE_FILE)) : {};
-	setInterval(() => writeFile(guildsData), config.saveIntervalSec * 1000);
+module.exports = (client, config = null) => {
+	config = config || require("./config.json"); //load config file
+	const guildsData = FileSystem.existsSync(config.generic.saveFile) ? fromJSON(JsonFile.readFileSync(config.generic.saveFile)) : {}; //read data from file, or generate new one if file doesn't exist
+	writeFile = () => JsonFile.writeFile(config.generic.saveFile, guildsData, err => { if (err) DiscordUtil.dateError("Error writing file", err); });
+	setInterval(() => writeFile(), config.generic.saveIntervalSec * 1000); //set interval to save data to file
 
 	parseLinksInGuilds(client.guilds, guildsData).then(() => writeFile(guildsData))
 		.then(() => checkFeedsInGuilds(client.guilds, guildsData))
@@ -39,7 +39,7 @@ module.exports = (client, config) => {
 
 const HandleMessage = {
 	dm: (client, config, message) => {
-		message.reply("This bot does not have any handling for direct messages. To learn more or get help please visit http://benji7425.github.io, or join my Discord server here: https://discord.gg/SSkbwSJ");
+		message.reply(config.generic.defaultDMResponse);
 	},
 	text: (client, config, message, guildsData) => {
 		//handle admins invoking commands
@@ -47,18 +47,19 @@ const HandleMessage = {
 			&& message.member.permissions.has("ADMINISTRATOR")) //user has admin perms
 		{
 			const params = message.content.split(" "); //split the message at the spaces
+
+			//check which command was invoked
 			switch (params[1]) {
-				//add handling for different commands here
-				case config.commands.version:
+				case config.commands.admin.version:
 					message.reply("v" + require("../package.json").version);
 					break;
-				case config.commands.addFeed:
+				case config.commands.admin.addFeed:
 					addFeed(client, guildsData, message, config.maxCacheSize);
 					break;
-				case config.commands.removeFeed:
+				case config.commands.admin.removeFeed:
 					removeFeed(client, guildsData, message);
 					break;
-				case config.commands.viewFeeds:
+				case config.commands.admin.viewFeeds:
 					viewFeeds(client, guildsData[message.guild.id], message);
 					break;
 			}
@@ -139,10 +140,6 @@ function parseLinksInGuilds(guilds, guildsData) {
 			promises.push(guildData.cachePastPostedLinks(guilds.get(guildId)));
 	}
 	return Promise.all(promises);
-}
-
-function writeFile(guildsData) {
-	JsonFile.writeFile(SAVE_FILE, guildsData, err => { if (err) DiscordUtil.dateError("Error writing file", err); });
 }
 
 function fromJSON(json) {
