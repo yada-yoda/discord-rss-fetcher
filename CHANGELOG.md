@@ -10,8 +10,15 @@
 	- Remove an existing feed
 
 ### Updated
+
+- Make save file configurable to allow use as a module with other bots
+- Update config file structure
 - Now uses discord.js instead of discord.io
 - YouTube links automatically handled; no more separate "YouTube mode" config item
+
+### Fixed
+
+- Crash if trying to view feeds list before any feeds have been set up
 
 ## v1.4.0
 

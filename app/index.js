@@ -125,6 +125,9 @@ function removeFeed(client, guildsData, message) {
 }
 
 function viewFeeds(client, guildData, message) {
+	if (!guildData)
+		return;
+
 	message.reply(guildData.feeds.map(f => f.toString()).join("\n"));
 }
 
