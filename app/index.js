@@ -38,6 +38,8 @@ module.exports = (client, config = null) => {
 				HandleMessage.text(client, config, message, guildsData);
 		}
 	});
+
+	Bot.onReady(client, guildsData, config).then(() => writeFile).catch(err => DiscordUtil.dateError(err));
 };
 
 const HandleMessage = {
