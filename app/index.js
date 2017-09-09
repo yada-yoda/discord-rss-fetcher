@@ -83,7 +83,7 @@ const HandleMessage = {
 					break;
 				default:
 					if (finalisedParams.length >= expectedParamCount)
-						Bot.onCommand(commandObj, config.commands, finalisedParams, guildData, message)
+						Bot.onCommand(commandObj, config.commands, finalisedParams, guildData, message, config, client, botName)
 							.then(msg => {
 								message.reply(msg);
 								writeFile();
