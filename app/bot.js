@@ -16,14 +16,14 @@ module.exports = {
 				.then(() => setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), config.feedCheckIntervalSec * 1000)); //set up an interval to check all the feeds
 		});
 	},
-	onCommand(commandObj, commandsObj, params, guildData, message) {
+	onCommand(commandObj, commandsObj, params, guildData, message, config, client, botName) {
 		switch (commandObj.command) {
 			case commandsObj.addFeed.command:
-				return addFeed();
+				return addFeed(client, guildData, message, config.maxCacheSize);
 			case commandsObj.removeFeed.command:
-				return removeFeed();
+				return removeFeed(guildData, message, botName);
 			case commandsObj.viewFeeds.command:
-				return viewFeeds();
+				return viewFeeds(guildData);
 		}
 	},
 	onNonCommandMsg(message, guildData) {
@@ -34,7 +34,7 @@ module.exports = {
 	}
 };
 
-function addFeed(client, guildsData, message, maxCacheSize) {
+function addFeed(client, guildData, message, maxCacheSize) {
 	return new Promise((resolve, reject) => {
 		const feedUrl = [...GetUrls(message.content)][0];
 		const channel = message.mentions.channels.first();
@@ -57,10 +57,10 @@ function addFeed(client, guildsData, message, maxCacheSize) {
 
 				//if they responded yes, save the feed and let them know, else tell them to start again
 				if (responseMessage.content.toLowerCase() === "yes") {
-					if (!guildsData[message.guild.id])
-						guildsData[message.guild.id] = new GuildData({ id: message.guild.id, feeds: [] });
+					if (!guildData)
+						guildData = new GuildData({ id: message.guild.id, feeds: [] });
 
-					guildsData[message.guild.id].feeds.push(feedData);
+					guildData.feeds.push(feedData);
 					resolve("Your new feed has been saved!");
 				}
 				else
@@ -69,19 +69,18 @@ function addFeed(client, guildsData, message, maxCacheSize) {
 	});
 }
 
-function removeFeed(guildsData, message, botName) {
+function removeFeed(guildData, message, botName) {
 	return new Promise((resolve, reject) => {
 		const parameters = message.content.split(" ");
 		if (parameters.length !== 3)
 			resolve(`Please use the command as such:\n\`\`\` ${botName} remove-feed feedid\`\`\``);
 		else {
-			const guildData = guildsData[message.guild.id];
 			const idx = guildData.feeds.findIndex(feed => feed.id === parameters[2]);
 			if (!Number.isInteger(idx))
 				reject("Can't find feed with id " + parameters[2]);
 			else {
 				guildData.feeds.splice(idx, 1);
-				reject("Feed removed!");
+				resolve("Feed removed!");
 			}
 		}
 	});

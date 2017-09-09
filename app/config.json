@@ -6,6 +6,7 @@
 		"discordInvite": "https://discord.gg/SSkbwSJ",
 		"defaultDMResponse": "This bot does not have any handling for direct messages. To learn more or get help please visit %s, or join my Discord server here: %s"
 	},
+	"maxCacheSize": 100,
 	"feedCheckIntervalSec": 30,
 	"commands": {
 		"version": {
