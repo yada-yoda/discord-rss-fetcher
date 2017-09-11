@@ -1,0 +1,28 @@
+{
+  "version": "3.0.0-b1",
+  "main": "app/index.js",
+  "scripts": {
+    "start": "node bootstrap.js"
+  },
+  "dependencies": {
+    "discord.js": "11.1.0",
+    "discordjs-util": "git+https://github.com/benji7425/discordjs-util.git",
+    "feed-read": "0.0.1",
+    "get-urls": "7.0.0",
+    "jsonfile": "3.0.1",
+    "shortid": "2.2.8"
+  },
+  "name": "discord-bot-rss-feed",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benji7425/discord-bot-rss-feed.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/benji7425/discord-bot-rss-feed/issues"
+  },
+  "homepage": "https://github.com/benji7425/discord-bot-rss-feed#readme",
+  "description": ""
+}
