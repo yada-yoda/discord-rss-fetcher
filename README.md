@@ -17,8 +17,8 @@ Posts the latest URLs from an RSS feed, optionally @mention-ing a role when post
 
 ## Invite
 
-By inviting this bot to your server you agree to the [terms and conditions](#privacy-statement) laid out in the privacy section of this document  
-If you agree, invite to your server with [this link](https://discordapp.com/oauth2/authorize?client_id=343909688045469698&scope=bot&permissions=0x00010c00)
+By inviting this bot to your server you agree to the [terms and conditions](#privacy-statement) laid out in the privacy section of this document.  
+If you agree, invite to your server with [this link](https://discordapp.com/oauth2/authorize?client_id=343909688045469698&scope=bot&permissions=0x00010c00).
 
 ## Setup
 
@@ -50,7 +50,8 @@ Example:
 
 ## Permissions
 
-Why does the bot need these permissions?
+The bot requires certain permissions, which you are prompted for on the invite screen.
+Each permission has a reason for being required, explained below.
 
 | Permission           | Reason                                                      |
 |----------------------|-------------------------------------------------------------|
