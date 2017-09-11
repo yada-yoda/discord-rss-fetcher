@@ -4,7 +4,7 @@ const Util = require("discordjs-util");
 module.exports = class GuildData {
 	constructor({ id, feeds }) {
 		this.id = id;
-		this.feeds = feeds.map(feed => new FeedData(feed));
+		this.feeds = (feeds || []).map(feed => new FeedData(feed));
 	}
 
 	cachePastPostedLinks(guild) {
