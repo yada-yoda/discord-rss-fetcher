@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.0-b2
+
+### Fixed
+
+- Full and short youtube urls not being properly converted
+
 ## v3.0.0-b1
 
 ### Added
