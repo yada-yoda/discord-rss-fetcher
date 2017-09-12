@@ -78,12 +78,12 @@ module.exports = class FeedData {
 };
 
 function normaliseUrl(url) {
-	url = url.replace("https://", "http://"); //cheaty way to get around http and https not matching
+	url = url.replace("https://", "http://"); //hacky way to treat http and https the same
 
-	if (Url.parse(url).host.includes("youtu")) //detect youtu.be and youtube.com - yes I know it's hacky
-		url = url.split("&")[0]; //quick way to chop off stuff like &feature=youtube
+	if (Url.parse(url).host.startsWith("http://youtu"))
+		url = url.split("?")[0]; //quick way to chop off stuff like ?feature=youtube
 
-	url = url.replace(/(www.)?youtube.com\/watch\?v=/, "youtu.be/"); //turn full url into share url
+	url = url.replace(/(www.)?youtube.com\/watch\?v=/, "youtu.be/"); //convert youtube full url to short
 
 	return url;
 }
