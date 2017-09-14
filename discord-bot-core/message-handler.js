@@ -39,7 +39,7 @@ function handleTextMessage({ client, commands, message, guildDataModel, guildsDa
 				break;
 			default:
 				if (invoke && params.length >= expectedParamCount) {
-					invoke({ command, params: params, guildData, botName, message, client })
+					invoke({ params, guildData, botName, message, client })
 						.then(msg => {
 							message.reply(msg);
 							writeFile();

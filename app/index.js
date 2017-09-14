@@ -8,7 +8,9 @@ function onReady(client, guildsData) {
 	return new Promise((resolve, reject) => {
 		parseLinksInGuilds(client.guilds, guildsData)
 			.then(() => checkFeedsInGuilds(client.guilds, guildsData))
-			.then(() => setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), Config.feedCheckIntervalSec * 1000)); //set up an interval to check all the feeds
+			.then(() => setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), Config.feedCheckIntervalSec * 1000))
+			.then(resolve)
+			.catch(reject);
 	});
 }
 
@@ -19,25 +21,25 @@ function onTextMessage(message, guildData) {
 	});
 }
 
-function addFeed(client, guildData, message, maxCacheSize) {
+function addFeed({ guildData, message, client }) {
+	const feedUrl = [...GetUrls(message.content)][0];
+	const channel = message.mentions.channels.first();
+
+	if (!feedUrl || !channel)
+		return Promise.reject("Please provide both a channel and an RSS feed URL. You can optionally @mention a role also.");
+
+	const role = message.mentions.roles.first();
+
+	const feedData = new FeedData({
+		url: feedUrl,
+		channelName: channel.name,
+		roleName: role ? role.name : null,
+		maxCacheSize: Config.maxCacheSize
+	});
+
 	return new Promise((resolve, reject) => {
-		const feedUrl = [...GetUrls(message.content)][0];
-		const channel = message.mentions.channels.first();
-
-		if (!feedUrl || !channel)
-			reject("Please provide both a channel and an RSS feed URL. You can optionally @mention a role also.");
-
-		const role = message.mentions.roles.first();
-
-		const feedData = new FeedData({
-			url: feedUrl,
-			channelName: channel.name,
-			roleName: role ? role.name : null,
-			maxCacheSize: maxCacheSize
-		});
-
 		//ask the user if they're happy with the details they set up, save if yes, don't if no
-		Core.util.ask(client, message.channel, message.member, "Are you happy with this?\n" + feedData.toString())
+		Core.util.ask(client, message.channel, message.member, "Are you happy with this (yes/no)?\n" + feedData.toString())
 			.then(responseMessage => {
 
 				//if they responded yes, save the feed and let them know, else tell them to start again
@@ -54,21 +56,13 @@ function addFeed(client, guildData, message, maxCacheSize) {
 	});
 }
 
-function removeFeed(guildData, message, botName) {
-	return new Promise((resolve, reject) => {
-		const parameters = message.content.split(" ");
-		if (parameters.length !== 3)
-			resolve(`Please use the command as such:\n\`\`\` ${botName} remove-feed feedid\`\`\``);
-		else {
-			const idx = guildData.feeds.findIndex(feed => feed.id === parameters[2]);
-			if (!Number.isInteger(idx))
-				reject("Can't find feed with id " + parameters[2]);
-			else {
-				guildData.feeds.splice(idx, 1);
-				resolve("Feed removed!");
-			}
-		}
-	});
+function removeFeed({ params, guildData, botName }) {
+	const idx = guildData.feeds.findIndex(feed => feed.id === params[2]);
+	if (!Number.isInteger(idx))
+		return Promise.reject("Can't find feed with id " + params[2]);
+
+	guildData.feeds.splice(idx, 1);
+	return Promise.resolve("Feed removed!");
 }
 
 function viewFeeds(guildData) {
