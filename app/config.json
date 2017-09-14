@@ -1,43 +1,4 @@
 {
-	"generic": {
-		"saveFile": "./guilds.json",
-		"saveIntervalSec": 60,
-		"website": "https://benji7425.github.io",
-		"discordInvite": "https://discord.gg/SSkbwSJ",
-		"defaultDMResponse": "This bot does not have any handling for direct messages. To learn more or get help please visit %s, or join my Discord server here: %s"
-	},
 	"maxCacheSize": 100,
-	"feedCheckIntervalSec": 30,
-	"commands": {
-		"version": {
-			"command": "version",
-			"description": "Returns the bot version",
-			"syntax": "version",
-			"admin": false
-		},
-		"help": {
-			"command": "help",
-			"description": "Display information about commands available to you",
-			"syntax": "help",
-			"admin": false
-		},
-		"addFeed": {
-			"command": "add-feed",
-			"description": "Add an RSS feed to be posted in a channel, with an optional role to tag",
-			"syntax": "add-feed <url> <#channel> [@role]",
-			"admin": true
-		},
-		"removeFeed": {
-			"command": "remove-feed",
-			"description": "Remove an RSS feed by it's ID",
-			"syntax": "remove-feed <id>",
-			"admin": true
-		},
-		"viewFeeds": {
-			"command": "view-feeds",
-			"description": "View a list of configured feeds and their associated details",
-			"syntax": "view-feed",
-			"admin": true
-		}
-	}
+	"feedCheckIntervalSec": 30
 }

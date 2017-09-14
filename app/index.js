@@ -1,123 +1,103 @@
-//node imports
-const FileSystem = require("fs"); //manage files
-const Util = require("util"); //various node utilities
+const GetUrls = require("get-urls"); //for extracting urls from messages
+const Core = require("../discord-bot-core");
+const GuildData = require("./models/guild-data.js");
+const FeedData = require("./models/feed-data.js");
+const Config = require("./config.json");
 
-//external lib imports
-const Discord = require("discord.js");
-const JsonFile = require("jsonfile"); //save/load data to/from json
-
-//my imports
-const DiscordUtil = require("discordjs-util"); //some discordjs helper functions of mine
-
-//app components
-const GuildData = require("./models/guild-data.js"); //data structure for guilds
-const PackageJSON = require("../package.json"); //used to provide some info about the bot
-const Bot = require("./bot.js");
-
-//global vars
-let writeFile = null;
-
-//use module.exports as a psuedo "onready" function
-module.exports = (client, config = null) => {
-	config = config || require("./config.json"); //load config file
-	const guildsData = FileSystem.existsSync(config.generic.saveFile) ? fromJSON(JsonFile.readFileSync(config.generic.saveFile)) : {}; //read data from file, or generate new one if file doesn't exist
-
-	//create our writeFile function that will allow other functions to save data to json without needing access to the full guildsData or config objects
-	//then set an interval to automatically save data to file
-	writeFile = () => JsonFile.writeFile(config.generic.saveFile, guildsData, err => { if (err) DiscordUtil.dateError("Error writing file", err); });
-	setInterval(() => writeFile(), config.generic.saveIntervalSec * 1000);
-
-	//handle messages
-	client.on("message", message => {
-		if (message.author.id !== client.user.id) { //check the bot isn't triggering itself
-
-			//check whether we need to use DM or text channel handling
-			if (message.channel.type === "dm")
-				HandleMessage.dm(client, config, message);
-			else if (message.channel.type === "text" && message.member)
-				HandleMessage.text(client, config, message, guildsData);
-		}
+function onReady(client, guildsData) {
+	return new Promise((resolve, reject) => {
+		parseLinksInGuilds(client.guilds, guildsData)
+			.then(() => checkFeedsInGuilds(client.guilds, guildsData))
+			.then(() => setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), Config.feedCheckIntervalSec * 1000)); //set up an interval to check all the feeds
 	});
+}
 
-	Bot.onReady(client, guildsData, config).then(() => writeFile).catch(err => DiscordUtil.dateError(err));
-};
+function onTextMessage(message, guildData) {
+	guildData.feeds.forEach(feedData => {
+		if (message.channel.name === feedData.channelName)
+			feedData.cachedLinks.push(...GetUrls(message.content)); //spread the urlSet returned by GetUrls into the cache array
+	});
+}
 
-const HandleMessage = {
-	dm: (client, config, message) => {
-		message.reply(Util.format(config.generic.defaultDMResponse, config.generic.website, config.generic.discordInvite));
-	},
-	text: (client, config, message, guildsData) => {
-		const isCommand = message.content.startsWith(message.guild.me.toString());
-		let guildData = guildsData[message.guild.id];
+function addFeed(client, guildData, message, maxCacheSize) {
+	return new Promise((resolve, reject) => {
+		const feedUrl = [...GetUrls(message.content)][0];
+		const channel = message.mentions.channels.first();
 
-		if (!guildData)
-			guildData = guildsData[message.guild.id] = new GuildData({ id: message.guild.id });
+		if (!feedUrl || !channel)
+			reject("Please provide both a channel and an RSS feed URL. You can optionally @mention a role also.");
 
-		if (isCommand) {
-			const userIsAdmin = message.member.permissions.has("ADMINISTRATOR");
-			const botName = "@" + (message.guild.me.nickname || client.user.username);
+		const role = message.mentions.roles.first();
 
-			const split = message.content.toLowerCase().split(/\ +/); //split the message at whitespace
-			const command = split[1]; //extract the command used
-			const commandObj = config.commands[Object.keys(config.commands).find(x => config.commands[x].command.toLowerCase() === command)]; //find the matching command object
+		const feedData = new FeedData({
+			url: feedUrl,
+			channelName: channel.name,
+			roleName: role ? role.name : null,
+			maxCacheSize: maxCacheSize
+		});
 
-			if (!commandObj || (!commandObj.admin && !userIsAdmin))
-				return;
+		//ask the user if they're happy with the details they set up, save if yes, don't if no
+		Core.util.ask(client, message.channel, message.member, "Are you happy with this?\n" + feedData.toString())
+			.then(responseMessage => {
 
-			const params = split.slice(2, split.length); //extract the parameters passed for the command
-			const expectedParamCount = commandObj.syntax.split(/\ +/).length - 1; //calculate the number of expected command params
+				//if they responded yes, save the feed and let them know, else tell them to start again
+				if (responseMessage.content.toLowerCase() === "yes") {
+					if (!guildData)
+						guildData = new GuildData({ id: message.guild.id, feeds: [] });
 
-			let finalisedParams;
-			if (params.length > expectedParamCount) //if we have more params than needed
-				finalisedParams = params.slice(0, expectedParamCount - 1).concat([params.slice(expectedParamCount - 1, params.length).join(" ")]);
-			else //else we either have exactly the right amount, or not enough
-				finalisedParams = params;
+					guildData.feeds.push(feedData);
+					resolve("Your new feed has been saved!");
+				}
+				else
+					reject("Your feed has not been saved, please add it again with the correct details");
+			});
+	});
+}
 
-			//find which command was used and handle it
-			switch (command) {
-				case config.commands.version.command:
-					message.reply(`${PackageJSON.name} v${PackageJSON.version}`);
-					break;
-				case config.commands.help.command:
-					message.channel.send(createHelpEmbed(botName, config, userIsAdmin));
-					break;
-				default:
-					if (finalisedParams.length >= expectedParamCount)
-						Bot.onCommand(commandObj, config.commands, finalisedParams, guildData, message, config, client, botName)
-							.then(msg => {
-								message.reply(msg);
-								writeFile();
-							})
-							.catch(err => {
-								message.reply(err);
-								DiscordUtil.dateError(err);
-							});
-					else
-						message.reply(`Incorrect syntax!\n**Expected:** *${botName} ${commandObj.syntax}*\n**Need help?** *${botName} ${config.commands.help.command}*`);
-					break;
+function removeFeed(guildData, message, botName) {
+	return new Promise((resolve, reject) => {
+		const parameters = message.content.split(" ");
+		if (parameters.length !== 3)
+			resolve(`Please use the command as such:\n\`\`\` ${botName} remove-feed feedid\`\`\``);
+		else {
+			const idx = guildData.feeds.findIndex(feed => feed.id === parameters[2]);
+			if (!Number.isInteger(idx))
+				reject("Can't find feed with id " + parameters[2]);
+			else {
+				guildData.feeds.splice(idx, 1);
+				resolve("Feed removed!");
 			}
 		}
-		else
-			Bot.onNonCommandMsg(message, guildData);
+	});
+}
+
+function viewFeeds(guildData) {
+	if (!guildData)
+		return Promise.reject("Guild not setup");
+
+	return Promise.resolve(guildData.feeds.map(f => f.toString()).join("\n"));
+}
+
+function checkFeedsInGuilds(guilds, guildsData) {
+	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds(guilds));
+}
+
+function parseLinksInGuilds(guilds, guildsData) {
+	const promises = [];
+	for (let guildId of guilds.keys()) {
+		const guildData = guildsData[guildId];
+		if (guildData)
+			promises.push(guildData.cachePastPostedLinks(guilds.get(guildId)));
 	}
+	return Promise.all(promises);
+}
+
+module.exports = {
+	onReady,
+	onTextMessage,
+	addFeed,
+	removeFeed,
+	viewFeeds
 };
 
-function fromJSON(json) {
-	const guildsData = Object.keys(json);
-	guildsData.forEach(guildID => { json[guildID] = new GuildData(json[guildID]); });
-	return json;
-}
-
-function createHelpEmbed(name, config, userIsAdmin) {
-	const commandsArr = Object.keys(config.commands).map(x => config.commands[x]).filter(x => userIsAdmin || !x.admin);
-
-	const embed = new Discord.RichEmbed().setTitle("__Help__");
-
-	commandsArr.forEach(command => {
-		embed.addField(command.command, `${command.description}\n**Usage:** *${name} ${command.syntax}*${userIsAdmin && command.admin ? "\n***Admin only***" : ""}`);
-	});
-
-	embed.addField("__Need more help?__", `[Visit my website](${config.generic.website}) or [Join my Discord](${config.generic.discordInvite})`, true);
-
-	return { embed };
-}
+Core.bootstrap(module.exports, GuildData, require("./commands.json"));

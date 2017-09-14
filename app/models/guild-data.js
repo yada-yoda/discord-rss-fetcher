@@ -1,23 +1,7 @@
-const FeedData = require("./feed-data.js");
-const Util = require("discordjs-util");
+const DiscordUtil = require("../../discord-bot-core").util;
 
 module.exports = class GuildData {
-	constructor({ id, feeds }) {
+	constructor({ id }) {
 		this.id = id;
-		this.feeds = (feeds || []).map(feed => new FeedData(feed));
-	}
-
-	cachePastPostedLinks(guild) {
-		const promises = [];
-
-		this.feeds.forEach(feed => {
-			promises.push(feed.updatePastPostedLinks(guild).catch(Util.dateError));
-		});
-
-		return Promise.all(promises);
-	}
-
-	checkFeeds(guilds) {
-		this.feeds.forEach(feed => feed.check(guilds.get(this.id)));
 	}
 };
