@@ -11,7 +11,7 @@ const ParentPackageJSON = require("../package.json"); //used to provide some inf
 const DiscordUtil = require("./util.js"); //some discordjs helper functions of mine
 const MessageHandler = require("./message-handler.js");
 
-function bootstrap(component, guildDataModel, commands) {
+function bootstrap(token, component, guildDataModel, commands) {
 	process.on("uncaughtException", (err) => {
 		DiscordUtil.dateError("Uncaught exception!", err);
 	});
@@ -29,7 +29,7 @@ function bootstrap(component, guildDataModel, commands) {
 		DiscordUtil.dateError("Bot was disconnected!", eventData.code, eventData.reason);
 	});
 
-	client.login(require("../token.json").token);
+	client.login(token);
 }
 
 function onReady(client, component, guildDataModel, commands) {
@@ -69,6 +69,4 @@ function fromJSON(json, guildDataModel) {
 	return json;
 }
 
-module.exports = {
-	bootstrap
-};
+module.exports = bootstrap;
