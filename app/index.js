@@ -94,4 +94,4 @@ module.exports = {
 	viewFeeds
 };
 
-Core.bootstrap(module.exports, GuildData, require("./commands.json"));
+Core.bootstrap(require("../" + process.argv[2]), module.exports, GuildData, require("./commands.json"));
