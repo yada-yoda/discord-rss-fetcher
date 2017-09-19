@@ -1,5 +1,5 @@
 //my imports
-const DiscordUtil = require("discordjs-util");
+const DiscordUtil = require("../../discord-bot-core").util;
 
 //external lib imports
 const Dns = require("dns"); //for host resolution checking

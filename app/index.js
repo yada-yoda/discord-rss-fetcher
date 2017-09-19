@@ -4,11 +4,12 @@ const GuildData = require("./models/guild-data.js");
 const FeedData = require("./models/feed-data.js");
 const Config = require("./config.json");
 
-function onReady(client, guildsData) {
+//IMPLEMENTATIONS//
+function onReady(coreClient) {
 	return new Promise((resolve, reject) => {
-		parseLinksInGuilds(client.guilds, guildsData)
-			.then(() => checkFeedsInGuilds(client.guilds, guildsData))
-			.then(() => setInterval(() => checkFeedsInGuilds(client.guilds, guildsData), Config.feedCheckIntervalSec * 1000))
+		parseLinksInGuilds(coreClient.actual.guilds, coreClient.guildsData)
+			.then(() => checkFeedsInGuilds(coreClient.actual.guilds, coreClient.guildsData))
+			.then(() => setInterval(() => checkFeedsInGuilds(coreClient.actual.guilds, coreClient.guildsData), Config.feedCheckIntervalSec * 1000))
 			.then(resolve)
 			.catch(reject);
 	});
@@ -19,9 +20,10 @@ function onTextMessage(message, guildData) {
 		if (message.channel.name === feedData.channelName)
 			feedData.cachedLinks.push(...GetUrls(message.content)); //spread the urlSet returned by GetUrls into the cache array
 	});
+	return Promise.resolve();
 }
 
-function addFeed({ guildData, message, client }) {
+function addFeed({ command, params, guildData, botName, message, coreClient }) {
 	const feedUrl = [...GetUrls(message.content)][0];
 	const channel = message.mentions.channels.first();
 
@@ -39,7 +41,7 @@ function addFeed({ guildData, message, client }) {
 
 	return new Promise((resolve, reject) => {
 		//ask the user if they're happy with the details they set up, save if yes, don't if no
-		Core.util.ask(client, message.channel, message.member, "Are you happy with this (yes/no)?\n" + feedData.toString())
+		Core.util.ask(coreClient.actual, message.channel, message.member, "Are you happy with this (yes/no)?\n" + feedData.toString())
 			.then(responseMessage => {
 
 				//if they responded yes, save the feed and let them know, else tell them to start again
@@ -56,7 +58,7 @@ function addFeed({ guildData, message, client }) {
 	});
 }
 
-function removeFeed({ params, guildData, botName }) {
+function removeFeed({ command, params, guildData, botName, message, coreClient }) {
 	const idx = guildData.feeds.findIndex(feed => feed.id === params[2]);
 	if (!Number.isInteger(idx))
 		return Promise.reject("Can't find feed with id " + params[2]);
@@ -65,13 +67,14 @@ function removeFeed({ params, guildData, botName }) {
 	return Promise.resolve("Feed removed!");
 }
 
-function viewFeeds(guildData) {
+function viewFeeds({ command, params, guildData, botName, message, coreClient }) {
 	if (!guildData)
 		return Promise.reject("Guild not setup");
 
 	return Promise.resolve(guildData.feeds.map(f => f.toString()).join("\n"));
 }
 
+//INTERNAL FUNCTIONS//
 function checkFeedsInGuilds(guilds, guildsData) {
 	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds(guilds));
 }
@@ -86,12 +89,16 @@ function parseLinksInGuilds(guilds, guildsData) {
 	return Promise.all(promises);
 }
 
-module.exports = {
-	onReady,
-	onTextMessage,
-	addFeed,
-	removeFeed,
-	viewFeeds
-};
-
-Core.bootstrap(require("../" + process.argv[2]), module.exports, GuildData, require("./commands.json"));
+//CLIENT SETUP//
+const token = require("../" + process.argv[2]).token,
+	dataFile = process.argv[3],
+	commands = require("./commands.json"),
+	implementations = {
+		onReady,
+		onTextMessage,
+		addFeed,
+		removeFeed,
+		viewFeeds
+	};
+const client = new Core.Client(token, dataFile, commands, implementations, GuildData);
+client.bootstrap();

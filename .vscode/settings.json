@@ -1,7 +1,0 @@
-{
-	"files.exclude": {
-		"log": true,
-		"token.json": true,
-		"_config.yml": true
-	}
-}
