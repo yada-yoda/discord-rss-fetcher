@@ -50,7 +50,8 @@ function addFeed({ command, params, guildData, botName, message, coreClient }) {
 						guildData = new GuildData({ id: message.guild.id, feeds: [] });
 
 					guildData.feeds.push(feedData);
-					resolve("Your new feed has been saved!");
+					guildData.cachePastPostedLinks(message.guild)
+						.then(() => resolve("Your new feed has been saved!"));
 				}
 				else
 					reject("Your feed has not been saved, please add it again with the correct details");
