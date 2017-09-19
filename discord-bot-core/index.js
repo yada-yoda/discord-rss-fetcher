@@ -1,7 +1,7 @@
-const Config = require("./config.json");
+const Config = require("./internal-config.json");
 
 module.exports = {
-	bootstrap: require("./bootstrapper.js"),
+	Client: require("./client.js"),
 	util: require("./util.js"),
 	details: {
 		website: Config.website,
