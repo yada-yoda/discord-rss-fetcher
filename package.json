@@ -2,7 +2,8 @@
   "version": "3.0.0-b2",
   "main": "app/index.js",
   "scripts": {
-    "start": "node bootstrap.js"
+	"postinstall": "cd ./discord-bot-core && npm install",
+    "start": "node app/index.js token.json guilds.json"
   },
   "dependencies": {
     "discord.js": "11.1.0",

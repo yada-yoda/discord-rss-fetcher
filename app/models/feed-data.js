@@ -1,5 +1,5 @@
 //my imports
-const DiscordUtil = require("discordjs-util");
+const DiscordUtil = require("../../discord-bot-core").util;
 
 //external lib imports
 const Dns = require("dns"); //for host resolution checking
@@ -80,10 +80,14 @@ module.exports = class FeedData {
 function normaliseUrl(url) {
 	url = url.replace("https://", "http://"); //hacky way to treat http and https the same
 
-	if (Url.parse(url).host.startsWith("http://youtu"))
-		url = url.split("?")[0]; //quick way to chop off stuff like ?feature=youtube
-
-	url = url.replace(/(www.)?youtube.com\/watch\?v=/, "youtu.be/"); //convert youtube full url to short
+	const parsedUrl = Url.parse(url);
+	if (parsedUrl.host.includes("youtube.com")) {
+		const videoIDParam = parsedUrl.query.split("&").find(x => x.startsWith("v="));
+		if (videoIDParam) {
+			const videoID = videoIDParam.substring(videoIDParam.indexOf("=") + 1, videoIDParam.length);
+			url = "http://youtu.be/" + videoID;
+		}
+	}
 
 	return url;
 }

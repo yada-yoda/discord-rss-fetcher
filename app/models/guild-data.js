@@ -1,5 +1,5 @@
+const DiscordUtil = require("../../discord-bot-core").util;
 const FeedData = require("./feed-data.js");
-const Util = require("discordjs-util");
 
 module.exports = class GuildData {
 	constructor({ id, feeds }) {
@@ -11,7 +11,7 @@ module.exports = class GuildData {
 		const promises = [];
 
 		this.feeds.forEach(feed => {
-			promises.push(feed.updatePastPostedLinks(guild).catch(Util.dateError));
+			promises.push(feed.updatePastPostedLinks(guild).catch(DiscordUtil.dateError));
 		});
 
 		return Promise.all(promises);
