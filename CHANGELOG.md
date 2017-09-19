@@ -1,5 +1,16 @@
 # Changelog
 
+## v3.0.0-b3
+
+### Updated
+
+- Updated error handling for Discord API errors
+- Updated bootstrapping and command handling to use shared subrepo
+
+### Fixed
+
+- *Actually* fixed full/short youtube urls not being properly converted
+
 ## v3.0.0-b2
 
 ### Fixed
