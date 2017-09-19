@@ -82,7 +82,7 @@ function normaliseUrl(url) {
 
 	const parsedUrl = Url.parse(url);
 	if (parsedUrl.host.includes("youtube.com")) {
-		const videoIDParam = parsedUrl.query.split("&").find(x => x.startsWith("v="));
+		const videoIDParam = (parsedUrl.query || "").split("&").find(x => x.startsWith("v="));
 		if (videoIDParam) {
 			const videoID = videoIDParam.substring(videoIDParam.indexOf("=") + 1, videoIDParam.length);
 			url = "http://youtu.be/" + videoID;
