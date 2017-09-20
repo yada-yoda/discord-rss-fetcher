@@ -11,7 +11,7 @@ module.exports = class GuildData {
 		const promises = [];
 
 		this.feeds.forEach(feed => {
-			promises.push(feed.updatePastPostedLinks(guild).catch(DiscordUtil.dateError));
+			promises.push(feed.updatePastPostedLinks(guild).catch(err => DiscordUtil.dateError(`Error reading history in ${err.path}`)));
 		});
 
 		return Promise.all(promises);

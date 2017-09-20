@@ -64,7 +64,7 @@ module.exports = class FeedData {
 
 							const channel = guild.channels.find(ch => ch.type === "text" && ch.name.toLowerCase() === this.channelName.toLowerCase());
 							const role = this.roleName ? guild.roles.find(role => role.name.toLowerCase() === this.roleName.toLowerCase()) : null;
-							channel.send((role ? role + " " : "") + latest);
+							channel.send((role ? role + " " : "") + latest).catch(err => DiscordUtil.dateError(`Error posting in ${channel.id}`));
 						}
 					}
 				});
