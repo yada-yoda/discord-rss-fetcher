@@ -9,7 +9,7 @@ const GetUrls = require("get-urls"); //for extracting urls from messages
 const ShortID = require("shortid"); //to provide ids for each feed, allowing guilds to remove them
 
 module.exports = class FeedData {
-	constructor({ id, url, channelName, roleName, cachedLinks, maxCacheSize }) {
+	constructor({ id = null, url, channelName, roleName, cachedLinks = null, maxCacheSize }) {
 		this.id = id || ShortID.generate();
 		this.url = url;
 		this.channelName = channelName;
@@ -28,14 +28,10 @@ module.exports = class FeedData {
 		};
 	}
 
-	/**
-	 * Returns a promise providing all the links posted in the last 100 messages
-	 * @param {Discord.Guild} guild The guild this feed belongs to
-	 * @returns {Promise<string[]>} Links posted in last 100 messages
-	 */
+	/**@param param*/
 	updatePastPostedLinks(guild) {
 		const channel = guild.channels.find(ch => ch.type === "text" && ch.name === this.channelName);
-
+		
 		return new Promise((resolve, reject) => {
 			channel.fetchMessages({ limit: 100 })
 				.then(messages => {
@@ -46,6 +42,7 @@ module.exports = class FeedData {
 		});
 	}
 
+	/**@param param */
 	check(guild) {
 		Dns.resolve(Url.parse(this.url).host || "", err => { //check we can resolve the host, so we can throw an appropriate error if it fails
 			if (err)
