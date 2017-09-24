@@ -13,17 +13,18 @@ client.on("beforeLogin", () => {
 	setInterval(() => checkFeedsInGuilds(client.guilds, client.guildsData), Config.feedCheckIntervalSec * 1000);
 });
 
-client.on("ready", (coreClient) => {
-	parseLinksInGuilds(coreClient.actual.guilds, coreClient.guildsData)
-		.then(() => checkFeedsInGuilds(coreClient.actual.guilds, coreClient.guildsData));
+client.on("ready", () => {
+	parseLinksInGuilds(client.guilds, client.guildsData)
+		.then(() => checkFeedsInGuilds(client.guilds, client.guildsData));
 });
 
 client.on("message", message => {
 	const guildData = client.guildsData[message.guild.id];
-	guildData.feeds.forEach(feedData => {
-		if (message.channel.name === feedData.channelName)
-			feedData.cachedLinks.push(...GetUrls(message.content));
-	});
+	if (guildData)
+		guildData.feeds.forEach(feedData => {
+			if (message.channel.name === feedData.channelName)
+				feedData.cachedLinks.push(...GetUrls(message.content));
+		});
 });
 
 client.bootstrap();

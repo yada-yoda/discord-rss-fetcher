@@ -10,7 +10,7 @@ module.exports = new Core.Command({
 
 function invoke({ message, params, guildData, client }) {
 	if (!guildData)
-		return Promise.reject("Guild not setup");
+		message.reply("Guild not setup");
 
-	return Promise.resolve(guildData.feeds.map(f => f.toString()).join("\n"));
+	message.reply(guildData.feeds.map(f => f.toString()).join("\n"));
 }
