@@ -1,111 +1,84 @@
-//node imports
-const FileSystem = require("fs"); //checking if files exist
+const FileSystem = require("fs");
+const Discord = require("discord.js");
+const JsonFile = require("jsonfile");
+const RequireAll = require("require-all");
+const CoreUtil = require("./util.js");
+const HandleMessage = require("./HandleMessage.js");
+// @ts-ignore
+const InternalConfig = require("./internal-config.json");
 
-//external lib imports
-const Discord = require("discord.js"); //discord interaction
-const JsonFile = require("jsonfile"); //saving to/reading from json
-
-//component imports
-const DiscordUtil = require("./util.js"); //some helper methods
-const MessageHandler = require("./message-handler.js"); //message handling
-const Config = require("./internal-config.json"); //some configuration values
-
-class CoreClient {
+module.exports = class Client extends Discord.Client {
 	/**
-	 * @param {string} token 
-	 * @param {string} dataFile 
-	 * @param {object} guildDataModel 
-	 * @param {object[]} commands 
+	 * @param {*} token 
+	 * @param {*} dataFile 
+	 * @param {*} commandsDir 
+	 * @param {*} guildDataModel 
 	 */
-	constructor(token, dataFile, commands, implementations, guildDataModel) {
-		this.actual = new Discord.Client();
+	constructor(token, dataFile, commandsDir, guildDataModel) {
+		super();
 
-		this.token = token;
+		this._token = token;
 		this.dataFile = dataFile;
-		this.commands = commands;
-		this.implementations = implementations;
+		this.commandsDir = commandsDir;
 		this.guildDataModel = guildDataModel;
-		this.guildsData = FileSystem.existsSync(this.dataFile) ?
-			fromJSON(JsonFile.readFileSync(this.dataFile), this.guildDataModel) : {};
 
-		process.on("uncaughtException", err => onUncaughtException(this, err));
+		this.commands = RequireAll(this.commandsDir);
+		this.guildsData = FileSystem.existsSync(this.dataFile) ? this.fromJSON(JsonFile.readFileSync(this.dataFile)) : {};
+
+		this.on("ready", this.onReady);
+		this.on("message", this.onMessage);
+		this.on("debug", this.onDebug);
+		process.on("uncaughtException", err => this.onUnhandledException(this, err));
+	}
+
+	bootstrap() {
+		this.beforeLogin();
+		this.login(this._token);
+	}
+
+	beforeLogin() {
+		setInterval(() => this.writeFile(), InternalConfig.saveIntervalSec * 1000);
+		this.emit("beforeLogin");
+	}
+
+	onReady() {
+		this.user.setGame(InternalConfig.website.replace("http://", ""));
+		CoreUtil.dateLog(`Registered bot ${this.user.username}`);
+	}
+
+	onMessage(message) {
+		if (message.channel.type === "text" && message.member)
+			HandleMessage(message, this.commands, this.guildsData[message.guild.id] || new this.guildDataModel(message.guild.id));
+	}
+
+	onDebug(info) {
+		if (!InternalConfig.debugIgnores.some(x => info.startsWith(x)))
+			CoreUtil.dateLog(info);
+	}
+
+	onUnhandledException(client, err) {
+		CoreUtil.dateError(err.message || err);
+		CoreUtil.dateLog("Destroying existing client...");
+		client.destroy().then(() => {
+			CoreUtil.dateLog("Client destroyed, recreating...");
+			client.login(client._token);
+		});
 	}
 
 	writeFile() {
 		JsonFile.writeFile(
 			this.dataFile,
 			this.guildsData,
-			err => {
-				if (err) DiscordUtil.dateError("Error writing file", err);
-			});
+			err => { if (err) CoreUtil.dateError(`Error writing data file! ${err.message || err}`); });
 	}
 
-	bootstrap() {
-		this.actual.on("ready", () => onReady(this));
-
-		this.actual.on("disconnect", eventData => DiscordUtil.dateError("Disconnect!", eventData.code, eventData.reason));
-
-		this.actual.on("message", message => {
-			if (message.author.id === this.actual.user.id)
-				return;
-			if (message.channel.type === "dm")
-				MessageHandler.handleDirectMessage(this, message);
-			else if (message.channel.type === "text" && message.member)
-				MessageHandler.handleTextMessage(this, message, this.guildsData)
-					.then(msg => {
-						if (msg) message.reply(msg);
-					})
-					.catch(err => {
-						if (err) {
-							message.reply(err);
-							DiscordUtil.dateError(`Command error in guild ${message.guild.name}\n`, err.message || err);
-						}
-					})
-					.then(() => this.writeFile());
-		});
-
-		this.actual.login(this.token);
+	/**
+	 * @param {*} json 
+	 * @param {*} guildDataModel 
+	 */
+	fromJSON(json) {
+		const guildsData = Object.keys(json);
+		guildsData.forEach(guildID => { json[guildID] = new this.guildDataModel(json[guildID]); });
+		return json;
 	}
-}
-
-/**
- * @param {*} coreClient 
- */
-function onReady(coreClient) {
-	coreClient.actual.user.setGame("benji7425.github.io");
-	DiscordUtil.dateLog("Registered bot " + coreClient.actual.user.username);
-
-	setInterval(() => coreClient.writeFile(), Config.saveIntervalSec * 1000);
-
-	if (coreClient.implementations.onReady)
-		coreClient.implementations.onReady(coreClient)
-			.then(() => coreClient.writeFile())
-			.catch(err => DiscordUtil.dateError(err));
-}
-
-/**
- * @param {*} coreClient 
- * @param {*} err 
- */
-function onUncaughtException(coreClient, err) {
-	DiscordUtil.dateError(err.message || err);
-	DiscordUtil.dateLog("Destroying existing client...");
-	coreClient.actual.destroy().then(() => {
-		DiscordUtil.dateLog("Client destroyed, recreating...");
-		coreClient.actual = new Discord.Client();
-		coreClient.bootstrap();
-	});
-}
-
-/**
- * Convert json from file to a usable format
- * @param {object} json json from file
- * @param {*} guildDataModel
- */
-function fromJSON(json, guildDataModel) {
-	const guildsData = Object.keys(json);
-	guildsData.forEach(guildID => { json[guildID] = new guildDataModel(json[guildID]); });
-	return json;
-}
-
-module.exports = CoreClient;
+};
