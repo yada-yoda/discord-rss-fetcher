@@ -1,9 +1,10 @@
 const DiscordUtil = require("../../discord-bot-core").util;
+const Core = require("../../discord-bot-core");
 const FeedData = require("./feed-data.js");
 
-module.exports = class GuildData {
+module.exports = class GuildData extends Core.BaseGuildData{
 	constructor({ id, feeds }) {
-		this.id = id;
+		super(id);
 		this.feeds = (feeds || []).map(feed => new FeedData(feed));
 	}
 

@@ -11,8 +11,8 @@ module.exports = new Core.Command({
 function invoke({ message, params, guildData, client }) {
 	const idx = guildData.feeds.findIndex(feed => feed.id === params[2]);
 	if (!Number.isInteger(idx))
-		message.reply("Can't find feed with id " + params[2]);
+		return Promise.reject("Can't find feed with id " + params[2]);
 
 	guildData.feeds.splice(idx, 1);
-	message.reply("Feed removed!");
+	return Promise.resolve("Feed removed!");
 }

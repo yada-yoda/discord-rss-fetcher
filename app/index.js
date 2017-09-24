@@ -10,12 +10,12 @@ const token = require("../" + process.argv[2]).token,
 const client = new Core.Client(token, dataFile, __dirname + "/commands", GuildData);
 
 client.on("beforeLogin", () => {
-	setInterval(() => checkFeedsInGuilds(client.guilds, client.guildsData), Config.feedCheckIntervalSec * 1000);
+	setInterval(() => checkFeedsInGuilds(client.guildsData), Config.feedCheckIntervalSec * 1000);
 });
 
 client.on("ready", () => {
 	parseLinksInGuilds(client.guilds, client.guildsData)
-		.then(() => checkFeedsInGuilds(client.guilds, client.guildsData));
+		.then(() => checkFeedsInGuilds(client.guildsData));
 });
 
 client.on("message", message => {
@@ -30,8 +30,8 @@ client.on("message", message => {
 client.bootstrap();
 
 //INTERNAL FUNCTIONS//
-function checkFeedsInGuilds(guilds, guildsData) {
-	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds(guilds));
+function checkFeedsInGuilds(guildsData) {
+	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds(client.guilds));
 }
 
 function parseLinksInGuilds(guilds, guildsData) {

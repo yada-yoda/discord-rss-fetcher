@@ -29,20 +29,22 @@ function invoke({ message, params, guildData, client }) {
 		maxCacheSize: Config.maxCacheSize
 	});
 
-	//ask the user if they're happy with the details they set up, save if yes, don't if no
-	Core.util.ask(client, message.channel, message.member, "Are you happy with this (yes/no)?\n" + feedData.toString())
-		.then(responseMessage => {
+	return new Promise((resolve, reject) => {
+		//ask the user if they're happy with the details they set up, save if yes, don't if no
+		Core.util.ask(client, message.channel, message.member, "Are you happy with this (yes/no)?\n" + feedData.toString())
+			.then(responseMessage => {
 
-			//if they responded yes, save the feed and let them know, else tell them to start again
-			if (responseMessage.content.toLowerCase() === "yes") {
-				if (!guildData)
-					guildData = new GuildData({ id: message.guild.id, feeds: [] });
+				//if they responded yes, save the feed and let them know, else tell them to start again
+				if (responseMessage.content.toLowerCase() === "yes") {
+					if (!guildData)
+						guildData = new GuildData({ id: message.guild.id, feeds: [] });
 
-				guildData.feeds.push(feedData);
-				guildData.cachePastPostedLinks(message.guild)
-					.then(() => message.reply("Your new feed has been saved!"));
-			}
-			else
-				message.reply("Your feed has not been saved, please add it again with the correct details");
-		});
+					guildData.feeds.push(feedData);
+					guildData.cachePastPostedLinks(message.guild)
+						.then(() => resolve("Your new feed has been saved!"));
+				}
+				else
+					reject("Your feed has not been saved, please add it again with the correct details");
+			});
+	});
 }
