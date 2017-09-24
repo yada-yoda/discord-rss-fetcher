@@ -13,7 +13,7 @@ function handleMessage(client, message, commands, guildData) {
 		command = commands[Object.keys(commands).find(x => commands[x].name.toLowerCase() === (split[1] || "").toLowerCase())];
 
 	if (!command)
-		handleInternalCommand(message, params);
+		handleInternalCommand(message, split);
 	else if (params.length < command.expectedParamCount)
 		message.reply(`Incorrect syntax!\n**Expected:** *${botName} ${command.syntax}*\n**Need help?** *${botName} help*`);
 	else if(isMemberAdmin || !command.admin)
