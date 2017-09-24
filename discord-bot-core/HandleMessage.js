@@ -2,7 +2,7 @@
 const ParentPackageJSON = require("../package.json");
 
 /**@param param*/
-function handleMessage(message, commands, guildData) {
+function handleMessage(client, message, commands, guildData) {
 	if (!message.content.startsWith(message.guild.me.toString())) //criteria for a command is the bot being tagged
 		return;
 
@@ -17,7 +17,7 @@ function handleMessage(message, commands, guildData) {
 	else if (params.length < command.expectedParamCount)
 		message.reply(`Incorrect syntax!\n**Expected:** *${botName} ${command.syntax}*\n**Need help?** *${botName} help*`);
 	else if(isMemberAdmin || !command.admin)
-		command.invoke({ message, params, guildData });
+		command.invoke({ message, params, guildData, client });
 }
 
 /**@param param*/

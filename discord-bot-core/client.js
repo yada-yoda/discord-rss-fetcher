@@ -48,7 +48,7 @@ module.exports = class Client extends Discord.Client {
 
 	onMessage(message) {
 		if (message.channel.type === "text" && message.member)
-			HandleMessage(message, this.commands, this.guildsData[message.guild.id] || new this.guildDataModel(message.guild.id));
+			HandleMessage(this, message, this.commands, this.guildsData[message.guild.id] || new this.guildDataModel(message.guild.id));
 	}
 
 	onDebug(info) {
