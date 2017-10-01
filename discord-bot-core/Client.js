@@ -2,7 +2,7 @@ const FileSystem = require("fs");
 const Discord = require("discord.js");
 const JsonFile = require("jsonfile");
 const RequireAll = require("require-all");
-const CoreUtil = require("./util.js");
+const CoreUtil = require("./Util.js");
 const HandleMessage = require("./HandleMessage.js");
 // @ts-ignore
 const InternalConfig = require("./internal-config.json");
@@ -47,8 +47,11 @@ module.exports = class Client extends Discord.Client {
 	}
 
 	onMessage(message) {
-		if (message.channel.type === "text" && message.member)
-			HandleMessage(message, this.commands, this.guildsData[message.guild.id] || new this.guildDataModel(message.guild.id));
+		if (message.channel.type === "text" && message.member) {
+			if(!this.guildsData[message.guild.id])
+				this.guildsData[message.guild.id] = new this.guildDataModel({ id: message.guild.id });
+			HandleMessage(this, message, this.commands, this.guildsData[message.guild.id]);
+		}
 	}
 
 	onDebug(info) {

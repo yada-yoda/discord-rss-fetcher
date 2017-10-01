@@ -9,71 +9,78 @@ const GetUrls = require("get-urls"); //for extracting urls from messages
 const ShortID = require("shortid"); //to provide ids for each feed, allowing guilds to remove them
 
 module.exports = class FeedData {
-	constructor({ id, url, channelName, roleName, cachedLinks, maxCacheSize }) {
+	constructor({ id = null, url, channelID, roleID, cachedLinks = null, maxCacheSize }) {
 		this.id = id || ShortID.generate();
 		this.url = url;
-		this.channelName = channelName;
-		this.roleName = roleName;
+		this.channelID = channelID;
+		this.roleID = roleID;
 		this.cachedLinks = cachedLinks || [];
 		this.maxCacheSize = maxCacheSize || 10;
 
 		this.cachedLinks.push = (...elements) => {
-			const unique = elements
-				.map(el => normaliseUrl(el)) //normalise all the urls
-				.filter(el => !this.cachedLinks.includes(el)); //filter out any already cached
-			Array.prototype.push.apply(this.cachedLinks, unique);
+			Array.prototype.push.apply(
+				this.cachedLinks,
+				elements
+					.map(el => normaliseUrl(el))
+					.filter(el => !this.cachedLinks.includes(el))
+			);
 
-			if (this.cachedLinks.length > this.maxCacheSize)
-				this.cachedLinks.splice(0, this.cachedLinks.length - this.maxCacheSize); //remove the # of elements above the max from the beginning
+			//seeing as new links come in at the end of the array, we need to remove the old links from the beginning
+			this.cachedLinks.splice(0, this.cachedLinks.length - this.maxCacheSize);
 		};
 	}
 
-	/**
-	 * Returns a promise providing all the links posted in the last 100 messages
-	 * @param {Discord.Guild} guild The guild this feed belongs to
-	 * @returns {Promise<string[]>} Links posted in last 100 messages
-	 */
+	/**@param param*/
 	updatePastPostedLinks(guild) {
-		const channel = guild.channels.find(ch => ch.type === "text" && ch.name === this.channelName);
+		const channel = guild.channels.get(this.channelID);
+
+		if (!channel)
+			return Promise.reject("Channel not found!");
 
 		return new Promise((resolve, reject) => {
 			channel.fetchMessages({ limit: 100 })
 				.then(messages => {
-					new Map([...messages].reverse()).forEach(m => this.cachedLinks.push(...GetUrls(m.content))); //push all the links in each message into our links array
-					resolve(this);
+					/* we want to push the links in oldest first, but discord.js returns messages newest first, so we need to reverse them
+					 * discord.js returns a map, and maps don't have .reverse methods, hence needing to spread the elements into an array first */
+					[...messages.values()].reverse().forEach(m => this.cachedLinks.push(...GetUrls(m.content)));
+					resolve();
 				})
 				.catch(reject);
 		});
 	}
 
-	check(guild) {
-		Dns.resolve(Url.parse(this.url).host || "", err => { //check we can resolve the host, so we can throw an appropriate error if it fails
+	/**@param param */
+	fetchLatest(guild) {
+		Dns.resolve(Url.parse(this.url).host || "", err => {
 			if (err)
-				DiscordUtil.dateError("Connection Error: Can't resolve host", err); //log our error if we can't resolve the host
+				DiscordUtil.dateError("Connection Error: Can't resolve host", err.message || err);
 			else
-				FeedRead(this.url, (err, articles) => { //check the feed
-					if (err)
-						DiscordUtil.dateError(err);
-					else {
-						let latest = articles[0].link; //extract the latest link
-						latest = normaliseUrl(latest); //standardise it a bit
-
-						//if we don't have it cached already, cache it and callback
-						if (!this.cachedLinks.includes(latest)) {
-							this.cachedLinks.push(latest);
-
-							const channel = guild.channels.find(ch => ch.type === "text" && ch.name.toLowerCase() === this.channelName.toLowerCase());
-							const role = this.roleName ? guild.roles.find(role => role.name.toLowerCase() === this.roleName.toLowerCase()) : null;
-							channel.send((role ? role + " " : "") + latest).catch(err => DiscordUtil.dateError(`Error posting in ${channel.id}`));
-						}
-					}
-				});
+				this._doFetchRSS(guild);
 		});
 	}
 
 	toString() {
 		const blacklist = ["cachedLinks", "maxCacheSize"];
-		return `\`\`\`JavaScript\n ${JSON.stringify(this, (k, v) => !blacklist.includes(k) ? v : undefined, "\t")} \`\`\``;
+		return `\`\`\`JavaScript\n ${JSON.stringify(this, (k, v) => !blacklist.find(x => x === k) ? v : undefined, "\t")} \`\`\``;
+	}
+
+	_doFetchRSS(guild) {
+		FeedRead(this.url, (err, articles) => {
+			if (err)
+				return DiscordUtil.dateError(err.message || err);
+
+			const latest = normaliseUrl(articles[0].link);
+
+			if (!this.cachedLinks.includes(latest)) {
+				this.cachedLinks.push(latest);
+
+				const channel = guild.channels.get(this.channelID),
+					role = guild.roles.get(this.roleID);
+
+				channel.send((role ? role + " " : "") + latest)
+					.catch(err => DiscordUtil.dateError(`Error posting in ${channel.id}: ${err.message || err}`));
+			}
+		});
 	}
 };
 
