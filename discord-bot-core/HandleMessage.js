@@ -33,6 +33,9 @@ function handleMessage(client, message, commands, guildData) {
 
 /**@param param*/
 function handleInternalCommand(message, split, commands, isMemberAdmin) {
+	if (!split[1])
+		return;
+
 	if (split[1].toLowerCase() === "version")
 		message.reply(`${ParentPackageJSON.name} v${ParentPackageJSON.version}`);
 	else if (split[1].toLowerCase() === "help") {
