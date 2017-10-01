@@ -14,31 +14,25 @@ module.exports = new Core.Command({
 });
 
 function invoke({ message, params, guildData, client }) {
-	const feedUrl = [...GetUrls(message.content)][0];
-	const channel = message.mentions.channels.first();
+	const feedUrl = [...GetUrls(message.content)][0],
+		channel = message.mentions.channels.first();
 
 	if (!feedUrl || !channel)
 		return Promise.reject("Please provide both a channel and an RSS feed URL. You can optionally @mention a role also.");
 
-	const role = message.mentions.roles.first();
-
-	const feedData = new FeedData({
-		url: feedUrl,
-		channelName: channel.name,
-		roleName: role ? role.name : null,
-		maxCacheSize: Config.maxCacheSize
-	});
+	const role = message.mentions.roles.first(),
+		feedData = new FeedData({
+			url: feedUrl,
+			channelID: channel.id,
+			roleID: role ? role.id : null,
+			maxCacheSize: Config.maxCacheSize
+		});
 
 	return new Promise((resolve, reject) => {
 		//ask the user if they're happy with the details they set up, save if yes, don't if no
 		Core.util.ask(client, message.channel, message.member, "Are you happy with this (yes/no)?\n" + feedData.toString())
 			.then(responseMessage => {
-
-				//if they responded yes, save the feed and let them know, else tell them to start again
 				if (responseMessage.content.toLowerCase() === "yes") {
-					if (!guildData)
-						guildData = new GuildData({ id: message.guild.id, feeds: [] });
-
 					guildData.feeds.push(feedData);
 					guildData.cachePastPostedLinks(message.guild)
 						.then(() => resolve("Your new feed has been saved!"));

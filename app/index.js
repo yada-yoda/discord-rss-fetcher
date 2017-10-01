@@ -16,15 +16,15 @@ client.on("beforeLogin", () => {
 client.on("ready", () => {
 	parseLinksInGuilds(client.guilds, client.guildsData)
 		.then(() => checkFeedsInGuilds(client.guildsData));
-});
 
-client.on("message", message => {
-	const guildData = client.guildsData[message.guild.id];
-	if (guildData)
-		guildData.feeds.forEach(feedData => {
-			if (message.channel.name === feedData.channelName)
-				feedData.cachedLinks.push(...GetUrls(message.content));
-		});
+	client.on("message", message => {
+		const guildData = client.guildsData[message.guild.id];
+		if (guildData)
+			guildData.feeds.forEach(feedData => {
+				if (message.channel.name === feedData.channelName)
+					feedData.cachedLinks.push(...GetUrls(message.content));
+			});
+	});
 });
 
 client.bootstrap();

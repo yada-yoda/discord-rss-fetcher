@@ -2,7 +2,7 @@
 const InternalConfig = require("./internal-config.json");
 
 module.exports = {
-	Client: require("./client.js"),
+	Client: require("./Client.js"),
 	BaseGuildData: require("./BaseGuildData.js"),
 	Command: require("./Command.js"),
 	util: require("./Util.js"),
