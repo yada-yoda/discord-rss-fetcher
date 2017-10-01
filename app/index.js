@@ -14,6 +14,8 @@ client.on("beforeLogin", () => {
 });
 
 client.on("ready", () => {
+	doUpgradeJSON();
+
 	parseLinksInGuilds(client.guilds, client.guildsData)
 		.then(() => checkFeedsInGuilds(client.guildsData));
 
@@ -42,4 +44,24 @@ function parseLinksInGuilds(guilds, guildsData) {
 			promises.push(guildData.cachePastPostedLinks(guilds.get(guildId)));
 	}
 	return Promise.all(promises);
+}
+
+function doUpgradeJSON() {
+	Object.keys(client.guildsData).forEach(id => {
+		const guild = client.guilds.get(id);
+		if (!guild)
+			return;
+
+		client.guildsData[id].feeds.forEach(feed => {
+			if (feed.roleName) {
+				feed.roleID = client.guilds.get(id).roles.find(x => x.name.toLowerCase() === feed.roleName.toLowerCase()).id;
+				delete feed.roleName;
+			}
+
+			if (feed.channelName) {
+				feed.channelID = client.guilds.get(id).channels.find(x => x.name.toLowerCase() === feed.channelName.toLowerCase()).id;
+				delete feed.channelID;
+			}
+		});
+	});
 }

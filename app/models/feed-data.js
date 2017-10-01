@@ -9,13 +9,17 @@ const GetUrls = require("get-urls"); //for extracting urls from messages
 const ShortID = require("shortid"); //to provide ids for each feed, allowing guilds to remove them
 
 module.exports = class FeedData {
-	constructor({ id = null, url, channelID, roleID, cachedLinks = null, maxCacheSize }) {
+	constructor({ id = null, url, channelID, roleID, cachedLinks = null, maxCacheSize, roleName = undefined, channelName = undefined }) {
 		this.id = id || ShortID.generate();
 		this.url = url;
 		this.channelID = channelID;
 		this.roleID = roleID;
 		this.cachedLinks = cachedLinks || [];
 		this.maxCacheSize = maxCacheSize || 10;
+
+		//these two are actually deprecated, but need to be here for compatibility with old data files to be upgraded
+		this.roleName = roleName;
+		this.channelName = channelName;
 
 		this.cachedLinks.push = (...elements) => {
 			Array.prototype.push.apply(
