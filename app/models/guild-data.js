@@ -21,7 +21,7 @@ module.exports = class GuildData extends Core.BaseGuildData {
 		return Promise.all(promises);
 	}
 
-	checkFeeds(guilds) {
-		this.feeds.forEach(feed => feed.fetchLatest(guilds.get(this.id)));
+	checkFeeds(guild) {
+		this.feeds.forEach(feed => feed.fetchLatest(guild));
 	}
 };

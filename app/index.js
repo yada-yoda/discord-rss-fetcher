@@ -10,14 +10,14 @@ const token = require("../" + process.argv[2]).token,
 const client = new Core.Client(token, dataFile, __dirname + "/commands", GuildData);
 
 client.on("beforeLogin", () => {
-	setInterval(() => checkFeedsInGuilds(client.guildsData), Config.feedCheckIntervalSec * 1000);
+	setInterval(() => checkFeedsInGuilds(), Config.feedCheckIntervalSec * 1000);
 });
 
 client.on("ready", () => {
 	doUpgradeJSON();
 
-	parseLinksInGuilds(client.guilds, client.guildsData)
-		.then(() => checkFeedsInGuilds(client.guildsData));
+	parseLinksInGuilds()
+		.then(() => checkFeedsInGuilds());
 
 	client.on("message", message => {
 		const guildData = client.guildsData[message.guild.id];
@@ -32,16 +32,20 @@ client.on("ready", () => {
 client.bootstrap();
 
 //INTERNAL FUNCTIONS//
-function checkFeedsInGuilds(guildsData) {
-	Object.keys(guildsData).forEach(key => guildsData[key].checkFeeds(client.guilds));
+function checkFeedsInGuilds() {
+	client.guilds.forEach(guild => {
+		const guildData = client.guildsData[guild.id];
+		if (guildData)
+			guildData.checkFeeds(guild);
+	});
 }
 
-function parseLinksInGuilds(guilds, guildsData) {
+function parseLinksInGuilds() {
 	const promises = [];
-	for (let guildId of guilds.keys()) {
-		const guildData = guildsData[guildId];
+	for (let guildId of client.guilds.keys()) {
+		const guildData = client.guildsData[guildId];
 		if (guildData)
-			promises.push(guildData.cachePastPostedLinks(guilds.get(guildId)));
+			promises.push(guildData.cachePastPostedLinks(client.guilds.get(guildId)));
 	}
 	return Promise.all(promises);
 }
@@ -60,7 +64,7 @@ function doUpgradeJSON() {
 
 			if (feed.channelName) {
 				feed.channelID = client.guilds.get(id).channels.find(x => x.name.toLowerCase() === feed.channelName.toLowerCase()).id;
-				delete feed.channelID;
+				delete feed.channelName;
 			}
 		});
 	});
