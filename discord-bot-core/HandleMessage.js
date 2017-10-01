@@ -1,6 +1,7 @@
 // @ts-ignore
+const Discord = require("discord.js");
 const ParentPackageJSON = require("../package.json");
-const CoreUtil = require("./Util.js");
+const InternalConfig = require("./internal-config.json");
 
 /**@param param*/
 function handleMessage(client, message, commands, guildData) {
@@ -14,7 +15,7 @@ function handleMessage(client, message, commands, guildData) {
 		command = commands[Object.keys(commands).find(x => commands[x].name.toLowerCase() === (split[1] || "").toLowerCase())];
 
 	if (!command)
-		handleInternalCommand(message, split);
+		handleInternalCommand(message, split, commands, isMemberAdmin);
 	else if (params.length < command.expectedParamCount)
 		message.reply(`Incorrect syntax!\n**Expected:** *${botName} ${command.syntax}*\n**Need help?** *${botName} help*`);
 	else if (isMemberAdmin || !command.admin)
@@ -31,15 +32,44 @@ function handleMessage(client, message, commands, guildData) {
 }
 
 /**@param param*/
-function handleInternalCommand(message, split) {
+function handleInternalCommand(message, split, commands, isMemberAdmin) {
 	if (split[1].toLowerCase() === "version")
 		message.reply(`${ParentPackageJSON.name} v${ParentPackageJSON.version}`);
-	else if (split[1].toLowerCase() === "help")
-		message.reply(createHelpEmbed());
+	else if (split[1].toLowerCase() === "help") {
+		const helpCommands = [...Object.keys(commands).map(x => commands[x])];
+		helpCommands.push({
+			name: "version",
+			description: "Return version number",
+			syntax: "version"
+		});
+		helpCommands.push({
+			name: "help",
+			description: "View help",
+			syntax: "help"
+		});
+		message.reply(createHelpEmbed(ParentPackageJSON.name, helpCommands, isMemberAdmin));
+	}
 }
 
-function createHelpEmbed() {
-	return "not yet implemented";
+/**
+ * Create a help embed for available commands
+ * @param {string} name name of the bot
+ * @param {*[]} commands commands array
+ * @param {boolean} userIsAdmin whether the user is admin
+ */
+function createHelpEmbed(name, commands, userIsAdmin) {
+	const commandsArr = Object.keys(commands).map(x => commands[x]).filter(x => userIsAdmin || !x.admin);
+
+	const embed = new Discord.RichEmbed().setTitle(`__Help__ for ${(ParentPackageJSON.name + "").replace("discord-bot-", "")}`);
+
+	commandsArr.forEach(command => {
+		embed.addField(command.name, `${command.description}\n**Usage:** *${name} ${command.syntax}*${userIsAdmin && command.admin ? "\n***Admin only***" : ""}`);
+	});
+
+	embed.addField("__Need more help?__", `[Visit my website](${InternalConfig.website}) or [Join my Discord](${InternalConfig.discordInvite})`, true);
+
+	return { embed };
 }
+
 
 module.exports = handleMessage;
