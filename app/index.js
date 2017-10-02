@@ -20,6 +20,9 @@ client.on("ready", () => {
 		.then(() => checkFeedsInGuilds());
 
 	client.on("message", message => {
+		if (message.channel.type !== "text" || !message.member)
+			return;
+
 		const guildData = client.guildsData[message.guild.id];
 		if (guildData)
 			guildData.feeds.forEach(feedData => {

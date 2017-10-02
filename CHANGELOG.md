@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.0-b7
+
+- Fix crash restart when bot received a DM
+
 ## v3.0.0-b6
 
 ### Updatd
