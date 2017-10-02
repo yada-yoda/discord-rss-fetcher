@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.0.0-b6
+
+### Updatd
+
+- Removed "Body is not RSS or ATOM" error from being console logged
+	- These seem to happen quite a lot, but don't actually impair the functionality, so just cause un-necessary spam
+
 ## v3.0.0-b5
 
 ### Added

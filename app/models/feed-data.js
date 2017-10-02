@@ -70,8 +70,12 @@ module.exports = class FeedData {
 
 	_doFetchRSS(guild) {
 		FeedRead(this.url, (err, articles) => {
-			if (err)
-				return DiscordUtil.dateError(err.message || err);
+			//filter out "Body is not RSS or ATOM" errors because these seem to happen rather frequently
+			if (err) {
+				if (err.message !== "Body is not RSS or ATOM")
+					DiscordUtil.dateError("Error reading RSS feed: " + (err.message || err));
+				return;
+			}
 
 			const latest = normaliseUrl(articles[0].link);
 
