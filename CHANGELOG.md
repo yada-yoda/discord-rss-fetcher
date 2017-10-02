@@ -1,6 +1,23 @@
 # Changelog
 
+## v3.0.0-b5
+
+### Added
+
+- Significantly more debug logging
+
+### Updated
+
+- Refactored back-end code for stability
+
+### Fixed
+
+- Fixed a memory leak issue with prev beta
+- Fixed "multiple instance" issue with previous beta
+
 ## v3.0.0-b4
+
+### Updated
 
 - Removed "command not recognised" response, it caused 'fake' errors if multiple bots being run off the same token
 
