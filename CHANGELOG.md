@@ -1,62 +1,26 @@
 # Changelog
 
-## v3.0.0-b7
-
-- Fix crash restart when bot received a DM
-
-## v3.0.0-b6
-
-### Updatd
-
-- Removed "Body is not RSS or ATOM" error from being console logged
-	- These seem to happen quite a lot, but don't actually impair the functionality, so just cause un-necessary spam
-
-## v3.0.0-b5
+## v3.0.0
 
 ### Added
 
 - Significantly more debug logging
-
-### Updated
-
-- Refactored back-end code for stability
-
-### Fixed
-
-- Fixed a memory leak issue with prev beta
-- Fixed "multiple instance" issue with previous beta
-
-## v3.0.0-b4
-
-### Updated
-
-- Removed "command not recognised" response, it caused 'fake' errors if multiple bots being run off the same token
-
-## v3.0.0-b3
-
-### Updated
-
-- Updated error handling for Discord API errors
-- Updated bootstrapping and command handling to use shared subrepo
-
-### Fixed
-
-- *Actually* fixed full/short youtube urls not being properly converted
-
-## v3.0.0-b2
-
-### Fixed
-
-- Full and short youtube urls not being properly converted
-
-## v3.0.0-b1
-
-### Added
 - Fancy new @bot help command
 
-### Updated
+### Updatd
+
 - Significant back-end updates
 - Commands now invoked with an @mention to the bot
+- Updated error handling for Discord API errors
+- Removed "Body is not RSS or ATOM" error from being console logged
+	- These seem to happen quite a lot, but don't actually impair the functionality, so just cause un-necessary spam
+- Removed "command not recognised" response, it caused 'fake' errors if multiple bots being run off the same token
+
+### Fixed
+
+- Fixed full and short youtube urls not being properly converted
+- Fixed "multiple instance" issue
+- Fixed a couple of occasional memory leaks
 
 ## v2.0.0-b1
 
