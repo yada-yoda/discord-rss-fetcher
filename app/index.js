@@ -26,7 +26,7 @@ client.on("ready", () => {
 		const guildData = client.guildsData[message.guild.id];
 		if (guildData)
 			guildData.feeds.forEach(feedData => {
-				if (message.channel.name === feedData.channelName)
+				if (message.channel.id === feedData.channelID)
 					feedData.cachedLinks.push(...GetUrls(message.content));
 			});
 	});
