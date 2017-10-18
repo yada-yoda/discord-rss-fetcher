@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.0.1
+
+### Fixed
+
+- Fixed nicknamed bot not responding to users on android
+- Fixed "playing" message including "https://" in front of site url
+
 ## v3.0.0
 
 ### Added
