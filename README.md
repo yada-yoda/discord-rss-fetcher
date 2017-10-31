@@ -18,7 +18,7 @@ Posts the latest URLs from an RSS feed, optionally @mention-ing a role when post
 ## Invite
 
 By inviting this bot to your server you agree to the [terms and conditions](#privacy-statement) laid out in the privacy section of this document.  
-If you agree, invite to your server with [this link](https://discordapp.com/oauth2/authorize?client_id=343909688045469698&scope=bot&permissions=0x00010c00).
+If you agree, invite to your server with [this link](https://discordapp.com/oauth2/authorize?client_id=343909688045469698&scope=bot&permissions=0x00014c00).
 
 ## Setup
 
@@ -53,11 +53,12 @@ Example:
 The bot requires certain permissions, which you are prompted for on the invite screen.
 Each permission has a reason for being required, explained below.
 
-| Permission           | Reason                                                      |
-|----------------------|-------------------------------------------------------------|
-| Read messages        | Detect when you use commands                                |
-| Send messages        | Respond when you use commands; post new RSS links           |
-| Read message history | Check if any new RSS links have been posted during downtime |
+| Permission           | Reason                                                       |
+|----------------------|--------------------------------------------------------------|
+| Read messages        | Detect when you use commands                                 |
+| Send messages        | Respond when you use commands; post new RSS links            |
+| Read message history | Check if any new RSS links have been posted during downtime  |
+| Embed links   | Responses to 'help' requests use message embeds for nice formatting |
 
 ## Privacy statement
 
@@ -80,6 +81,9 @@ Should you wish for the data stored about your server to be removed, please cont
 3. Run `npm install`
 4. Add *token.json* in the root folder: `{ "token": "your-token-goes-here" }`
 5. Run `npm start`
+
+**Note for git users**  
+If you cloned the repository with git, make sure you `git reset --hard vX.Y` to a specific version, as latest master isn't always production ready!
 
 ## Need help?
 
