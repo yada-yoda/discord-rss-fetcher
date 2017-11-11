@@ -1,7 +1,8 @@
 const Console = require("console");
 const SimpleFileWriter = require("simple-file-writer");
 
-const logWriter = new SimpleFileWriter("./log");
+const logWriter = new SimpleFileWriter("./console.log");
+const debugLogWriter = new SimpleFileWriter("./debug.log");
 
 /**
  	* Returns a promise that the user will answer
@@ -27,23 +28,40 @@ function ask(client, textChannel, member, question) {
 }
 
 function dateLog(...args) {
-	args = formatArgs(args);
-	Console.log.apply(this, args);
-	logWriter.write(args.join("") + "\n");
+	doDateLog(Console.log, logWriter, args);
 }
 
 function dateError(...args) {
+	doDateLog(Console.error, logWriter, args);
+}
+
+function dateDebug(...args) {
+	doDateLog(null, null, args);
+}
+
+function doDateLog(consoleMethod, fileWriter, args) {
 	args = formatArgs(args);
-	Console.error.apply(this, args);
-	logWriter.write(args.join("") + "\n");
+
+	if (consoleMethod !== null)
+		consoleMethod.apply(this, args);
+
+	if (fileWriter !== null)
+		fileWriter.write(formatArgsForFile(args));
+
+	debugLogWriter.write(formatArgsForFile(args));
 }
 
 function formatArgs(args) {
 	return ["[", new Date().toUTCString(), "] "].concat(args);
 }
 
+function formatArgsForFile(args) {
+	return args.join("") + "\n";
+}
+
 module.exports = {
 	dateError,
 	dateLog,
+	dateDebug,
 	ask
 };

@@ -56,7 +56,7 @@ module.exports = class Client extends Discord.Client {
 
 	onDebug(info) {
 		if (!InternalConfig.debugIgnores.some(x => info.startsWith(x)))
-			CoreUtil.dateLog(info);
+			CoreUtil.dateDebug(info);
 	}
 
 	onUnhandledException(client, err) {
