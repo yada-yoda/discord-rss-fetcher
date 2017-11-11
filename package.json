@@ -1,28 +1,28 @@
 {
-  "version": "3.0.1",
-  "main": "app/index.js",
-  "scripts": {
-	"postinstall": "cd ./discord-bot-core && npm install",
-    "start": "node app/index.js token.json guilds.json"
-  },
-  "dependencies": {
-    "discord.js": "11.2.0",
-    "feed-read": "0.0.1",
-    "get-urls": "7.0.0",
-    "jsonfile": "3.0.1",
-    "shortid": "2.2.8"
-  },
-  "name": "discord-bot-rss-feed",
-  "devDependencies": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/benji7425/discord-bot-rss-feed.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/benji7425/discord-bot-rss-feed/issues"
-  },
-  "homepage": "https://github.com/benji7425/discord-bot-rss-feed#readme",
-  "description": ""
+	"version": "3.0.1",
+	"main": "app/index.js",
+	"scripts": {
+		"postinstall": "cd ./discord-bot-core && npm install",
+		"start": "node app/index.js token.json guilds.json --max-old-space-size=64"
+	},
+	"dependencies": {
+		"discord.js": "11.2.0",
+		"feed-read": "0.0.1",
+		"get-urls": "7.0.0",
+		"jsonfile": "3.0.1",
+		"shortid": "2.2.8"
+	},
+	"name": "discord-bot-rss-feed",
+	"devDependencies": {},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/benji7425/discord-bot-rss-feed.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/benji7425/discord-bot-rss-feed/issues"
+	},
+	"homepage": "https://github.com/benji7425/discord-bot-rss-feed#readme",
+	"description": ""
 }
