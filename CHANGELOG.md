@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Guild join and leave messages in the console
+
+### Updated
+
+- Route a lot of mostly irrelevant console spam to a file instead of the console
+
 ## v3.0.1
 
 ### Fixed
