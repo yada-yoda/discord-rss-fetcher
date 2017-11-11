@@ -85,12 +85,23 @@ module.exports = class FeedData {
 				const channel = guild.channels.get(this.channelID),
 					role = guild.roles.get(this.roleID);
 
-				channel.send((role ? role + " " : "") + latest)
+				channel.send((role || "") + formatPost(articles[0]))
 					.catch(err => DiscordUtil.dateError(`Error posting in ${channel.id}: ${err.message || err}`));
 			}
 		});
 	}
 };
+
+function formatPost(article) {
+	let message = "";
+	if (article.title)
+		message += `\n**${article.title}**`;
+	if (article.content)
+		message += `\n${article.content}`;
+	if (article.link)
+		message += `\n\n${normaliseUrl(article.link)}`;
+	return message;
+}
 
 function normaliseUrl(url) {
 	url = url.replace("https://", "http://"); //hacky way to treat http and https the same
