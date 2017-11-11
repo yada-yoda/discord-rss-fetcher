@@ -28,19 +28,19 @@ function ask(client, textChannel, member, question) {
 }
 
 function dateLog(...args) {
-	doDateLog(Console.log, logWriter, args);
+	doDateLog(Console.log, logWriter, args, "INFO");
 }
 
 function dateError(...args) {
-	doDateLog(Console.error, logWriter, args);
+	doDateLog(Console.error, logWriter, args, "ERROR");
 }
 
 function dateDebug(...args) {
-	doDateLog(null, null, args);
+	doDateLog(null, null, args, "DEBUG");
 }
 
-function doDateLog(consoleMethod, fileWriter, args) {
-	args = formatArgs(args);
+function doDateLog(consoleMethod, fileWriter, args, prefix = "") {
+	args = formatArgs([`[${prefix}]`].concat(args));
 
 	if (consoleMethod !== null)
 		consoleMethod.apply(this, args);
@@ -52,7 +52,7 @@ function doDateLog(consoleMethod, fileWriter, args) {
 }
 
 function formatArgs(args) {
-	return ["[", new Date().toUTCString(), "] "].concat(args);
+	return [`[${new Date().toUTCString()}]`].concat(args);
 }
 
 function formatArgsForFile(args) {
