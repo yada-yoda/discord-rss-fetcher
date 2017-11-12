@@ -46,6 +46,10 @@ module.exports = class Client extends Discord.Client {
 	onReady() {
 		this.user.setGame(InternalConfig.website.replace(/^https?:\/\//, ""));
 		CoreUtil.dateLog(`Registered bot ${this.user.username}`);
+
+		for (let guildID of Object.keys(this.guildsData))
+			if (!this.guilds.get(guildID))
+				delete this.guildsData[guildID];
 	}
 
 	onMessage(message) {
@@ -93,7 +97,9 @@ module.exports = class Client extends Discord.Client {
 	 */
 	fromJSON(json) {
 		const guildsData = Object.keys(json);
-		guildsData.forEach(guildID => { json[guildID] = new this.guildDataModel(json[guildID]); });
+		guildsData.forEach(guildID => {
+			json[guildID] = new this.guildDataModel(json[guildID]);
+		});
 		return json;
 	}
 };
