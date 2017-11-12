@@ -1,12 +1,13 @@
 # Changelog
 
-## v3.1.0-b1
+## v3.1.0
 
 ### Added
 
 - RSS element content is now included in the post the bot makes when there is a new feed
 - Warning message after setup command if supplied URL does not return valid RSS
 - Guild join and leave messages in the console
+- Removal of guild data if the bot leaves a guild
 
 ### Updated
 
@@ -16,6 +17,7 @@
 ### Fixed
 
 - Fixed syntax error when role omitted in feed setup command; it is now properly optional
+- Fixed the wrong feed sometimes being removed when using the remove-feed command
 
 ## v3.0.1
 
