@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.1.1
+
+### Fixed
+
+- Empty RSS feed crash
+
 ## v3.1.0
 
 ### Added

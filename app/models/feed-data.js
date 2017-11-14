@@ -77,16 +77,19 @@ module.exports = class FeedData {
 				return;
 			}
 
-			const latest = normaliseUrl(articles[0].link);
+			if (articles.length > 0) {
 
-			if (!this.cachedLinks.includes(latest)) {
-				this.cachedLinks.push(latest);
+				const latest = normaliseUrl(articles[0].link);
 
-				const channel = guild.channels.get(this.channelID),
-					role = guild.roles.get(this.roleID);
+				if (!this.cachedLinks.includes(latest)) {
+					this.cachedLinks.push(latest);
 
-				channel.send((role || "") + formatPost(articles[0]))
-					.catch(err => DiscordUtil.dateError(`Error posting in ${channel.id}: ${err.message || err}`));
+					const channel = guild.channels.get(this.channelID),
+						role = guild.roles.get(this.roleID);
+
+					channel.send((role || "") + formatPost(articles[0]))
+						.catch(err => DiscordUtil.dateError(`Error posting in ${channel.id}: ${err.message || err}`));
+				}
 			}
 		});
 	}
