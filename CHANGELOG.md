@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.1.2
+
+### Fixed
+
+- Deleted channels with feeds sending the bot into a reconnect loop
+
 ## v3.1.1
 
 ### Fixed

@@ -11,17 +11,20 @@ module.exports = class GuildData extends Core.BaseGuildData {
 	cachePastPostedLinks(guild) {
 		const promises = [];
 
-		this.feeds.forEach(feed =>
-			promises.push(
-				feed.updatePastPostedLinks(guild)
-					.catch(err => DiscordUtil.dateError(`Error reading history in ${err.path}`))
-			)
-		);
+		this.feeds.forEach(feed => {
+			if (guild.channels.get(feed.channelID))
+				promises.push(
+					feed.updatePastPostedLinks(guild)
+						.catch(err => DiscordUtil.dateError(`Error reading history in channel ${feed.channelID}: ${err.message || err}`)));
+		});
 
 		return Promise.all(promises);
 	}
 
 	checkFeeds(guild) {
-		this.feeds.forEach(feed => feed.fetchLatest(guild));
+		this.feeds.forEach(feed => {
+			if (guild.channels.get(feed.channelID))
+				feed.fetchLatest(guild);
+		});
 	}
 };
