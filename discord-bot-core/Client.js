@@ -61,8 +61,8 @@ module.exports = class Client extends Discord.Client {
 	}
 
 	onDebug(info) {
-		if (!InternalConfig.debugIgnores.some(x => info.startsWith(x)))
-			CoreUtil.dateDebug(info);
+		info = info.replace(/Authenticated using token [^ ]+/, "Authenticated using token [redacted]");
+		CoreUtil.dateDebug(info);
 	}
 
 	onGuildCreate(guild) {
@@ -76,11 +76,11 @@ module.exports = class Client extends Discord.Client {
 	}
 
 	onUnhandledException(client, err) {
-		CoreUtil.dateError(err.message || err);
+		CoreUtil.dateError(err);
 		CoreUtil.dateLog("Destroying existing client...");
 		client.destroy().then(() => {
 			CoreUtil.dateLog("Client destroyed, recreating...");
-			client.login(client._token);
+			setTimeout(() => client.login(client._token), InternalConfig.reconnectTimeout);
 		});
 	}
 
@@ -92,8 +92,7 @@ module.exports = class Client extends Discord.Client {
 	}
 
 	/**
-	 * @param {*} json 
-	 * @param {*} guildDataModel 
+	 * @param {*} json
 	 */
 	fromJSON(json) {
 		const guildsData = Object.keys(json);
