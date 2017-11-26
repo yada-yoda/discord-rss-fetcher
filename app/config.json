@@ -1,4 +1,5 @@
 {
 	"maxCacheSize": 100,
-	"feedCheckIntervalSec": 30
+	"feedCheckIntervalSec": 30,
+	"charLimit": 500
 }

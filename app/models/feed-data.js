@@ -1,7 +1,6 @@
-//my imports
 const DiscordUtil = require("../../discord-bot-core").util;
-
-//external lib imports
+// @ts-ignore
+const Config = require("../config.json");
 const Dns = require("dns"); //for host resolution checking
 const Url = require("url"); //for url parsing
 const FeedRead = require("feed-read"); //for extracing new links from RSS feeds
@@ -34,7 +33,7 @@ module.exports = class FeedData {
 		};
 	}
 
-	/**@param param*/
+	/**@param guild*/
 	updatePastPostedLinks(guild) {
 		const channel = guild.channels.get(this.channelID);
 
@@ -53,7 +52,7 @@ module.exports = class FeedData {
 		});
 	}
 
-	/**@param param */
+	/**@param guild */
 	fetchLatest(guild) {
 		Dns.resolve(Url.parse(this.url).host || "", err => {
 			if (err)
@@ -100,7 +99,7 @@ function formatPost(article) {
 	if (article.title)
 		message += `\n**${article.title}**`;
 	if (article.content)
-		message += `\n${article.content}`;
+		message += article.content.length > Config.charLimit ? "\nArticle content too long for a single Discord message!" : `\n${article.content}`;
 	if (article.link)
 		message += `\n\n${normaliseUrl(article.link)}`;
 	return message;
