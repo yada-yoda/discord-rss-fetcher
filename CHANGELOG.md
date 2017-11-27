@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add rudimentary pagination for viewing feeds when there are more than 10
 - Fix articles not posting if contents too long for a single discord message
 
 ## v3.1.2
