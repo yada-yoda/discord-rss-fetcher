@@ -33,7 +33,6 @@ module.exports = class FeedData {
 		};
 	}
 
-	/**@param guild*/
 	updatePastPostedLinks(guild) {
 		const channel = guild.channels.get(this.channelID);
 
@@ -52,7 +51,6 @@ module.exports = class FeedData {
 		});
 	}
 
-	/**@param guild */
 	fetchLatest(guild) {
 		Dns.resolve(Url.parse(this.url).host || "", err => {
 			if (err)

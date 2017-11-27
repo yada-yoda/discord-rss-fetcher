@@ -54,12 +54,6 @@ function handleInternalCommand(message, split, commands, isMemberAdmin) {
 	}
 }
 
-/**
- * Create a help embed for available commands
- * @param {string} name name of the bot
- * @param {*[]} commands commands array
- * @param {boolean} userIsAdmin whether the user is admin
- */
 function createHelpEmbed(name, commands, userIsAdmin) {
 	const commandsArr = Object.keys(commands).map(x => commands[x]).filter(x => userIsAdmin || !x.admin);
 

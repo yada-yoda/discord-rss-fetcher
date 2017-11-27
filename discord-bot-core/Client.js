@@ -8,12 +8,6 @@ const HandleMessage = require("./HandleMessage.js");
 const InternalConfig = require("./internal-config.json");
 
 module.exports = class Client extends Discord.Client {
-	/**
-	 * @param {*} token 
-	 * @param {*} dataFile 
-	 * @param {*} commandsDir 
-	 * @param {*} guildDataModel 
-	 */
 	constructor(token, dataFile, commandsDir, guildDataModel) {
 		super();
 
