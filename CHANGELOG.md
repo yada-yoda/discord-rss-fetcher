@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fix articles not posting if contents too long for a single discord message
+
 ## v3.1.2
 
 ### Fixed
