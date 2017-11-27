@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v3.1.3
 ### Added
 - Add rudimentary pagination for viewing feeds when there are more than 10
 
