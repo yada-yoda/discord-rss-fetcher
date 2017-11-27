@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixed
+- Temporary fix for bot crash if used with a feed without links in the articles (didn't realise this was possible...)
+
 ## v3.1.3
 ### Added
 - Add rudimentary pagination for viewing feeds when there are more than 10

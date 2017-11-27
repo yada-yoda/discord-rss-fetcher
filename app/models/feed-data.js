@@ -74,7 +74,7 @@ module.exports = class FeedData {
 				return;
 			}
 
-			if (articles.length > 0) {
+			if (articles.length > 0 && articles[0].link) {
 
 				const latest = normaliseUrl(articles[0].link);
 
