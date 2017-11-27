@@ -3,7 +3,7 @@
 	"main": "app/index.js",
 	"scripts": {
 		"postinstall": "cd ./discord-bot-core && npm install",
-		"start": "node app/index.js token.json guilds.json --max-old-space-size=64"
+		"start": "node app/index.js token.json guilds.json --max-old-space-size=64 --name=rss-feed"
 	},
 	"dependencies": {
 		"discord.js": "11.2.0",

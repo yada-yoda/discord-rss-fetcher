@@ -22,31 +22,31 @@ If you agree, invite to your server with [this link](https://discordapp.com/oaut
 
 ## Setup
 
-You can ask the bot for help with commands by typing `@RSS_Bot help`
+You can ask the bot for help with commands by typing `@RSS Bot help`
 
 ### Add a new feed
 
-`@RSS_Bot add-feed <url> <#channel> [@role]`  
+`@RSS Bot add-feed <url> <#channel> [@role]`  
 - *url* must be an RSS feed URL
 - *#channel* must be a channel mention
 - *@role* must be a role mention (make sure "Anyone can mention this role" is turned on during setup)
 
 Example:
-`@RSS_Bot add-feed http://lorem-rss.herokuapp.com/feed?unit=second&interval=30 #rss-posts @subscribers`
+`@RSS Bot add-feed http://lorem-rss.herokuapp.com/feed?unit=second&interval=30 #rss-posts @subscribers`
 
 ### View feeds configured for this server
 
-`@RSS_Bot view-feeds`  
+`@RSS Bot view-feeds`  
 This will display a list of RSS feeds configured for this server, along with a unique ID for each
 
 ### Remove a configured feed
 
-`@RSS_Bot remove-feed <feed-id>`  
+`@RSS Bot remove-feed <feed-id>`  
 
 To remove a feed you will need it's unique ID, which you can find by running the above *view-feeds* command
 
 Example:
-`@RSS_Bot remove-feed ABc-123dEF`
+`@RSS Bot remove-feed ABc-123dEF`
 
 ## Permissions
 

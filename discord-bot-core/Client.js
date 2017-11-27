@@ -92,10 +92,6 @@ module.exports = class Client extends Discord.Client {
 			err => { if (err) CoreUtil.dateError(`Error writing data file! ${err.message || err}`); });
 	}
 
-	/**
-	 * @param {*} json 
-	 * @param {*} guildDataModel 
-	 */
 	fromJSON(json) {
 		const guildsData = Object.keys(json);
 		guildsData.forEach(guildID => {
