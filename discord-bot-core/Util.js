@@ -30,6 +30,10 @@ function dateError(...args) {
 	doDateLog(Console.error, logWriter, args, "ERROR");
 }
 
+function dateDebugError(...args) {
+	doDateLog(null, null, args, "DEBUG ERROR");
+}
+
 function dateDebug(...args) {
 	doDateLog(null, null, args, "DEBUG");
 }
@@ -58,5 +62,6 @@ module.exports = {
 	dateError,
 	dateLog,
 	dateDebug,
+	dateDebugError,
 	ask
 };

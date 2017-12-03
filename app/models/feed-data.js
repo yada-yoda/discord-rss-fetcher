@@ -54,7 +54,7 @@ module.exports = class FeedData {
 	fetchLatest(guild) {
 		Dns.resolve(Url.parse(this.url).host || "", err => {
 			if (err)
-				DiscordUtil.dateError("Connection Error: Can't resolve host", err.message || err);
+				DiscordUtil.dateDebugError("Connection Error: Can't resolve host", err.message || err);
 			else
 				this._doFetchRSS(guild);
 		});
@@ -67,12 +67,8 @@ module.exports = class FeedData {
 
 	_doFetchRSS(guild) {
 		FeedRead(this.url, (err, articles) => {
-			//filter out "Body is not RSS or ATOM" errors because these seem to happen rather frequently
-			if (err) {
-				if (err.message !== "Body is not RSS or ATOM")
-					DiscordUtil.dateError("Error reading RSS feed: " + (err.message || err));
+			if (err)
 				return;
-			}
 
 			if (articles.length > 0 && articles[0].link) {
 
@@ -85,7 +81,7 @@ module.exports = class FeedData {
 						role = guild.roles.get(this.roleID);
 
 					channel.send((role || "") + formatPost(articles[0]))
-						.catch(err => DiscordUtil.dateError(`Error posting in ${channel.id}: ${err.message || err}`));
+						.catch(err => DiscordUtil.dateDebugError(`Error posting in ${channel.id}: ${err.message || err}`));
 				}
 			}
 		});
