@@ -107,7 +107,7 @@ function normaliseUrl(url) {
 	url = url.replace("https://", "http://"); //hacky way to treat http and https the same
 
 	const parsedUrl = Url.parse(url);
-	if (parsedUrl.host.includes("youtube.com")) {
+	if (parsedUrl.host && parsedUrl.host.includes("youtube.com")) {
 		const videoIDParam = (parsedUrl.query || "").split("&").find(x => x.startsWith("v="));
 		if (videoIDParam) {
 			const videoID = videoIDParam.substring(videoIDParam.indexOf("=") + 1, videoIDParam.length);

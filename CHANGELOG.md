@@ -2,6 +2,7 @@
 
 ## Unreleased
 ### Fixed
+- Fix bot crash if feed article contains link with invalid host name
 - Temporary fix for bot crash if used with a feed without links in the articles (didn't realise this was possible...)
 
 ## v3.1.3
