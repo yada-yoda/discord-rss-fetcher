@@ -1,5 +1,5 @@
 update.sh
-guilds.json
+guilds-data/*
 token.json*
 log
 

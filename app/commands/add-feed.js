@@ -2,9 +2,8 @@ const Core = require("../../discord-bot-core");
 const GetUrls = require("get-urls");
 const FeedRead = require("feed-read");
 const FeedData = require("../models/feed-data.js");
-const GuildData = require("../models/guild-data.js");
-// @ts-ignore
 const Config = require("../config.json");
+const ShortID = require("shortid");
 
 module.exports = new Core.Command({
 	name: "add-feed",
@@ -22,7 +21,8 @@ function invoke({ message, params, guildData, client }) {
 		return Promise.reject("Please provide both a channel and an RSS feed URL. You can optionally @mention a role also.");
 
 	const role = message.mentions.roles.first(),
-		feedData = new FeedData({
+		feedData = FeedData.create({
+			feedID: ShortID.generate(),
 			url: feedUrl,
 			channelID: channel.id,
 			roleID: role ? role.id : null,
@@ -30,7 +30,7 @@ function invoke({ message, params, guildData, client }) {
 		});
 
 	return new Promise((resolve, reject) => {
-		FeedRead(feedUrl, (err, articles) => {
+		FeedRead(feedUrl, err => {
 			if (err)
 				return reject(`Unable to add the feed due to the following error:\n${err.message}`);
 

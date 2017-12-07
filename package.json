@@ -6,6 +6,7 @@
 		"start": "node app/index.js token.json guilds.json --max-old-space-size=64 --name=rss-feed"
 	},
 	"dependencies": {
+		"camo": "git+https://github.com/scottwrobinson/camo.git",
 		"discord.js": "11.2.0",
 		"feed-read": "0.0.1",
 		"get-urls": "7.0.0",

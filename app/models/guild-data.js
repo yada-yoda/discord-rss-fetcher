@@ -3,9 +3,10 @@ const Core = require("../../discord-bot-core");
 const FeedData = require("./feed-data.js");
 
 module.exports = class GuildData extends Core.BaseGuildData {
-	constructor({ id, feeds = [] }) {
-		super(id);
-		this.feeds = feeds.map(feed => new FeedData(feed));
+	constructor() {
+		super();
+
+		this.feeds = [FeedData];
 	}
 
 	cachePastPostedLinks(guild) {
