@@ -32,6 +32,7 @@ module.exports = class Client extends Discord.Client {
 		this.on("debug", this._onDebug);
 		this.on("guildCreate", this._onGuildCreate);
 		this.on("guildDelete", this._onGuildDelete);
+		process.on("uncaughtException", err => this._onUnhandledException(this, err));
 	}
 
 	bootstrap() {
@@ -69,6 +70,15 @@ module.exports = class Client extends Discord.Client {
 		this.guildDataModel.findOneAndDelete({ id: guild.id });
 
 		CoreUtil.dateLog(`Removed from guild ${guild.name}, removing data for this guild`);
+	}
+
+	_onUnhandledException(client, err) {
+		CoreUtil.dateError("Unhandled exception!\n", err);
+		CoreUtil.dateLog("Destroying existing client...");
+		client.destroy().then(() => {
+			CoreUtil.dateLog("Client destroyed, recreating...");
+			setTimeout(() => client.login(client._token), InternalConfig.reconnectTimeout);
+		});
 	}
 };
 
