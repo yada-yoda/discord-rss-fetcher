@@ -1,36 +1,33 @@
 const DiscordUtil = require("../../discord-bot-core").util;
-// @ts-ignore
+const Camo = require("camo");
 const Config = require("../config.json");
 const Dns = require("dns"); //for host resolution checking
 const Url = require("url"); //for url parsing
 const FeedRead = require("feed-read"); //for extracing new links from RSS feeds
 const GetUrls = require("get-urls"); //for extracting urls from messages
-const ShortID = require("shortid"); //to provide ids for each feed, allowing guilds to remove them
 
-module.exports = class FeedData {
-	constructor({ id = null, url, channelID, roleID, cachedLinks = null, maxCacheSize, roleName = undefined, channelName = undefined }) {
-		this.id = id || ShortID.generate();
-		this.url = url;
-		this.channelID = channelID;
-		this.roleID = roleID;
-		this.cachedLinks = cachedLinks || [];
-		this.maxCacheSize = maxCacheSize || 10;
+module.exports = class FeedData extends Camo.EmbeddedDocument {
+	constructor() {
+		super();
 
-		//these two are actually deprecated, but need to be here for compatibility with old data files to be upgraded
-		this.roleName = roleName;
-		this.channelName = channelName;
+		this.feedID = String;
+		this.url = String;
+		this.channelID = String;
+		this.roleID = String;
+		this.cachedLinks = [String];
+		this.maxCacheSize = Number;
+	}
 
-		this.cachedLinks.push = (...elements) => {
-			Array.prototype.push.apply(
-				this.cachedLinks,
-				elements
-					.map(el => normaliseUrl(el))
-					.filter(el => !this.cachedLinks.includes(el))
-			);
+	cache(...elements) {
+		Array.prototype.push.apply(
+			this.cachedLinks,
+			elements
+				.map(el => normaliseUrl(el))
+				.filter(el => !this.cachedLinks.includes(el))
+		);
 
-			//seeing as new links come in at the end of the array, we need to remove the old links from the beginning
-			this.cachedLinks.splice(0, this.cachedLinks.length - this.maxCacheSize);
-		};
+		//seeing as new links come in at the end of the array, we need to remove the old links from the beginning
+		this.cachedLinks.splice(0, this.cachedLinks.length - this.maxCacheSize);
 	}
 
 	updatePastPostedLinks(guild) {

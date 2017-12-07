@@ -9,7 +9,7 @@ module.exports = new Core.Command({
 });
 
 function invoke({ message, params, guildData, client }) {
-	const idx = guildData.feeds.findIndex(feed => feed.id === params[0]);
+	const idx = guildData.feeds.findIndex(feed => feed.feedID === params[0]);
 	if (!Number.isInteger(idx))
 		return Promise.reject("Can't find feed with id " + params[0]);
 

@@ -19,5 +19,5 @@ function invoke({ message, params, guildData, client }) {
 	let responseStr = guildData.feeds.map(f => f.toString()).slice(startIdx, endIdx).join("\n");
 	if (guildData.feeds.length > endIdx)
 		responseStr += `Use *view-feeds ${startIdx + 2}* to view more`;
-	return Promise.resolve(responseStr);
+	return Promise.resolve(responseStr || "No feeds configured");
 }

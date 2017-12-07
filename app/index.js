@@ -14,61 +14,38 @@ client.on("beforeLogin", () => {
 });
 
 client.on("ready", () => {
-	doUpgradeJSON();
-
 	parseLinksInGuilds()
 		.then(() => checkFeedsInGuilds());
+});
 
-	client.on("message", message => {
-		if (message.channel.type !== "text" || !message.member)
-			return;
+client.on("message", message => {
+	if (message.channel.type !== "text" || !message.member)
+		return;
 
-		const guildData = client.guildsData[message.guild.id];
-		if (guildData)
-			guildData.feeds.forEach(feedData => {
-				if (message.channel.id === feedData.channelID)
-					feedData.cachedLinks.push(...GetUrls(message.content));
-			});
-	});
+	client.guildDataModel.findOne({ guildID: message.guild.id })
+		.then(guildData => {
+			if (guildData)
+				guildData.feeds.forEach(feedData => {
+					if (message.channel.id === feedData.channelID)
+						feedData.cachedLinks.push(...GetUrls(message.content));
+				});
+		});
+
 });
 
 client.bootstrap();
 
 //INTERNAL FUNCTIONS//
 function checkFeedsInGuilds() {
-	client.guilds.forEach(guild => {
-		const guildData = client.guildsData[guild.id];
-		if (guildData)
-			guildData.checkFeeds(guild);
-	});
+	client.guildDataModel.find().then(guildDatas =>
+		guildDatas.forEach(guildData =>
+			guildData.checkFeeds(client.guilds.get(guildData.guildID))));
 }
 
 function parseLinksInGuilds() {
 	const promises = [];
-	for (let guildId of client.guilds.keys()) {
-		const guildData = client.guildsData[guildId];
-		if (guildData)
-			promises.push(guildData.cachePastPostedLinks(client.guilds.get(guildId)));
-	}
+	client.guildDataModel.find().then(guildDatas =>
+		guildDatas.forEach(guildData => promises.push(guildData.cachePastPostedLinks(client.guilds.get(guildData.guildID)))));
+
 	return Promise.all(promises);
-}
-
-function doUpgradeJSON() {
-	Object.keys(client.guildsData).forEach(id => {
-		const guild = client.guilds.get(id);
-		if (!guild)
-			return;
-
-		client.guildsData[id].feeds.forEach(feed => {
-			if (feed.roleName) {
-				feed.roleID = client.guilds.get(id).roles.find(x => x.name.toLowerCase() === feed.roleName.toLowerCase()).id;
-				delete feed.roleName;
-			}
-
-			if (feed.channelName) {
-				feed.channelID = client.guilds.get(id).channels.find(x => x.name.toLowerCase() === feed.channelName.toLowerCase()).id;
-				delete feed.channelName;
-			}
-		});
-	});
 }
