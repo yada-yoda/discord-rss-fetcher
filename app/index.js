@@ -24,13 +24,12 @@ client.on("message", message => {
 
 	client.guildDataModel.findOne({ guildID: message.guild.id })
 		.then(guildData => {
-			if (guildData)
-				guildData.feeds.forEach(feedData => {
-					if (message.channel.id === feedData.channelID)
-						feedData.cachedLinks.push(...GetUrls(message.content));
-				});
+			if (guildData) {
+				guildData.feeds.forEach(feedData =>
+					message.channel.id === feedData.channelID && feedData.cache(...GetUrls(message.content)));
+				guildData.save();
+			}
 		});
-
 });
 
 client.bootstrap();

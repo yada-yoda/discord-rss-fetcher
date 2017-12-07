@@ -41,7 +41,7 @@ module.exports = class FeedData extends Camo.EmbeddedDocument {
 				.then(messages => {
 					/* we want to push the links in oldest first, but discord.js returns messages newest first, so we need to reverse them
 					 * discord.js returns a map, and maps don't have .reverse methods, hence needing to spread the elements into an array first */
-					[...messages.values()].reverse().forEach(m => this.cachedLinks.push(...GetUrls(m.content)));
+					[...messages.values()].reverse().forEach(m => this.cache(...GetUrls(m.content)));
 					resolve();
 				})
 				.catch(reject);
@@ -72,8 +72,6 @@ module.exports = class FeedData extends Camo.EmbeddedDocument {
 				const latest = normaliseUrl(articles[0].link);
 
 				if (!this.cachedLinks.includes(latest)) {
-					this.cachedLinks.push(latest);
-
 					const channel = guild.channels.get(this.channelID),
 						role = guild.roles.get(this.roleID);
 
