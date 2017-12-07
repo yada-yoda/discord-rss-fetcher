@@ -4,6 +4,6 @@ module.exports = class BaseGuildData extends Camo.Document {
 	constructor() {
 		super();
 
-		this.id = Number;
+		this.guildID = String;
 	}
 };

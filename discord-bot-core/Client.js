@@ -67,7 +67,7 @@ module.exports = class Client extends Discord.Client {
 	}
 
 	_onGuildDelete(guild) {
-		this.guildDataModel.findOneAndDelete({ id: guild.id });
+		this.guildDataModel.findOneAndDelete({ guildID: guild.id });
 
 		CoreUtil.dateLog(`Removed from guild ${guild.name}, removing data for this guild`);
 	}

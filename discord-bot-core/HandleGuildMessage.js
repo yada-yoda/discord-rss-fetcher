@@ -4,13 +4,13 @@ const internalCommands = RequireAll(__dirname + "/core-commands");
 
 function handleGuildMessage(client, message, commands) {
 	if (isCommand(message))
-		client.guildDataModel.findOne({ id: message.guild.id })
+		client.guildDataModel.findOne({ guildID: message.guild.id })
 			.then(guildData =>
 				handleGuildCommand(
 					client,
 					message,
 					Object.assign({}, internalCommands, commands),
-					guildData || client.guildDataModel.create({ id: message.guild.id })
+					guildData || client.guildDataModel.create({ guildID: message.guild.id })
 				));
 }
 

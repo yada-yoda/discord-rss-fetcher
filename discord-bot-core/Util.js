@@ -23,7 +23,7 @@ function ask(client, textChannel, member, question) {
 			}
 		};
 
-		client.once("message", handler);
+		client.on("message", handler);
 
 		textChannel.send(member.toString() + " " + question).catch(reject);
 	});
