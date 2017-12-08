@@ -62,7 +62,7 @@ function formatArgs(args) {
 }
 
 function formatArgsForFile(args) {
-	return args.join("") + "\n";
+	return args.join(" ") + "\n";
 }
 
 module.exports = {

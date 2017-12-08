@@ -3,7 +3,8 @@ const Camo = require("camo");
 const Config = require("../config.json");
 const Dns = require("dns"); //for host resolution checking
 const Url = require("url"); //for url parsing
-const FeedRead = require("feed-read"); //for extracing new links from RSS feeds
+const { promisify } = require("util");
+const FeedReadPromise = promisify(require("feed-read")); //for extracing new links from RSS feeds
 const GetUrls = require("get-urls"); //for extracting urls from messages
 
 module.exports = class FeedData extends Camo.EmbeddedDocument {
@@ -63,23 +64,21 @@ module.exports = class FeedData extends Camo.EmbeddedDocument {
 	}
 
 	_doFetchRSS(guild) {
-		FeedRead(this.url, (err, articles) => {
-			if (err)
-				return;
+		FeedReadPromise(this.url + "asdf")
+			.then(articles => {
+				if (articles.length > 0 && articles[0].link) {
+					const latest = normaliseUrl(articles[0].link);
 
-			if (articles.length > 0 && articles[0].link) {
+					if (!this.cachedLinks.includes(latest)) {
+						const channel = guild.channels.get(this.channelID),
+							role = guild.roles.get(this.roleID);
 
-				const latest = normaliseUrl(articles[0].link);
-
-				if (!this.cachedLinks.includes(latest)) {
-					const channel = guild.channels.get(this.channelID),
-						role = guild.roles.get(this.roleID);
-
-					channel.send((role || "") + formatPost(articles[0]))
-						.catch(err => DiscordUtil.dateDebugError(`Error posting in ${channel.id}: ${err.message || err}`));
+						channel.send((role || "") + formatPost(articles[0]))
+							.catch(err => DiscordUtil.dateDebugError(`Error posting in ${channel.id}: ${err.message || err}`));
+					}
 				}
-			}
-		});
+			})
+			.catch(err => DiscordUtil.dateDebugError(`Error reading feed ${this.url}`, err));
 	}
 };
 
