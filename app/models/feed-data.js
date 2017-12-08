@@ -64,21 +64,25 @@ module.exports = class FeedData extends Camo.EmbeddedDocument {
 	}
 
 	_doFetchRSS(guild) {
-		FeedReadPromise(this.url + "asdf")
+		const that = this;
+		FeedReadPromise(this.url)
 			.then(articles => {
 				if (articles.length > 0 && articles[0].link) {
 					const latest = normaliseUrl(articles[0].link);
 
-					if (!this.cachedLinks.includes(latest)) {
-						const channel = guild.channels.get(this.channelID),
-							role = guild.roles.get(this.roleID);
+					if (!that.cachedLinks.includes(latest)) {
+						that.cache(latest);
+
+						const channel = guild.channels.get(that.channelID),
+							role = guild.roles.get(that.roleID);
 
 						channel.send((role || "") + formatPost(articles[0]))
 							.catch(err => DiscordUtil.dateDebugError(`Error posting in ${channel.id}: ${err.message || err}`));
 					}
 				}
 			})
-			.catch(err => DiscordUtil.dateDebugError(`Error reading feed ${this.url}`, err));
+			.catch(err =>
+				DiscordUtil.dateDebugError(`Error reading feed ${that.url}`, err));
 	}
 };
 

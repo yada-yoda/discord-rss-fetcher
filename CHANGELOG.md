@@ -1,4 +1,6 @@
 # Changelog
+### Fixed
+- Fixed upgrader script not including channel ID in new database
 
 ## v3.2.0-b1
 ### Updated

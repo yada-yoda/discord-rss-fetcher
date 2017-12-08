@@ -16,6 +16,7 @@ module.exports = function () {
 				feedID: feed.id,
 				url: feed.url,
 				roleID: feed.roleID,
+				channelID: feed.channelID,
 				cachedLinks: feed.cachedLinks,
 				maxCacheSize: feed.maxCacheSize
 			}));
@@ -24,5 +25,5 @@ module.exports = function () {
 		guildData.save();
 	}
 
-	FileSystem.unlinkSync("./guilds.json");
+	FileSystem.rename("./guilds.json", "./guilds.json.backup");
 };

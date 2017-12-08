@@ -17,6 +17,9 @@ function handleGuildMessage(client, message, commands) {
 function handleGuildCommand(client, message, commands, guildData) {
 	const { botName, isMemberAdmin, params, command } = parseDetails(message, commands);
 
+	if (!command)
+		return;
+
 	if (params.length < command.expectedParamCount)
 		message.reply(`Incorrect syntax!\n**Expected:** *${botName} ${command.syntax}*\n**Need help?** *${botName} help*`);
 
