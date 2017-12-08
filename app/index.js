@@ -52,7 +52,10 @@ function doGuildIteration() {
 function parseLinksInGuilds() {
 	const promises = [];
 	client.guildDataModel.find().then(guildDatas =>
-		guildDatas.forEach(guildData => promises.push(guildData.cachePastPostedLinks(client.guilds.get(guildData.guildID)))));
+		guildDatas.forEach(guildData => {
+			if (client.guilds.get(guildData.guildID))
+				promises.push(guildData.cachePastPostedLinks(client.guilds.get(guildData.guildID)));
+		}));
 
 	return Promise.all(promises);
 }

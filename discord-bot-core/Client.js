@@ -35,20 +35,11 @@ module.exports = class Client extends Discord.Client {
 		process.on("uncaughtException", err => this._onUnhandledException(this, err));
 	}
 
-	bootstrap() {
-		Camo.connect("nedb://guilds-data").then(db => {
-			neDB = db;
-
-			this.emit("beforeLogin");
-			this.login(this._token);
-		});
-	}
-
 	_onReady() {
 		this.user.setGame(InternalConfig.website.replace(/^https?:\/\//, ""));
 		CoreUtil.dateLog(`Registered bot ${this.user.username}`);
 
-		new CronJob(InternalConfig.dbCompactionSchedule, () => compactCollections(), null, true);
+		this.removeDeletedGuilds();
 	}
 
 	_onMessage(message) {
@@ -80,6 +71,24 @@ module.exports = class Client extends Discord.Client {
 			setTimeout(() => client.login(client._token), InternalConfig.reconnectTimeout);
 		});
 	}
+
+	bootstrap() {
+		Camo.connect("nedb://guilds-data").then(db => {
+			neDB = db;
+			new CronJob(InternalConfig.dbCompactionSchedule, compactCollections, null, true);
+
+			this.emit("beforeLogin");
+			this.login(this._token);
+		});
+	}
+
+	removeDeletedGuilds() {
+		this.guildDataModel.find().then(guildDatas => {
+			for (let guildData of guildDatas)
+				if (!this.guilds.get(guildData.guildID))
+					guildData.delete();
+		});
+	}
 };
 
 function compactCollections() {
@@ -89,6 +98,6 @@ function compactCollections() {
 	  and camo is designed to work with both NeDB and MongoDB, which is presumably why it doesn't alraedy exist */
 	for (let collectionName of Object.keys(neDB._collections))
 		neDB._collections[collectionName].persistence.compactDatafile();
-	
+
 	Util.dateLog("Executed compaction on loaded NeDB collections");
 }
