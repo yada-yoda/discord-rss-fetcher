@@ -1,11 +1,15 @@
 # Changelog
 
-## Unreleased
+## v3.2.0-b1
 ### Updated
+- Updated data storage to use a NeDB database rather than a json file
+- Updated feed checking interval to check one guild every 10 seconds (this may slow down the time it takes to post, but will improve performance)
+- Improve stability of feed checking
 - Tidy up some console spam
 ### Fixed
 - Fix bot crash if feed article contains link with invalid host name
 - Temporary fix for bot crash if used with a feed without links in the articles (didn't realise this was possible...)
+- Attempt fix for issues caused by every feed of every guild being checked at the same time
 
 ## v3.1.3
 ### Added
