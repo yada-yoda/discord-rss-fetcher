@@ -1,6 +1,6 @@
 {
 	"maxCacheSize": 100,
-	"feedCheckIntervalSec": 30,
+	"feedCheckInterval": 10000,
 	"charLimit": 500,
 	"viewFeedsPaginationLimit": 10
 }
