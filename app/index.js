@@ -24,6 +24,7 @@ client.on("beforeLogin", () =>
 
 client.on("ready", () => {
 	parseLinksInGuilds().then(doGuildIteration);
+	require("./legacy-upgrader.js")(); //upgrade legacy json into new database format
 });
 
 client.on("message", message => {
