@@ -1,4 +1,3 @@
-const DiscordUtil = require("../../discord-bot-core").util;
 const Core = require("../../discord-bot-core");
 const FeedData = require("./feed-data.js");
 
@@ -10,22 +9,15 @@ module.exports = class GuildData extends Core.BaseGuildData {
 	}
 
 	cachePastPostedLinks(guild) {
-		const promises = [];
-
-		this.feeds.forEach(feed => {
-			if (guild.channels.get(feed.channelID))
-				promises.push(
-					feed.updatePastPostedLinks(guild)
-						.catch(err => DiscordUtil.dateError(`Error reading history in channel ${feed.channelID}: ${err.message || err}`)));
-		});
-
-		return Promise.all(promises);
+		return Promise.all(
+			this.feeds.map(feed => guild.channels.get(feed.channelID) ? feed.updatePastPostedLinks(guild) : Promise.resolve())
+		);
 	}
 
 	checkFeeds(guild) {
-		this.feeds.forEach(feed => {
-			if (guild.channels.get(feed.channelID))
-				feed.fetchLatest(guild);
-		});
+		return Promise.all(
+			this.feeds.map(feed => 
+				guild.channels.get(feed.channelID) ? feed.fetchLatest(guild) : Promise.resolve())
+		);
 	}
 };

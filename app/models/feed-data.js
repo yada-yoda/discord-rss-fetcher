@@ -5,6 +5,7 @@ const Dns = require("dns"); //for host resolution checking
 const Url = require("url"); //for url parsing
 const { promisify } = require("util");
 const FeedReadPromise = promisify(require("feed-read")); //for extracing new links from RSS feeds
+const DnsResolvePromise = promisify(Dns.resolve);
 const GetUrls = require("get-urls"); //for extracting urls from messages
 
 module.exports = class FeedData extends Camo.EmbeddedDocument {
@@ -50,12 +51,11 @@ module.exports = class FeedData extends Camo.EmbeddedDocument {
 	}
 
 	fetchLatest(guild) {
-		Dns.resolve(Url.parse(this.url).host || "", err => {
-			if (err)
-				DiscordUtil.dateDebugError("Connection Error: Can't resolve host", err.message || err);
-			else
-				this._doFetchRSS(guild);
-		});
+		const dnsPromise = DnsResolvePromise(Url.parse(this.url).host).then(() => this._doFetchRSS(guild));
+
+		dnsPromise.catch(err => DiscordUtil.dateError("Connection error: Can't resolve host", err.message || err));
+
+		return dnsPromise;
 	}
 
 	toString() {
@@ -64,25 +64,29 @@ module.exports = class FeedData extends Camo.EmbeddedDocument {
 	}
 
 	_doFetchRSS(guild) {
-		const that = this;
-		FeedReadPromise(this.url)
-			.then(articles => {
-				if (articles.length > 0 && articles[0].link) {
-					const latest = normaliseUrl(articles[0].link);
+		const feedPromise = FeedReadPromise(this.url).then(articles => this._processLatestArticle(guild, articles));
 
-					if (!that.cachedLinks.includes(latest)) {
-						that.cache(latest);
+		feedPromise.catch(err => DiscordUtil.dateDebugError([`Error reading feed ${this.url}`, err]));
 
-						const channel = guild.channels.get(that.channelID),
-							role = guild.roles.get(that.roleID);
+		return feedPromise;
+	}
 
-						channel.send((role || "") + formatPost(articles[0]))
-							.catch(err => DiscordUtil.dateDebugError(`Error posting in ${channel.id}: ${err.message || err}`));
-					}
-				}
-			})
-			.catch(err =>
-				DiscordUtil.dateDebugError(`Error reading feed ${that.url}`, err));
+	_processLatestArticle(guild, articles) {
+		if (articles.length === 0 || !articles[0].link)
+			return;
+	
+		const latest = normaliseUrl(articles[0].link);
+	
+		if (this.cachedLinks.includes(latest))
+			return;
+	
+		this.cache(latest);
+	
+		const channel = guild.channels.get(this.channelID),
+			role = guild.roles.get(this.roleID);
+	
+		channel.send((role || "") + formatPost(articles[0]))
+			.catch(err => DiscordUtil.dateDebugError(`Error posting in ${channel.id}: ${err.message || err}`));
 	}
 };
 

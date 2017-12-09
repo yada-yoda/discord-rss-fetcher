@@ -1,4 +1,9 @@
 # Changelog
+## v3.2.0-b3
+### Fixed
+- Fixed some race condtions with the 3.2 update
+
+## v3.2.0-b2
 ### Fixed
 - Fixed upgrader script not including channel ID in new database
 

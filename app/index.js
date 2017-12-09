@@ -47,7 +47,7 @@ client.bootstrap();
 function doGuildIteration() {
 	const guild = guildsIterator.next().value;
 	guild && client.guildDataModel.findOne({ guildID: guild.id })
-		.then(guildData => guildData && guildData.checkFeeds(guild));
+		.then(guildData => guildData && guildData.checkFeeds(guild).then(() => guildData.save()));
 }
 
 function parseLinksInGuilds() {
