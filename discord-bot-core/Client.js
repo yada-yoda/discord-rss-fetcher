@@ -13,15 +13,13 @@ module.exports = class Client extends Discord.Client {
 	/**
 	 * Construct a new Discord.Client with some added functionality
 	 * @param {string} token bot token
-	 * @param {string} dataFile location for json data file
 	 * @param {string} commandsDir location of dir containing commands .js files
 	 * @param {*} guildDataModel GuildData model to be used for app; must extend BaseGuildData
 	 */
-	constructor(token, dataFile, commandsDir, guildDataModel) {
+	constructor(token, commandsDir, guildDataModel) {
 		super();
 
 		this._token = token;
-		this.dataFile = dataFile;
 		this.commandsDir = commandsDir;
 		this.guildDataModel = guildDataModel;
 
