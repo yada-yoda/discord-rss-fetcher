@@ -14,10 +14,8 @@ const guildsIterator = (function* () {
 	}
 })();
 
-const token = require("../" + process.argv[2]).token,
-	dataFile = process.argv[3];
-
-const client = new Core.Client(token, dataFile, __dirname + "/commands", GuildData);
+// @ts-ignore
+const client = new Core.Client(require("../token.json"), __dirname + "/commands", GuildData);
 
 client.on("beforeLogin", () =>
 	setInterval(doGuildIteration, Config.feedCheckInterval));
@@ -32,31 +30,45 @@ client.on("message", message => {
 		return;
 
 	client.guildDataModel.findOne({ guildID: message.guild.id })
-		.then(guildData => {
-			if (guildData) {
-				guildData.feeds.forEach(feedData =>
-					message.channel.id === feedData.channelID && feedData.cache(...GetUrls(message.content)));
-				guildData.save();
-			}
-		});
+		.then(guildData => guildData && cacheUrlsInMessage(message, guildData));
 });
 
 client.bootstrap();
 
 //INTERNAL FUNCTIONS//
-function doGuildIteration() {
-	const guild = guildsIterator.next().value;
-	guild && client.guildDataModel.findOne({ guildID: guild.id })
-		.then(guildData => guildData && guildData.checkFeeds(guild).then(() => guildData.save()));
-}
-
 function parseLinksInGuilds() {
 	const promises = [];
+
 	client.guildDataModel.find().then(guildDatas =>
-		guildDatas.forEach(guildData => {
-			if (client.guilds.get(guildData.guildID))
-				promises.push(guildData.cachePastPostedLinks(client.guilds.get(guildData.guildID)));
-		}));
+		guildDatas
+			.filter(guildData => client.guilds.get(guildData.guildID))
+			.map(guildData => ({ guildData, guild: client.guilds.get(guildData.guildID) }))
+			.forEach(({ guildData, guild }) => promises.push(guildData.cachePastPostedLinks(guild).catch()))
+	);
 
 	return Promise.all(promises);
+}
+
+function doGuildIteration() {
+	const guild = guildsIterator.next().value;
+
+	if (guild)
+		client.guildDataModel.findOne({ guildID: guild.id })
+			.then(guildData => guildData && checkGuildFeeds(guild, guildData));
+}
+
+function checkGuildFeeds(guild, guildData) {
+	guildData.checkFeeds(guild)
+		.then(values => values.some(x => x) && guildData.save());
+}
+
+function cacheUrlsInMessage(message, guildData) {
+	const anyNewLinksPosted = [];
+
+	guildData.feeds
+		.filter(feedData => message.channel.id === feedData.channelID)
+		.forEach(feedData => anyNewLinksPosted.push(feedData.cache(...GetUrls(message.content))));
+
+	if (anyNewLinksPosted.some(x => x))
+		guildData.save();
 }

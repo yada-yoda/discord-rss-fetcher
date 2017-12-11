@@ -1,35 +1,49 @@
-const DiscordUtil = require("../../discord-bot-core").util;
-const Camo = require("camo");
+// @ts-ignore
 const Config = require("../config.json");
-const Dns = require("dns"); //for host resolution checking
-const Url = require("url"); //for url parsing
-const { promisify } = require("util");
-const FeedReadPromise = promisify(require("feed-read")); //for extracing new links from RSS feeds
-const DnsResolvePromise = promisify(Dns.resolve);
-const GetUrls = require("get-urls"); //for extracting urls from messages
 
-module.exports = class FeedData extends Camo.EmbeddedDocument {
+const { promisify } = require("util");
+const Camo = require("camo");
+const Core = require("../../discord-bot-core");
+const DiscordUtil = require("../../discord-bot-core").util;
+const GetUrls = require("get-urls");
+const Url = require("url");
+
+// @ts-ignore
+const readFeed = url => promisify(require("feed-read"))(url);
+const resolveDns = promisify(require("dns").resolve);
+
+module.exports = class FeedData extends Core.BaseEmbeddedData {
 	constructor() {
 		super();
 
-		this.feedID = String;
-		this.url = String;
-		this.channelID = String;
-		this.roleID = String;
-		this.cachedLinks = [String];
-		this.maxCacheSize = Number;
+		this.feedID = "";
+		this.url = "";
+		this.channelID = "";
+		this.roleID = "";
+		this.cachedLinks = [];
+		this.maxCacheSize = 100;
+
+		// @ts-ignore
+		this.schema({
+			feedID: String,
+			url: String,
+			channelID: String,
+			roleID: String,
+			cachedLinks: [String],
+			maxCacheSize: Number
+		});
 	}
 
 	cache(...elements) {
-		Array.prototype.push.apply(
-			this.cachedLinks,
-			elements
-				.map(el => normaliseUrl(el))
-				.filter(el => !this.cachedLinks.includes(el))
-		);
+		const newArticles = elements
+			.map(el => normaliseUrl(el))
+			.filter(el => this.cachedLinks.indexOf(el) === -1);
 
-		//seeing as new links come in at the end of the array, we need to remove the old links from the beginning
-		this.cachedLinks.splice(0, this.cachedLinks.length - this.maxCacheSize);
+		Array.prototype.push.apply(this.cachedLinks, newArticles);
+
+		this.cachedLinks.splice(0, this.cachedLinks.length - this.maxCacheSize); //seeing as new links come in at the end of the array, we need to remove the old links from the beginning
+
+		return elements.length > 0;
 	}
 
 	updatePastPostedLinks(guild) {
@@ -51,9 +65,9 @@ module.exports = class FeedData extends Camo.EmbeddedDocument {
 	}
 
 	fetchLatest(guild) {
-		const dnsPromise = DnsResolvePromise(Url.parse(this.url).host).then(() => this._doFetchRSS(guild));
+		const dnsPromise = resolveDns(Url.parse(this.url).host).then(() => this._doFetchRSS(guild));
 
-		dnsPromise.catch(err => DiscordUtil.dateError("Connection error: Can't resolve host", err.message || err));
+		dnsPromise.catch(err => DiscordUtil.dateDebugError("Connection error: Can't resolve host", err.message || err));
 
 		return dnsPromise;
 	}
@@ -64,7 +78,7 @@ module.exports = class FeedData extends Camo.EmbeddedDocument {
 	}
 
 	_doFetchRSS(guild) {
-		const feedPromise = FeedReadPromise(this.url).then(articles => this._processLatestArticle(guild, articles));
+		const feedPromise = readFeed(this.url).then(articles => this._processLatestArticle(guild, articles));
 
 		feedPromise.catch(err => DiscordUtil.dateDebugError([`Error reading feed ${this.url}`, err]));
 
@@ -73,31 +87,32 @@ module.exports = class FeedData extends Camo.EmbeddedDocument {
 
 	_processLatestArticle(guild, articles) {
 		if (articles.length === 0 || !articles[0].link)
-			return;
-	
+			return false;
+
 		const latest = normaliseUrl(articles[0].link);
-	
-		if (this.cachedLinks.includes(latest))
-			return;
-	
+
+		if (this.cachedLinks.indexOf(latest) > -1)
+			return false;
+
 		this.cache(latest);
-	
+
 		const channel = guild.channels.get(this.channelID),
 			role = guild.roles.get(this.roleID);
-	
+
 		channel.send((role || "") + formatPost(articles[0]))
 			.catch(err => DiscordUtil.dateDebugError(`Error posting in ${channel.id}: ${err.message || err}`));
+
+		return true;
 	}
 };
 
 function formatPost(article) {
 	let message = "";
-	if (article.title)
-		message += `\n**${article.title}**`;
-	if (article.content)
-		message += article.content.length > Config.charLimit ? "\nArticle content too long for a single Discord message!" : `\n${article.content}`;
-	if (article.link)
-		message += `\n\n${normaliseUrl(article.link)}`;
+
+	if (article.title) message += `\n**${article.title}**`;
+	if (article.content) message += article.content.length > Config.charLimit ? "\nArticle content too long for a single Discord message!" : `\n${article.content}`;
+	if (article.link) message += `\n\n${normaliseUrl(article.link)}`;
+
 	return message;
 }
 

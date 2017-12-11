@@ -1,3 +1,4 @@
+// @ts-nocheck
 const NewGuildData = require("./models/guild-data.js");
 const NewFeedData = require("./models/feed-data.js");
 const FileSystem = require("fs");

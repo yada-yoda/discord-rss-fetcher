@@ -5,19 +5,30 @@ module.exports = class GuildData extends Core.BaseGuildData {
 	constructor() {
 		super();
 
-		this.feeds = [FeedData];
+		this.feeds = [];
+
+		this.schema({
+			feeds: [FeedData]
+		});
 	}
 
 	cachePastPostedLinks(guild) {
 		return Promise.all(
-			this.feeds.map(feed => guild.channels.get(feed.channelID) ? feed.updatePastPostedLinks(guild) : Promise.resolve())
+			this.feeds
+				.filter(feed => feedIsActive(feed, guild))
+				.map(feed => feed.updatePastPostedLinks(guild))
 		);
 	}
 
 	checkFeeds(guild) {
 		return Promise.all(
-			this.feeds.map(feed => 
-				guild.channels.get(feed.channelID) ? feed.fetchLatest(guild) : Promise.resolve())
+			this.feeds
+				.filter(feed => feedIsActive(feed, guild))
+				.map(feed => feed.fetchLatest(guild))
 		);
 	}
 };
+
+function feedIsActive(feed, guild) {
+	return guild.channels.get(feed.channelID);
+}
