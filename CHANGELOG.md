@@ -1,13 +1,5 @@
 # Changelog
-## v3.2.0-b3
-### Fixed
-- Fixed some race condtions with the 3.2 update
-
-## v3.2.0-b2
-### Fixed
-- Fixed upgrader script not including channel ID in new database
-
-## v3.2.0-b1
+## v3.2.0
 ### Updated
 - Updated data storage to use a NeDB database rather than a json file
 - Updated feed checking interval to check one guild every 10 seconds (this may slow down the time it takes to post, but will improve performance)
