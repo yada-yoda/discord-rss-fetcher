@@ -17,7 +17,11 @@ module.exports = class Client extends Discord.Client {
 	 * @param {*} guildDataModel GuildData model to be used for app; must extend BaseGuildData
 	 */
 	constructor(token, commandsDir, guildDataModel) {
-		super();
+		super({
+			messageCacheMaxSize: 16,
+			messageCacheLifetime: 60,
+			messageSweepInterval: 480
+		});
 
 		this._token = token;
 		this.commandsDir = commandsDir;
