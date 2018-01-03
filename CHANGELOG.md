@@ -1,4 +1,8 @@
 # Changelog
+## v3.2.1
+### Fixed
+- Fixed memory leak due to unconfigured discord.js caching
+
 ## v3.2.0
 ### Updated
 - Updated data storage to use a NeDB database rather than a json file
