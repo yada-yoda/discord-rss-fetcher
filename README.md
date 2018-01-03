@@ -1,4 +1,4 @@
-# Discord rss bot
+# Discord RSS Bot
 
 <!--summary-->
 Posts the latest URLs from an RSS feed, optionally @mention-ing a role when posted
