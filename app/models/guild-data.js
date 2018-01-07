@@ -16,7 +16,7 @@ module.exports = class GuildData extends Core.BaseGuildData {
 		return Promise.all(
 			this.feeds
 				.filter(feed => feedIsActive(feed, guild))
-				.map(feed => feed.updatePastPostedLinks(guild))
+				.map(feed => feed.updatePastPostedLinks(guild).catch(err => null))
 		);
 	}
 
@@ -24,7 +24,7 @@ module.exports = class GuildData extends Core.BaseGuildData {
 		return Promise.all(
 			this.feeds
 				.filter(feed => feedIsActive(feed, guild))
-				.map(feed => feed.fetchLatest(guild))
+				.map(feed => feed.fetchLatest(guild).catch(err => null))
 		);
 	}
 };

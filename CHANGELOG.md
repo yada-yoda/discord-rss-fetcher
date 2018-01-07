@@ -1,4 +1,8 @@
 # Changelog
+## v3.2.2
+### Fixed
+- Fixed a couple of edge case errors
+
 ## v3.2.1
 ### Fixed
 - Fixed memory leak due to unconfigured discord.js caching
