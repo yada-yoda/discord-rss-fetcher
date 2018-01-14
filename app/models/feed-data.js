@@ -9,7 +9,7 @@ const GetUrls = require("get-urls");
 const Url = require("url");
 
 // @ts-ignore
-const readFeed = url => promisify(require("feed-read"))(url);
+const readFeed = url => promisify(require("rss-parser").parseURL)(url);
 const resolveDns = promisify(require("dns").resolve);
 
 module.exports = class FeedData extends Core.BaseEmbeddedData {
@@ -82,26 +82,26 @@ module.exports = class FeedData extends Core.BaseEmbeddedData {
 	}
 
 	_doFetchRSS(guild) {
-		const feedPromise = readFeed(this.url).then(articles => this._processLatestArticle(guild, articles));
+		const feedPromise = readFeed(this.url).then(parsed => this._processLatestArticle(guild, parsed.feed.entries));
 
 		feedPromise.catch(err => DiscordUtil.dateDebugError([`Error reading feed ${this.url}`, err]));
 
 		return feedPromise;
 	}
 
-	_processLatestArticle(guild, articles) {
-		if (articles.length === 0 || !articles[0].link)
+	_processLatestArticle(guild, entries) {
+		if (entries.length === 0 || !entries[0].link)
 			return false;
 
-		if (this._isCached(articles[0].link))
+		if (this._isCached(entries[0].link))
 			return false;
 
-		this.cache(articles[0].link);
+		this.cache(entries[0].link);
 
 		const channel = guild.channels.get(this.channelID),
 			role = guild.roles.get(this.roleID);
 
-		channel.send((role || "") + formatPost(articles[0]))
+		channel.send((role || "") + formatPost(entries[0]))
 			.catch(err => DiscordUtil.dateDebugError(`Error posting in ${channel.id}: ${err.message || err}`));
 
 		return true;

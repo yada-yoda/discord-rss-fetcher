@@ -1,9 +1,12 @@
-const Core = require("../../discord-bot-core");
-const GetUrls = require("get-urls");
-const FeedRead = require("feed-read");
-const FeedData = require("../models/feed-data.js");
+const { promisify } = require("util");
 const Config = require("../config.json");
+const Core = require("../../discord-bot-core");
+const FeedData = require("../models/feed-data.js");
+const GetUrls = require("get-urls");
 const ShortID = require("shortid");
+
+// @ts-ignore
+const readFeed = url => promisify(require("rss-parser").parseURL)(url);
 
 module.exports = new Core.Command({
 	name: "add-feed",
@@ -30,20 +33,19 @@ function invoke({ message, params, guildData, client }) {
 		});
 
 	return new Promise((resolve, reject) => {
-		FeedRead(feedUrl, err => {
-			if (err)
-				return reject(`Unable to add the feed due to the following error:\n${err.message}`);
-
-			Core.util.ask(client, message.channel, message.member, "Are you happy with this (yes/no)?\n" + feedData.toString())
-				.then(responseMessage => {
-					if (responseMessage.content.toLowerCase() === "yes") {
-						guildData.feeds.push(feedData);
-						guildData.cachePastPostedLinks(message.guild)
-							.then(() => resolve("Your new feed has been saved!"));
-					}
-					else
-						reject("Your feed has not been saved, please add it again with the correct details");
-				});
-		});
+		readFeed(feedUrl)
+			.then(() => {
+				Core.util.ask(client, message.channel, message.member, "Are you happy with this (yes/no)?\n" + feedData.toString())
+					.then(responseMessage => {
+						if (responseMessage.content.toLowerCase() === "yes") {
+							guildData.feeds.push(feedData);
+							guildData.cachePastPostedLinks(message.guild)
+								.then(() => resolve("Your new feed has been saved!"));
+						}
+						else
+							reject("Your feed has not been saved, please add it again with the correct details");
+					});
+			})
+			.catch(err => reject(`Unable to add the feed due to the following error:\n${err.message}`));
 	});
 }
