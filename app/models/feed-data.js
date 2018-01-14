@@ -36,8 +36,8 @@ module.exports = class FeedData extends Core.BaseEmbeddedData {
 
 	cache(...elements) {
 		const newArticles = elements
-			.map(el => normaliseUrl(el))
-			.filter(el => this.cachedLinks.indexOf(el) === -1);
+			.map(el => normaliseUrlForCache(el))
+			.filter(el => !this._isCached(el));
 
 		Array.prototype.push.apply(this.cachedLinks, newArticles);
 
@@ -77,6 +77,10 @@ module.exports = class FeedData extends Core.BaseEmbeddedData {
 		return `\`\`\`JavaScript\n ${JSON.stringify(this, (k, v) => !blacklist.find(x => x === k) ? v : undefined, "\t")} \`\`\``;
 	}
 
+	_isCached(url){
+		return this.cachedLinks.indexOf(normaliseUrlForCache(url)) > -1;
+	}
+
 	_doFetchRSS(guild) {
 		const feedPromise = readFeed(this.url).then(articles => this._processLatestArticle(guild, articles));
 
@@ -89,12 +93,10 @@ module.exports = class FeedData extends Core.BaseEmbeddedData {
 		if (articles.length === 0 || !articles[0].link)
 			return false;
 
-		const latest = normaliseUrl(articles[0].link);
-
-		if (this.cachedLinks.indexOf(latest) > -1)
+		if (this._isCached(articles[0].link))
 			return false;
 
-		this.cache(latest);
+		this.cache(articles[0].link);
 
 		const channel = guild.channels.get(this.channelID),
 			role = guild.roles.get(this.roleID);
@@ -111,22 +113,27 @@ function formatPost(article) {
 
 	if (article.title) message += `\n**${article.title}**`;
 	if (article.content) message += article.content.length > Config.charLimit ? "\nArticle content too long for a single Discord message!" : `\n${article.content}`;
-	if (article.link) message += `\n\n${normaliseUrl(article.link)}`;
+	if (article.link) message += `\n\n${normaliseUrlForDiscord(article.link)}`;
 
 	return message;
 }
 
-function normaliseUrl(url) {
-	url = url.replace("https://", "http://"); //hacky way to treat http and https the same
-
+function normaliseUrlForDiscord(url) {
 	const parsedUrl = Url.parse(url);
-	if (parsedUrl.host && parsedUrl.host.includes("youtube.com")) {
-		const videoIDParam = (parsedUrl.query || "").split("&").find(x => x.startsWith("v="));
-		if (videoIDParam) {
-			const videoID = videoIDParam.substring(videoIDParam.indexOf("=") + 1, videoIDParam.length);
-			url = "http://youtu.be/" + videoID;
-		}
-	}
+	if (parsedUrl.host && parsedUrl.host.includes("youtube.com"))
+		url = normaliseYouTubeUrl(url);
 
 	return url;
+}
+
+function normaliseYouTubeUrl(origUrl, parsedUrl) {
+	const videoIDParam = parsedUrl.query ? parsedUrl.query.split("&").find(x => x.startsWith("v=")) : null;
+	if (!videoIDParam)
+		return origUrl;
+	const videoID = videoIDParam.substring(videoIDParam.indexOf("=") + 1, videoIDParam.length);
+	return `http://youtu.be/${videoID}`
+}
+
+function normaliseUrlForCache(url){
+	return normaliseUrlForDiscord(url).replace(/^((https?:\/\/)?(www.)?)/, "");
 }
