@@ -1,4 +1,9 @@
 # Changelog
+## v3.3.0
+### Updated
+- Updated RSS parser to now use [rss-parser](https://www.npmjs.com/package/rss-parser) module to increase compatibility with feeds
+- Updated RSS entry caching to exclude 'www.' prefix to avoid certain mis-caches
+
 ## v3.2.2
 ### Fixed
 - Fixed a couple of edge case errors
