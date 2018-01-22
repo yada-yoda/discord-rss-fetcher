@@ -18,7 +18,8 @@ module.exports = class Client extends Discord.Client {
 	 */
 	constructor(token, commandsDir, guildDataModel) {
 		super({
-			messageCacheMaxSize: 16
+			messageCacheMaxSize: 16,
+			disabledEvents: InternalConfig.disabledEvents
 		});
 
 		this._token = token;
