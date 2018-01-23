@@ -1,4 +1,11 @@
 # Changelog
+## v3.4.0-b1
+### Added
+- Added automatic daily restart
+
+### Updated
+- Disabled a few unused websocket events
+
 ## v3.3.0
 ### Updated
 - Updated RSS parser to now use [rss-parser](https://www.npmjs.com/package/rss-parser) module to increase compatibility with feeds
