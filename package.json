@@ -3,9 +3,10 @@
 	"main": "app/index.js",
 	"scripts": {
 		"postinstall": "cd ./discord-bot-core && npm install",
-		"start": "node app/index.js --name=rss-feed"
+		"start": "node discord-bot-core/monitor.js ./app/index.js --name=rss-feed"
 	},
 	"dependencies": {
+		"@types/node": "9.3.0",
 		"camo": "git+https://github.com/scottwrobinson/camo.git",
 		"discord.js": "11.2.0",
 		"get-urls": "7.0.0",

@@ -1,5 +1,7 @@
 {
 	"dbCompactionSchedule": "0 0 0,3,6,9 * * *",
+	"restartSchedule": "0 0 0 * * *",
+	"restartTimeout": 5000,
 	"website": "https://benji7425.github.io",
 	"discordInvite": "https://discord.gg/SSkbwSJ",
 	"debugIgnores": [
