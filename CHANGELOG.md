@@ -1,10 +1,14 @@
 # Changelog
-## v3.4.0-b1
+## v3.4.0
 ### Added
 - Added automatic daily restart
 
 ### Updated
 - Disabled a few unused websocket events
+- Update database compaction to be more frequent
+
+### Fixed
+- Fixed YouTube feeds not updating
 
 ## v3.3.0
 ### Updated

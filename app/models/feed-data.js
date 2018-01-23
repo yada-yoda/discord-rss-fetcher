@@ -121,7 +121,7 @@ function formatPost(article) {
 function normaliseUrlForDiscord(url) {
 	const parsedUrl = Url.parse(url);
 	if (parsedUrl.host && parsedUrl.host.includes("youtube.com"))
-		url = normaliseYouTubeUrl(url);
+		url = normaliseYouTubeUrl(url, parsedUrl);
 
 	return url;
 }
