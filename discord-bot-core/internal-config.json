@@ -1,5 +1,5 @@
 {
-	"dbCompactionSchedule": "0 0 0,3,6,9 * * *",
+	"dbCompactionSchedule": "0 * * * * *",
 	"restartSchedule": "0 0 0 * * *",
 	"restartTimeout": 5000,
 	"website": "https://benji7425.github.io",
