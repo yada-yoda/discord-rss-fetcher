@@ -7,7 +7,7 @@ const HandleGuildMessage = require("./handle-guild-message.js");
 const InternalConfig = require("./internal-config.json");
 const RequireAll = require("require-all");
 
-let neDB;
+let database;
 
 module.exports = class Client extends Discord.Client {
     /**
@@ -74,9 +74,16 @@ module.exports = class Client extends Discord.Client {
     }
 
     bootstrap() {
-        Camo.connect("nedb://guilds-data").then(db => {
-            neDB = db;
-            new CronJob(InternalConfig.dbCompactionSchedule, compactCollections, null, true);
+        Camo.connect(InternalConfig.dbConnectionString).then(db => {
+            database = db;
+
+            const dbProtocol = InternalConfig.dbConnectionString.match(/^(.+):\/\//)[1];
+            CoreUtil.dateLog(`Database protocol: ${dbProtocol}`);
+
+            if (dbProtocol === "nedb") {
+                CoreUtil.dateLog(`Seting up NeDB collection compaction cron job; schedule: ${InternalConfig.neDBCompactionSchedule}`);
+                new CronJob(InternalConfig.neDBCompactionSchedule, compactNeDBCollections, null, true);
+            }
 
             this.emit("beforeLogin");
             this.login(this._token);
@@ -92,11 +99,11 @@ module.exports = class Client extends Discord.Client {
     }
 };
 
-function compactCollections() {
+function compactNeDBCollections() {
     /*I realise it is a bit of a cheat to just access _collections in this manner, but in the absence of 
   	  camo actually having any kind of solution for this it's the easiest method I could come up with.
 	  Maybe at some point in future I should fork camo and add this feature. The compaction function is NeDB only
 	  and camo is designed to work with both NeDB and MongoDB, which is presumably why it doesn't alraedy exist */
-    for (let collectionName of Object.keys(neDB._collections))
-        neDB._collections[collectionName].persistence.compactDatafile();
+    for (let collectionName of Object.keys(database._collections))
+        database._collections[collectionName].persistence.compactDatafile();
 }
