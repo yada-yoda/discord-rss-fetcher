@@ -1,4 +1,8 @@
 # Changelog
+## v3.5.0-b1
+### Added
+- MongoDB support
+
 ## v3.4.0
 ### Added
 - Added automatic daily restart
