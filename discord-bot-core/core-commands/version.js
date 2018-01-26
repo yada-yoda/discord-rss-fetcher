@@ -1,4 +1,4 @@
-const Command = require("../Command.js");
+const Command = require("../command.js");
 const ParentPackageJson = require("../../package.json");
 
 module.exports = new Command({

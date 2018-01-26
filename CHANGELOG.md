@@ -1,4 +1,8 @@
 # Changelog
+## v3.5.0-b2
+### Fixed
+- Fixed a couple of script errors
+
 ## v3.5.0-b1
 ### Added
 - MongoDB support

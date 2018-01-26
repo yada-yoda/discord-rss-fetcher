@@ -1,6 +1,6 @@
 const { fork } = require("child_process");
 const CronJob = require("cron").CronJob;
-const DiscordUtil = require("./Util.js");
+const DiscordUtil = require("./util.js");
 // @ts-ignore
 const InternalConfig = require("./internal-config.json");
 

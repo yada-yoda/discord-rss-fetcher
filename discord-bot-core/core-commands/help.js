@@ -1,4 +1,4 @@
-const Command = require("../Command.js");
+const Command = require("../command.js");
 const Discord = require("discord.js");
 const InternalConfig = require("../internal-config.json");
 const ParentPackageJson = require("../../package.json");
