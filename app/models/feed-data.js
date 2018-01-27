@@ -2,7 +2,6 @@
 const Config = require("../config.json");
 
 const { promisify } = require("util");
-const Camo = require("camo");
 const Core = require("../../core");
 const DiscordUtil = require("../../core").util;
 const GetUrls = require("get-urls");
