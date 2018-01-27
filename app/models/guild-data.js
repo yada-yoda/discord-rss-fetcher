@@ -1,4 +1,4 @@
-const Core = require("../../discord-bot-core");
+const Core = require("../../core");
 const FeedData = require("./feed-data.js");
 
 module.exports = class GuildData extends Core.BaseGuildData {

@@ -1,6 +1,6 @@
 const RequireAll = require("require-all");
 
-const internalCommands = RequireAll(__dirname + "/core-commands");
+const internalCommands = RequireAll(__dirname + "/commands");
 
 function handleGuildMessage(client, message, commands) {
     if (isCommand(message))

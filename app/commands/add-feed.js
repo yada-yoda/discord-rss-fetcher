@@ -1,6 +1,6 @@
 const { promisify } = require("util");
 const Config = require("../config.json");
-const Core = require("../../discord-bot-core");
+const Core = require("../../core");
 const FeedData = require("../models/feed-data.js");
 const GetUrls = require("get-urls");
 const ShortID = require("shortid");

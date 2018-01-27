@@ -1,4 +1,4 @@
-const Core = require("../discord-bot-core");
+const Core = require("../core");
 const GetUrls = require("get-urls");
 const GuildData = require("./models/guild-data.js");
 // @ts-ignore

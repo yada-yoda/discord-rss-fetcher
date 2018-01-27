@@ -2,7 +2,7 @@
 	"version": "3.5.0-b3",
 	"main": "app/index.js",
 	"scripts": {
-		"postinstall": "cd ./discord-bot-core && npm install",
+		"postinstall": "cd ./core && npm install",
 		"start": "node ./app/index.js --name=rss-feed"
 	},
 	"dependencies": {

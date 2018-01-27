@@ -10,16 +10,16 @@
     "require-all": "2.2.0",
     "simple-file-writer": "2.0.0"
   },
-  "name": "discord-bot-core",
+  "name": "core",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/benji7425/discord-bot-core.git"
+    "url": "git+https://github.com/benji7425/core.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/benji7425/discord-bot-core/issues"
+    "url": "https://github.com/benji7425/core/issues"
   },
-  "homepage": "https://github.com/benji7425/discord-bot-core#readme",
+  "homepage": "https://github.com/benji7425/core#readme",
   "description": "Core code shared amongst my Discord bots"
 }
