@@ -1,9 +1,9 @@
 {
-	"version": "3.5.0-b2",
+	"version": "3.5.0-b3",
 	"main": "app/index.js",
 	"scripts": {
 		"postinstall": "cd ./discord-bot-core && npm install",
-		"start": "node discord-bot-core/monitor.js ./app/index.js --name=rss-feed"
+		"start": "node ./app/index.js --name=rss-feed"
 	},
 	"dependencies": {
 		"@types/node": "9.3.0",

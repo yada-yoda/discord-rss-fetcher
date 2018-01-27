@@ -1,4 +1,15 @@
 # Changelog
+## v3.5.0-b3
+### Added
+- Reset command to clear all data for a guild
+
+### Updated
+- Updated MongoDB version to increase compatibility
+- Removed automatic daily restart (I think it shouldn't be needed now that MongoDB support is working)
+
+### Fixed
+- Guild data being deleted on a Discord outage
+
 ## v3.5.0-b2
 ### Fixed
 - Fixed a couple of script errors
