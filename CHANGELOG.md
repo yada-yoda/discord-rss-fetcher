@@ -1,4 +1,11 @@
 # Changelog
+## v3.5.1
+### Fixed
+- Fixed reset command not working
+
+### Updated
+- Removed deletion of data for removed guilds on startup, as Discord outages can wrongly report the bot as being removed
+
 ## v3.5.0
 ### Added
 - MongoDB support
