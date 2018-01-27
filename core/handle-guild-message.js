@@ -26,8 +26,9 @@ function handleGuildCommand(client, message, commands, guildData) {
     else if (isMemberAdmin || !command.admin)
         command.invoke({ message, params, guildData, client, commands, isMemberAdmin })
             .then(response => {
-                guildData.save();
-                if (response) message.reply(response);
+                guildData.save()
+                    .then(() => response && message.reply(response))
+                    .catch(() => message.reply("Error saving"));
             })
             .catch(err => err && message.reply(err));
 }

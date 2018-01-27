@@ -38,8 +38,6 @@ module.exports = class Client extends Discord.Client {
     _onReady() {
         this.user.setGame(InternalConfig.website.replace(/^https?:\/\//, ""));
         CoreUtil.dateLog(`Registered bot ${this.user.username}`);
-
-        this.removeDeletedGuilds();
     }
 
     _onMessage(message) {
@@ -80,14 +78,6 @@ module.exports = class Client extends Discord.Client {
 
             this.emit("beforeLogin");
             this.login(this._token);
-        });
-    }
-
-    removeDeletedGuilds() {
-        this.guildDataModel.find().then(guildDatas => {
-            for (let guildData of guildDatas)
-                if (!this.guilds.get(guildData.guildID))
-                    guildData.delete();
         });
     }
 };
