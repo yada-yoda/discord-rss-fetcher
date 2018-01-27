@@ -11,17 +11,17 @@ module.exports = new Command({
     invoke
 });
 
-function invoke({ commands, isMemberAdmin }) {
-    return Promise.resolve(createHelpEmbed(ParentPackageJson.name, commands, isMemberAdmin));
+function invoke({ commands, isMemberAdmin, client }) {
+    return Promise.resolve(createHelpEmbed(ParentPackageJson.name, commands, isMemberAdmin, client.user.username));
 }
 
-function createHelpEmbed(name, commands, userIsAdmin) {
+function createHelpEmbed(name, commands, userIsAdmin, username) {
     const commandsArr = Object.keys(commands).map(x => commands[x]).filter(x => userIsAdmin || !x.admin);
 
     const embed = new Discord.RichEmbed().setTitle(`__${(ParentPackageJson.name + "").replace("discord-bot-", "")} help__`);
 
     commandsArr.forEach(command => {
-        embed.addField(command.name, `${command.description}\n**Usage:** *${name} ${command.syntax}*${userIsAdmin && command.admin ? "\n***Admin only***" : ""}`);
+        embed.addField(command.name, `${command.description}\n**Usage:** *@${username} ${command.syntax}*${userIsAdmin && command.admin ? "\n***Admin only***" : ""}`);
     });
 
     embed.addField("__Need more help?__", `[Visit my website](${InternalConfig.website}) or [Join my Discord](${InternalConfig.discordInvite})`, true);
