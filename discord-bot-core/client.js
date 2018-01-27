@@ -75,7 +75,7 @@ module.exports = class Client extends Discord.Client {
 
             if (dbProtocol === "nedb") {
                 CoreUtil.dateLog(`Seting up NeDB collection compaction cron job; schedule: ${InternalConfig.neDBCompactionSchedule}`);
-                new CronJob(InternalConfig.neDBCompactionSchedule, compactNeDBCollections, null, true);
+                new CronJob(InternalConfig.neDBCompactionSchedule, () => database.compactCollectionFiles(), null, true);
             }
 
             this.emit("beforeLogin");
@@ -91,12 +91,3 @@ module.exports = class Client extends Discord.Client {
         });
     }
 };
-
-function compactNeDBCollections() {
-    /*I realise it is a bit of a cheat to just access _collections in this manner, but in the absence of 
-  	  camo actually having any kind of solution for this it's the easiest method I could come up with.
-	  Maybe at some point in future I should fork camo and add this feature. The compaction function is NeDB only
-	  and camo is designed to work with both NeDB and MongoDB, which is presumably why it doesn't alraedy exist */
-    for (let collectionName of Object.keys(database._collections))
-        database._collections[collectionName].persistence.compactDatafile();
-}
