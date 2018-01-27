@@ -7,7 +7,6 @@
 	},
 	"dependencies": {
 		"@types/node": "9.3.0",
-		"camo": "git+https://github.com/scottwrobinson/camo.git",
 		"discord.js": "11.2.0",
 		"eslint": "4.16.0",
 		"get-urls": "7.0.0",
