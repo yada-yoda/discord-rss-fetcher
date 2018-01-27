@@ -1,6 +1,6 @@
 {
     "dbConnectionString": "nedb://guilds-data",
-    "neDBCompactionSchedule": "0 * * * * *",
+    "neDBCompactionSchedule": "0 0 * * * *",
     "website": "https://benji7425.github.io",
     "discordInvite": "https://discord.gg/SSkbwSJ",
     "debugIgnores": [
