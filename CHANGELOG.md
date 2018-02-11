@@ -1,4 +1,12 @@
 # Changelog
+## v3.5.2
+### Added
+- Added bot name to version command
+- Added stats command
+
+### Fixed
+- Fixed reset command not being admin only
+
 ## v3.5.1
 ### Fixed
 - Fixed reset command not working
