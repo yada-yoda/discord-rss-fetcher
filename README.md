@@ -18,7 +18,8 @@ Posts the latest URLs from an RSS feed, optionally @mention-ing a role when post
 ## Invite
 
 By inviting this bot to your server you agree to the [terms and conditions](#privacy-statement) laid out in the privacy section of this document.  
-If you agree, invite to your server with [this link](https://discordapp.com/oauth2/authorize?client_id=343909688045469698&scope=bot&permissions=0x00014c00).
+~~If you agree, invite to your server with this link~~.
+*Temporarily unavailable due to scaling issues and the large amount of attention recently.*
 
 ## Setup
 
