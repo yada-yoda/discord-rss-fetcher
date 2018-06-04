@@ -111,7 +111,7 @@ function formatPost(article) {
     let message = "";
 
     if (article.title) message += `\n**${article.title}**`;
-    if (article.content) message += article.content.length > Config.charLimit ? "\nArticle content too long for a single Discord message!" : `\n${article.content}`;
+    if (article.content) message += article.content.length > Config.charLimit ? `\n${article.content.substr(0, Config.charLimit)}...` : `\n${article.content}`;
     if (article.link) message += `\n\n${normaliseUrlForDiscord(article.link)}`;
 
     return message;
