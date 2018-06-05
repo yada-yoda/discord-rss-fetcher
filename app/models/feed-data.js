@@ -109,10 +109,20 @@ module.exports = class FeedData extends Core.BaseEmbeddedData {
 
 function formatPost(article) {
     let message = "";
+    let link = "";
+    let title = "";
 
-    if (article.title) message += `\n**${article.title}**`;
-    if (article.content) message += article.content.length > Config.charLimit ? `\n${article.content.substr(0, Config.charLimit)}...` : `\n${article.content}`;
-    if (article.link) message += `\n\n${normaliseUrlForDiscord(article.link)}`;
+    if (article.title) title = `\n**${article.title}**`;
+    if (article.link) link = `\n\n${normaliseUrlForDiscord(article.link)}`;
+
+    message += title;
+
+    if (article.content) {
+        let maxLen = Config.charLimit - title.length - link.length - 4;
+        message += article.content.length > maxLen ? `\n${article.content.substr(0, maxLen)}...` : `\n${article.content}`;
+    }
+
+    message += link;
 
     return message;
 }
