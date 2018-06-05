@@ -54,8 +54,8 @@ module.exports = class FeedData extends Core.BaseEmbeddedData {
         return new Promise((resolve, reject) => {
             channel.fetchMessages({ limit: 100 })
                 .then(messages => {
-					/* we want to push the links in oldest first, but discord.js returns messages newest first, so we need to reverse them
-					 * discord.js returns a map, and maps don't have .reverse methods, hence needing to spread the elements into an array first */
+          /* we want to push the links in oldest first, but discord.js returns messages newest first, so we need to reverse them
+           * discord.js returns a map, and maps don't have .reverse methods, hence needing to spread the elements into an array first */
                     [...messages.values()].reverse().forEach(m => this.cache(...GetUrls(m.content)));
                     resolve();
                 })
