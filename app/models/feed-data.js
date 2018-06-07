@@ -6,6 +6,7 @@ const Core = require("../../core");
 const DiscordUtil = require("../../core").util;
 const GetUrls = require("get-urls");
 const Url = require("url");
+const HtmlToText = require("html-to-text");
 
 // @ts-ignore
 const readFeed = url => promisify(require("rss-parser").parseURL)(url);
@@ -119,7 +120,8 @@ function formatPost(article) {
 
     if (article.content) {
         let maxLen = Config.charLimit - title.length - link.length - 4;
-        message += article.content.length > maxLen ? `\n${article.content.substr(0, maxLen)}...` : `\n${article.content}`;
+        let sanitized = HtmlToText.fromString(article.content);
+        message += sanitized.length > maxLen ? `\n${sanitized.substr(0, maxLen)}...` : `\n${sanitized}`;
     }
 
     message += link;
