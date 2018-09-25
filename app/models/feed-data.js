@@ -65,7 +65,7 @@ module.exports = class FeedData extends Core.BaseEmbeddedData {
     }
 
     fetchLatest(guild) {
-        const dnsPromise = resolveDns(Url.parse(this.url).host).then(() => this._doFetchRSS(guild));
+        const dnsPromise = resolveDns(Url.parse(this.url).hostname).then(() => this._doFetchRSS(guild));
 
         dnsPromise.catch(err => DiscordUtil.dateDebugError("Connection error: Can't resolve host", err.message || err));
 
