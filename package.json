@@ -4,7 +4,9 @@
   "description": "",
   "main": "dist/index.js",
   "dependencies": {
-    "disharmony": "^0.6.3"
+    "disharmony": "^0.6.3",
+    "@types/xml2js": "^0.4.4",
+    "rss-parser": "^3.7.0"
   },
   "devDependencies": {
     "@types/node": "^11.13.7",
