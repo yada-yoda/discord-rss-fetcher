@@ -4,9 +4,11 @@
   "description": "",
   "main": "dist/index.js",
   "dependencies": {
-    "disharmony": "^0.6.3",
+    "@types/shortid": "0.0.29",
     "@types/xml2js": "^0.4.4",
-    "rss-parser": "^3.7.0"
+    "disharmony": "^0.6.3",
+    "rss-parser": "^3.7.0",
+    "shortid": "^2.2.14"
   },
   "devDependencies": {
     "@types/node": "^11.13.7",
