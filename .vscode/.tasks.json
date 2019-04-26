@@ -5,7 +5,7 @@
     "tasks": [
         {
             "label": "build",
-            "command": "./node_modules/.bin/tsc",
+            "command": "npm run build",
             "problemMatcher": "$tsc",
             "group": {
                 "kind": "build",
