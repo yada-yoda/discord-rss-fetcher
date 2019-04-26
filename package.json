@@ -11,6 +11,7 @@
     "typescript": "^3.4.5"
   },
   "scripts": {
+    "build": "./node_modules/.bin/tsc --sourceMap",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
