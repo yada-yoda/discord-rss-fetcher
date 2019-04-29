@@ -8,7 +8,7 @@ export default interface RssFetcher
 }
 
 let rssReader: RssFetcher
-export function getRssReader(): RssFetcher
+export function getRssFetcher(): RssFetcher
 {
     if (!rssReader)
         rssReader = new RssParser()

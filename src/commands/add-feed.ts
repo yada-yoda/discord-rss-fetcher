@@ -3,7 +3,7 @@ import { Command, PermissionLevel, IClient } from "disharmony";
 import * as Url from "url"
 import * as ShortId from "shortid"
 import Feed from "../models/feed";
-import { getRssReader } from "../service/rss-reader/abstract/rss-fetcher";
+import { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher";
 
 async function invoke(params: string[], message: Message, client: IClient)
 {
@@ -41,7 +41,7 @@ async function invoke(params: string[], message: Message, client: IClient)
         {
             message.reply("Please wait while I validate the RSS feed")
 
-            if (await getRssReader().validateFeed(url))
+            if (await getRssFetcher().validateFeed(url))
             {
                 message.guild.feeds.push(newFeed)
                 commandResponse = "Your new feed has been saved!"
