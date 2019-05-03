@@ -19,13 +19,16 @@ class FeedMonitor extends WorkerClient
             {
                 const guild = new Guild(djsGuild)
                 await guild.loadDocument()
-                await this.fetchAndProcessAllGuildFeeds(guild)
-                await guild.save()
+                const hasPostedArticles = await this.fetchAndProcessAllGuildFeeds(guild)
+
+                if (hasPostedArticles)
+                    await guild.save()
             }
     }
 
-    private async fetchAndProcessAllGuildFeeds(guild: Guild)
+    private async fetchAndProcessAllGuildFeeds(guild: Guild): Promise<boolean>
     {
+        let hasPostedArticles = false
         for (let feed of guild.feeds)
         {
             try
@@ -48,12 +51,14 @@ class FeedMonitor extends WorkerClient
                 const channel = guild.channels.get(feed.channelId) as TextChannel
 
                 await ArticlePoster.postArticle(channel, article)
+                hasPostedArticles = true
             }
             catch (e)
             {
                 Logger.debugLog(`Error fetching feed ${feed.url} in guild ${guild.id}\n${e.message || e}`, true)
             }
         }
+        return hasPostedArticles
     }
 }
 
