@@ -8,13 +8,13 @@ const articleFormattingShort = "\n{{article}}"
 const articleFormattingLong = "\n{{article}}..."
 const articleCharacterLimit = discordCharacterLimit - articleFormattingLong.replace("{{article}}", "").length
 
-async function postArticle(channel: TextChannel, article: RssArticle, role?: Role)
+async function postArticle(channel: TextChannel, article: RssArticle, roleId?: string)
 {
     const message = formatPost(article)
 
     try
     {
-        await channel.send((role || "") + message)
+        await channel.send((roleId ? `<@&${roleId}>` : "") + message)
     }
     catch (e)
     {

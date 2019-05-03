@@ -50,7 +50,7 @@ class FeedMonitor extends WorkerClient
 
                 const channel = guild.channels.get(feed.channelId) as TextChannel
 
-                await ArticlePoster.postArticle(channel, article)
+                await ArticlePoster.postArticle(channel, article, feed.roleId)
                 hasPostedArticles = true
             }
             catch (e)
