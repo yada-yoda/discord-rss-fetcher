@@ -18,6 +18,7 @@ export class RssParser implements RssFetcher
     }
 
     constructor(
-        private parser = new Parser()
+        //@ts-ignore
+        private parser = new Parser({ timeout: 5000 })
     ) { }
 }
