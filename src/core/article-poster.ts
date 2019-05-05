@@ -4,8 +4,9 @@ import { TextChannel, Role } from "discord.js";
 import { Logger } from "disharmony";
 
 const discordCharacterLimit = 2000
-const articleFormatting = "\n{{article}}..."
-const articleCharacterLimit = discordCharacterLimit - articleFormatting.replace("{{article}}", "").length
+const articleFormattingShort = "\n{{article}}"
+const articleFormattingLong = "\n{{article}}..."
+const articleCharacterLimit = discordCharacterLimit - articleFormattingLong.replace("{{article}}", "").length
 
 async function postArticle(channel: TextChannel, article: RssArticle, role?: Role)
 {
@@ -33,10 +34,13 @@ function formatPost(article: RssArticle)
         const contentCharacterLimit = articleCharacterLimit - title.length - link.length
         let articleString = HtmlToText.fromString(article.content)
 
-        articleString = articleString.length > contentCharacterLimit ?
-            articleString.substr(0, contentCharacterLimit) : articleString
-        
-        message += articleFormatting.replace("{{article}}", articleString)
+        articleString =
+            articleString.length > contentCharacterLimit ?
+                articleString.substr(0, contentCharacterLimit) : articleString
+
+        message +=
+            (articleString.length > contentCharacterLimit ? articleFormattingLong : articleFormattingShort)
+                .replace("{{article}}", articleString)
     }
     message += link
 

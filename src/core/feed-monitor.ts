@@ -1,5 +1,4 @@
-import RssArticle from "../service/rss-reader/abstract/rss-article";
-import { ClientWorker, Logger } from "disharmony";
+import { Logger, WorkerClient } from "disharmony";
 import Guild from "../models/guild";
 import RssFetcher, { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher";
 import { promisify } from "util"
@@ -8,16 +7,7 @@ import * as Url from "url"
 import ArticlePoster from "./article-poster"
 import { TextChannel } from "discord.js";
 
-export class ChannelArticle
-{
-    constructor(
-        public article: RssArticle,
-        public channelId: string,
-        public roleId: string
-    ) { }
-}
-
-export default class FeedMonitor extends ClientWorker
+class FeedMonitor extends WorkerClient
 {
     private rssFetcher: RssFetcher = getRssFetcher()
 
@@ -66,3 +56,7 @@ export default class FeedMonitor extends ClientWorker
         }
     }
 }
+
+const token = process.argv[2], dbConnectionString = process.argv[3]
+const feedMonitor = new FeedMonitor(token, dbConnectionString)
+feedMonitor.connect().then(() => feedMonitor.beginMonitoring());
