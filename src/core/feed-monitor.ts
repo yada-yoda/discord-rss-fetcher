@@ -1,4 +1,4 @@
-import { Logger, ILightClient, LightClient } from "disharmony";
+import { Logger, LightClient } from "disharmony";
 import Guild from "../models/guild";
 import RssFetcher, { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher";
 import { promisify } from "util"
@@ -6,6 +6,7 @@ import * as Dns from "dns"
 import * as Url from "url"
 import ArticlePoster from "./article-poster"
 import { TextChannel } from "discord.js";
+import Normalise from "./normaliser"
 
 export default class FeedMonitor
 {
@@ -46,7 +47,7 @@ export default class FeedMonitor
                 if (!link || feed.isLinkInHistory(link))
                     continue
 
-                feed.pushHistory(link)
+                feed.pushHistory(Normalise.forCache(link))
 
                 const channel = guild.channels.get(feed.channelId) as TextChannel
 
