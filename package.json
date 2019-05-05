@@ -8,6 +8,7 @@
     "@types/shortid": "0.0.29",
     "@types/xml2js": "^0.4.4",
     "disharmony": "^0.7.0",
+    "get-urls": "^9.1.0",
     "html-to-text": "^5.1.1",
     "rss-parser": "^3.7.0",
     "shortid": "^2.2.14",

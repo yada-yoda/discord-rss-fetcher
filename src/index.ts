@@ -4,12 +4,14 @@ import commands from "./commands"
 import { loadCredentials } from "disharmony"
 import * as Cluster from "cluster"
 import { resolve } from "path";
+import handleMessage from "./core/message-handler";
 
 const { token, dbConnectionString, isLocalDb } = loadCredentials()
 
 if (Cluster.isMaster)
 {
     const client = new Client("RSS Poster", commands, Message, dbConnectionString)
+    client.onMessage.sub(handleMessage)
     client.initialize(token)
         .then(() => startFeedMonitor(client, !isLocalDb))
 }
