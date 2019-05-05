@@ -1,9 +1,13 @@
 import Normalise from "../core/normaliser";
+import { NotifyPropertyChanged } from "disharmony";
+import { SimpleEventDispatcher } from "strongly-typed-events"
 
-export default class Feed
+export default class Feed implements NotifyPropertyChanged
 {
     private maxHistoryCount = 10
     private history: string[] = []
+
+    public onPropertyChanged = new SimpleEventDispatcher<string>()
 
     public isLinkInHistory(link: string): boolean
     {
@@ -15,6 +19,18 @@ export default class Feed
         const newLinks = links.map(x => Normalise.forCache(x)).filter(x => !this.isLinkInHistory(x))
         Array.prototype.push.apply(this.history, newLinks)
         this.history.splice(0, this.history.length - this.maxHistoryCount)
+        this.onPropertyChanged.dispatch("history")
+    }
+
+    public toRecord()
+    {
+        return {
+            id: this.id,
+            url: this.url,
+            channelId: this.channelId,
+            roleId: this.roleId,
+            history: this.history,
+        }
     }
 
     public static fromData(data: any)

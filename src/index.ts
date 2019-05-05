@@ -1,7 +1,9 @@
 import { Client } from "disharmony"
 import Message from "./models/message";
 import commands from "./commands"
+import { loadCredentials } from "disharmony"
 
-let client = new Client("RSS Poster", commands, Message)
+const { token, dbConnectionString } = loadCredentials()
 
-client.initialize(require("fs").readFileSync("./token", "utf8"))
+const client = new Client("RSS Poster", commands, Message, dbConnectionString)
+client.initialize(token)
