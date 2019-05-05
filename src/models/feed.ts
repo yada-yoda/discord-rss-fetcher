@@ -37,7 +37,11 @@ export default class Feed extends SubDocument implements NotifyPropertyChanged
 
     public loadRecord(record: any)
     {
-        [this.record, this.url, this.channelId, this.roleId, this.history] = record
+        this.id = record.id
+        this.url = record.url
+        this.channelId = record.channelId
+        this.roleId = record.roleId
+        this.history = record.history
     }
 
     public static create(id: string, url: string, channelId: string, roleId?: string): Feed
@@ -49,7 +53,7 @@ export default class Feed extends SubDocument implements NotifyPropertyChanged
 
         if (roleId)
             feed.roleId = roleId
-        
+
         return feed
     }
 }
