@@ -1,4 +1,4 @@
-import { Logger, WorkerClient } from "disharmony";
+import { Logger, ILightClient, LightClient } from "disharmony";
 import Guild from "../models/guild";
 import RssFetcher, { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher";
 import { promisify } from "util"
@@ -7,7 +7,7 @@ import * as Url from "url"
 import ArticlePoster from "./article-poster"
 import { TextChannel } from "discord.js";
 
-class FeedMonitor extends WorkerClient
+export default class FeedMonitor
 {
     private rssFetcher: RssFetcher = getRssFetcher()
 
@@ -60,8 +60,17 @@ class FeedMonitor extends WorkerClient
         }
         return hasPostedArticles
     }
+
+    constructor(
+        private client: LightClient
+    )
+    { }
 }
 
-const token = process.argv[2], dbConnectionString = process.argv[3]
-const feedMonitor = new FeedMonitor(token, dbConnectionString)
-feedMonitor.connect().then(() => feedMonitor.beginMonitoring());
+if (!module.parent)
+{
+    const token = process.argv[2], dbConnectionString = process.argv[3]
+    const client = new LightClient(dbConnectionString)
+    const feedMonitor = new FeedMonitor(client)
+    client.initialize(token).then(() => feedMonitor.beginMonitoring());
+}
