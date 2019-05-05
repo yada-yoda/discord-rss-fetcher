@@ -1,9 +1,15 @@
 import Normalise from "../core/normaliser";
+import { NotifyPropertyChanged, SubDocument } from "disharmony";
 
-export default class Feed
+export default class Feed extends SubDocument implements NotifyPropertyChanged
 {
     private maxHistoryCount = 10
     private history: string[] = []
+
+    public id: string
+    public url: string
+    public channelId: string
+    public roleId: string
 
     public isLinkInHistory(link: string): boolean
     {
@@ -15,19 +21,35 @@ export default class Feed
         const newLinks = links.map(x => Normalise.forCache(x)).filter(x => !this.isLinkInHistory(x))
         Array.prototype.push.apply(this.history, newLinks)
         this.history.splice(0, this.history.length - this.maxHistoryCount)
+        this.onPropertyChanged.dispatch("history")
     }
 
-    public static fromData(data: any)
+    public toRecord()
     {
-        const feed = new Feed(data.id, data.url, data.channelId, data.roleId)
-        feed.history = data.history || []
+        return {
+            id: this.id,
+            url: this.url,
+            channelId: this.channelId,
+            roleId: this.roleId,
+            history: this.history,
+        }
+    }
+
+    public loadRecord(record: any)
+    {
+        [this.record, this.url, this.channelId, this.roleId, this.history] = record
+    }
+
+    public static create(id: string, url: string, channelId: string, roleId?: string): Feed
+    {
+        const feed = new Feed()
+        feed.id = id
+        feed.url = url
+        feed.channelId = channelId
+
+        if (roleId)
+            feed.roleId = roleId
+        
         return feed
     }
-
-    constructor(
-        public id: string,
-        public url: string,
-        public channelId: string,
-        public roleId?: string
-    ) { }
 }

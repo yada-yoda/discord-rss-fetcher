@@ -8,7 +8,8 @@
     "@types/xml2js": "^0.4.4",
     "disharmony": "^0.6.3",
     "rss-parser": "^3.7.0",
-    "shortid": "^2.2.14"
+    "shortid": "^2.2.14",
+    "strongly-typed-events": "^1.4.10"
   },
   "devDependencies": {
     "@types/node": "^11.13.7",

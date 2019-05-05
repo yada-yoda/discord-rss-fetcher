@@ -7,15 +7,7 @@ export default class Guild extends BotGuild
     {
         if (!this.record.feeds)
             this.record.feeds = []
-        return new Proxy(this.record.feeds, {
-            get: (target, prop) =>
-            {
-                if (typeof prop === "string" && !isNaN(Number(prop)))
-                    target[prop] = Feed.fromData(target[prop])
-                return target[prop]
-            },
-            set: (target, prop, value) => target[prop] = value
-        })
+        return Feed.getArrayProxy(this.record.feeds, this, "feeds", Feed)
     }
     public set feeds(value: Feed[]) { this.record.feeds = value }
 
