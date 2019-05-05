@@ -28,7 +28,7 @@ async function invoke(params: string[], message: Message, client: IClient)
         throw new Error("Feed already exists")
 
     //add new feed
-    let newFeed = new Feed(ShortId.generate(), url, channelId, roleId)
+    let newFeed = Feed.create(ShortId.generate(), url, channelId, roleId)
 
     let prompt = `Are you happy with this? (y/n)\n\`\`\`JSON\n${JSON.stringify(newFeed, null, "\t")}\`\`\``
     let userResponse, commandResponse = ""

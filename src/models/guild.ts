@@ -7,25 +7,7 @@ export default class Guild extends BotGuild
     {
         if (!this.record.feeds)
             this.record.feeds = []
-        return new Proxy(this.record.feeds, {
-            get: (target, prop) =>
-            {
-                if (typeof prop === "string" && !isNaN(Number(prop)) && !(target[prop] instanceof Feed))
-                {
-                    const feed = Feed.fromData(target[prop])
-                    feed.onPropertyChanged.sub(() => this.addSetOperator(`feeds.${prop}`, feed.toRecord()))
-                    target[prop] = feed
-                }
-                return target[prop]
-            },
-            set: (target, prop, value) =>
-            {
-                target[prop] = value
-                if (!isNaN(Number(prop)))
-                    this.addSetOperator(`feeds.${prop as string}`, (value as Feed).toRecord())
-                return true
-            }
-        })
+        return Feed.getArrayProxy(this.record.feeds, this, "feeds", Feed)
     }
     public set feeds(value: Feed[]) { this.record.feeds = value }
 

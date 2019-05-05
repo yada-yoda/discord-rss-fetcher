@@ -1,13 +1,15 @@
 import Normalise from "../core/normaliser";
-import { NotifyPropertyChanged } from "disharmony";
-import { SimpleEventDispatcher } from "strongly-typed-events"
+import { NotifyPropertyChanged, SubDocument } from "disharmony";
 
-export default class Feed implements NotifyPropertyChanged
+export default class Feed extends SubDocument implements NotifyPropertyChanged
 {
     private maxHistoryCount = 10
     private history: string[] = []
 
-    public onPropertyChanged = new SimpleEventDispatcher<string>()
+    public id: string
+    public url: string
+    public channelId: string
+    public roleId: string
 
     public isLinkInHistory(link: string): boolean
     {
@@ -33,17 +35,21 @@ export default class Feed implements NotifyPropertyChanged
         }
     }
 
-    public static fromData(data: any)
+    public loadRecord(record: any)
     {
-        const feed = new Feed(data.id, data.url, data.channelId, data.roleId)
-        feed.history = data.history || []
-        return feed
+        [this.record, this.url, this.channelId, this.roleId, this.history] = record
     }
 
-    constructor(
-        public id: string,
-        public url: string,
-        public channelId: string,
-        public roleId?: string
-    ) { }
+    public static create(id: string, url: string, channelId: string, roleId?: string): Feed
+    {
+        const feed = new Feed()
+        feed.id = id
+        feed.url = url
+        feed.channelId = channelId
+
+        if (roleId)
+            feed.roleId = roleId
+        
+        return feed
+    }
 }
