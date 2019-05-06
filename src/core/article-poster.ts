@@ -18,7 +18,7 @@ async function postArticle(channel: TextChannel, article: RssArticle, roleId?: s
     }
     catch (e)
     {
-        Logger.debugLog(`Error posting article in channel ${channel.name} in guild ${channel.guild.name}\n${e.message || e}`, true)
+        Logger.debugLogError(`Error posting article in channel ${channel.name} in guild ${channel.guild.name}`, e)
     }
 }
 

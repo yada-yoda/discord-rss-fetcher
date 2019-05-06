@@ -50,7 +50,7 @@ export default class FeedMonitor
             }
             catch (e)
             {
-                Logger.debugLog(`Error fetching feed ${feed.url} in guild ${guild.id}\n${e.message || e}`, true)
+                Logger.debugLogError(`Error fetching feed ${feed.url} in guild ${guild.id}`, e)
             }
         }
         return hasPostedArticles
