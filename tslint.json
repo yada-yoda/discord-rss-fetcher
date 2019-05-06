@@ -1,0 +1,18 @@
+{
+    "extends": "tslint:recommended",
+    "rules": {
+        "semicolon": false,
+        "curly": false,
+        "max-line-length": false,
+        "one-line": false,
+        "interface-over-type-literal": false,
+        "member-ordering": false,
+        "object-literal-sort-keys": false,
+        "eofline": false,
+        "one-variable-per-declaration": false,
+        "max-classes-per-file": false,
+        "interface-name": false,
+        "arrow-parens": false,
+        "no-floating-promises": true
+    }
+}

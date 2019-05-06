@@ -1,6 +1,6 @@
-import Message from "../models/message";
 import { Command, PermissionLevel } from "disharmony";
 import Feed from "../models/feed";
+import Message from "../models/message";
 
 const paginationLimit = 10
 
@@ -25,7 +25,7 @@ export default new Command(
         /*description*/     "Show the configured RSS feeds for this server",
         /*syntax*/          "view-feeds",
         /*permissionLevel*/ PermissionLevel.Admin,
-        /*invoke*/          invoke
+        /*invoke*/          invoke,
 )
 
 function stringifyFeed(feed: Feed): string
