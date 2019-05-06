@@ -1,8 +1,8 @@
-import { Logger, LightClient } from "disharmony";
+import { TextChannel } from "discord.js";
+import { LightClient, Logger } from "disharmony";
 import Guild from "../models/guild";
 import RssFetcher, { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher";
 import ArticlePoster from "./article-poster"
-import { TextChannel } from "discord.js";
 import Normalise from "./normaliser"
 
 export default class FeedMonitor
@@ -11,9 +11,9 @@ export default class FeedMonitor
 
     public async beginMonitoring()
     {
-        //todo handle discord disconnects
+        // todo handle discord disconnects
         while (true)
-            for (let djsGuild of this.client.djs.guilds.values())
+            for (const djsGuild of this.client.djs.guilds.values())
             {
                 const guild = new Guild(djsGuild)
                 await guild.loadDocument()
@@ -27,7 +27,7 @@ export default class FeedMonitor
     private async fetchAndProcessAllGuildFeeds(guild: Guild): Promise<boolean>
     {
         let hasPostedArticles = false
-        for (let feed of guild.feeds)
+        for (const feed of guild.feeds)
         {
             try
             {
@@ -57,7 +57,7 @@ export default class FeedMonitor
     }
 
     constructor(
-        private client: LightClient
+        private client: LightClient,
     )
     { }
 }
@@ -67,5 +67,7 @@ if (!module.parent)
     const token = process.argv[2], dbConnectionString = process.argv[3]
     const client = new LightClient(dbConnectionString)
     const feedMonitor = new FeedMonitor(client)
-    client.initialize(token).then(() => feedMonitor.beginMonitoring());
+    client.initialize(token)
+        .then(() => feedMonitor.beginMonitoring())
+        .catch(e => Logger.debugLogError("Error initialising feed monitor", e));
 }

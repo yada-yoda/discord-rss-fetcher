@@ -1,5 +1,5 @@
-import Normalise from "../core/normaliser";
 import { NotifyPropertyChanged, SubDocument } from "disharmony";
+import Normalise from "../core/normaliser";
 
 export default class Feed extends SubDocument implements NotifyPropertyChanged
 {

@@ -1,45 +1,45 @@
-import Message from "../models/message";
-import { Command, PermissionLevel, IClient } from "disharmony";
-import * as Url from "url"
+import { Command, IClient, PermissionLevel } from "disharmony";
 import * as ShortId from "shortid"
+import * as Url from "url"
 import Feed from "../models/feed";
+import Message from "../models/message";
 import { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher";
 
 async function invoke(params: string[], message: Message, client: IClient)
 {
-    //validate and retrieve channel ID
+    // validate and retrieve channel ID
     if (message.mentions.channels.size === 0)
         throw new Error("Invalid channel")
     const channelId = message.mentions.channels.first().id
 
-    //validate and retrieve feed URL
+    // validate and retrieve feed URL
     const url = params[0]
     if (!isValid(url))
         throw new Error("Invalid URL")
 
-    //retrieve (optional) roleID
+    // retrieve (optional) roleID
     let roleId = ""
     if (message.mentions.roles.size > 0)
         roleId = message.mentions.roles.first().id
 
-    //retrieve and validate against existing feeds for this channel
-    const feeds = message.guild.feeds.filter(x => x.channelId == channelId)
-    if (feeds.find(x => x.url == url))
+    // retrieve and validate against existing feeds for this channel
+    const feeds = message.guild.feeds.filter(x => x.channelId === channelId)
+    if (feeds.find(x => x.url === url))
         throw new Error("Feed already exists")
 
-    //add new feed
-    let newFeed = Feed.create(ShortId.generate(), url, channelId, roleId)
+    // add new feed
+    const newFeed = Feed.create(ShortId.generate(), url, channelId, roleId)
 
     let prompt = `Are you happy with this? (y/n)\n\`\`\`JSON\n${JSON.stringify(newFeed, null, "\t")}\`\`\``
     let userResponse, commandResponse = ""
     while (commandResponse === "")
     {
-        //request confirmation
+        // request confirmation
         userResponse = (await Message.ask(client, message.channelId, prompt, message.member, true)).content.toLowerCase()
 
         if (userResponse === "y")
         {
-            message.reply("Please wait while I validate the RSS feed")
+            await message.reply("Please wait while I validate the RSS feed")
 
             if (await getRssFetcher().validateFeed(url))
             {
@@ -62,7 +62,7 @@ export default new Command(
     /*description*/     "Add an RSS feed to a channel, with optional role tagging",
     /*syntax*/          "add-feed <url> <#channel> [@role]",
     /*permissionLevel*/ PermissionLevel.Admin,
-    /*invoke*/          invoke
+    /*invoke*/          invoke,
 )
 
 function isValid(url: string): boolean

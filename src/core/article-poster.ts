@@ -1,7 +1,7 @@
-import RssArticle from "../service/rss-reader/abstract/rss-article";
-import * as HtmlToText from "html-to-text"
-import { TextChannel, Role } from "discord.js";
+import { Role, TextChannel } from "discord.js";
 import { Logger } from "disharmony";
+import * as HtmlToText from "html-to-text"
+import RssArticle from "../service/rss-reader/abstract/rss-article";
 
 const discordCharacterLimit = 2000
 const articleFormattingShort = "\n{{article}}"
@@ -48,5 +48,5 @@ function formatPost(article: RssArticle)
 }
 
 export default {
-    postArticle
+    postArticle,
 }
