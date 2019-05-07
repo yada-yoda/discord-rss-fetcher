@@ -20,6 +20,7 @@
     "typescript": "^3.4.5"
   },
   "scripts": {
+    "start": "node ./dist/index.js --name rss-fetcher",
     "build": "./node_modules/.bin/tsc --sourceMap",
     "lint": "./node_modules/.bin/tslint --project .",
     "test": "echo \"Error: no test specified\" && exit 1"

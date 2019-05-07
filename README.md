@@ -45,12 +45,12 @@ Each permission has a reason for being required, explained below.
 | Embed links          | Responses to 'help' requests use message embeds for nice formatting |
 
 ## Self hosting
-1. Clone the repository, or download and extract the zip file (preferrably from the release page)
-2. Make sure you have *npm* and *git* installed
-3. Run `npm install`
-4. Run `npm run build`
-5. Add a file named *token* in the root folder with your token string in
-6. Run `npm start`
+1. Install [Node.js v10](https://nodejs.org/en/) and 
+2. Clone the repository, or download and extract the zip file (preferrably from the [release page](https://github.com/benji7425/discord-rss-fetcher/releases))
+3. Add a file named *token* in the root folder; paste in your bot token
+3. Run `npm install` to install dependencies
+4. Run `npm run build` to generate output javascript
+6. Run `npm start` to start the bot
 
 **Note for git users**  
 If you cloned the repository with git, make sure you `git reset --hard vX.Y` to a specific version, as latest master isn't always production ready!
@@ -60,6 +60,7 @@ If you cloned the repository with git, make sure you `git reset --hard vX.Y` to 
 I am available for contact via my [support Discord server](https://discordapp.com/invite/SSkbwSJ). I will always do my best to respond, however I am often busy so can't always be available right away, and as this is a free service I may not always be able to resolve your query.
 
 ## Built With
+- [Node.js](https://nodejs.org/en/) - *Runtime*
 - [discord.js](https://github.com/discordjs/discord.js) - *Discord library*
 - [disharmony](https://github.com/benji7425/disharmony) - *Bot framework*
 - [rss-parser](https://github.com/bobby-brennan/rss-parser) - *RSS parsing library*
