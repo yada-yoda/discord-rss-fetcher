@@ -1,6 +1,6 @@
 {
   "name": "discord-rss-feed",
-  "version": "4.0.0-a1",
+  "version": "4.0.0-b1",
   "description": "",
   "main": "dist/index.js",
   "dependencies": {
