@@ -1,5 +1,7 @@
+import { TextChannel } from "discord.js";
 import { NotifyPropertyChanged, SubDocument } from "disharmony";
 import Normalise from "../core/normaliser";
+import Guild from "./guild";
 
 export default class Feed extends SubDocument implements NotifyPropertyChanged
 {
@@ -42,6 +44,20 @@ export default class Feed extends SubDocument implements NotifyPropertyChanged
         this.channelId = record.channelId
         this.roleId = record.roleId
         this.history = record.history
+    }
+
+    public toFriendlyObject(guild: Guild)
+    {
+        const channel = guild.channels.get(this.channelId)
+        const channelName = channel instanceof TextChannel ? channel.name : "<<unavailable>>"
+        const role = guild.djs.roles.get(this.roleId)
+        const roleName = role ? role.name : "<<N/A>>"
+        return {
+            id: this.id,
+            url: this.url,
+            channel: channelName,
+            role: roleName,
+        }
     }
 
     public static create(id: string, url: string, channelId: string, roleId?: string): Feed

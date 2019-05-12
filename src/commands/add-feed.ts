@@ -30,7 +30,7 @@ async function invoke(params: string[], message: Message, client: IClient)
     // add new feed
     const newFeed = Feed.create(ShortId.generate(), url, channelId, roleId)
 
-    let prompt = `Are you happy with this? (y/n)\n\`\`\`JSON\n${JSON.stringify(newFeed, null, "\t")}\`\`\``
+    let prompt = `Are you happy with this? (y/n)\n\`\`\`JSON\n${JSON.stringify(newFeed.toFriendlyObject(message.guild), null, "\t")}\`\`\``
     let userResponse, commandResponse = ""
     while (commandResponse === "")
     {
