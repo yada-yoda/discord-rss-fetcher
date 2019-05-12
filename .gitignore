@@ -1,7 +1,6 @@
 .vscode/[!.]*.json
 dist/
-token*
-credentials.json
+config.json
 nedb-data
 
 # Created by https://www.gitignore.io/api/node
