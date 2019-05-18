@@ -76,5 +76,9 @@ if (!module.parent)
     const feedMonitor = new FeedMonitor(client)
     client.initialize(config.token)
         .then(() => feedMonitor.beginMonitoring())
-        .catch(e => Logger.debugLogError("Error initialising feed monitor", e));
+        .catch(e =>
+        {
+            (Logger.debugLogError("Error initialising feed monitor", e) as Promise<void>)
+                .catch().then(() => process.exit(1)).catch()
+        });
 }
