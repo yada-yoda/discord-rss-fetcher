@@ -2,5 +2,9 @@
     "token": "",
     "dbConnectionString": "nedb://nedb-data",
     "serviceName": "RSS Fetcher",
-    "requiredPermissions": 84992
+    "requiredPermissions": 84992,
+    "askTimeoutMs": 30000,
+    "dbClientConfig": {
+        "compactionWriteCount": 100
+    }
 }
