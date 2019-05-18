@@ -1,4 +1,8 @@
 # Changelog
+## v4.0.0-b3
+### Updated
+- Module disharmony to v0.8.2
+
 ## v4.0.0-b2
 ### Updated
 - Module disharmony to v0.8.1
