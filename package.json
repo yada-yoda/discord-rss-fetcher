@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "dependencies": {
-    "disharmony": "^0.8.2",
+    "disharmony": "^0.8.3",
     "get-urls": "^9.1.0",
     "html-to-text": "^5.1.1",
     "rss-parser": "^3.7.0",
