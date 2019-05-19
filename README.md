@@ -1,3 +1,5 @@
+![health status](https://healthchecks.io/badge/757a86c5-43a4-4c74-a134-72ba9e7b391b/xJed9T7a.svg)
+
 # Discord RSS fetcher
 <!--summary-->
 A Discord bot to post the latest articles from an RSS feed into a channel, optionally mentioning a role when posting
@@ -19,7 +21,7 @@ A Discord bot to post the latest articles from an RSS feed into a channel, optio
 ## Getting started
 ### Invite
 - By using this bot you agree to the terms laid out in the [Privacy & Terms](./docs/privacy-and-terms) document
-- If you agree, use my [public invite]() (coming soon!) to invite the bot to your server
+- If you agree, use my [public invite](https://discordapp.com/oauth2/authorize?client_id=575106301261119498&scope=bot&permissions=0x00014c00) to invite the bot to your server
 
 ### Setup
 Use `@RSS Poster help` to view available commands
