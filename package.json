@@ -1,6 +1,6 @@
 {
   "name": "discord-rss-feed",
-  "version": "4.0.0-b3",
+  "version": "4.0.0-b4",
   "description": "",
   "main": "dist/index.js",
   "dependencies": {
@@ -23,7 +23,7 @@
     "start": "node ./dist/index.js --name rss-fetcher",
     "build": "./node_modules/.bin/tsc --sourceMap",
     "lint": "./node_modules/.bin/tslint --project .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "full-start": "npm install && npm run build && npm start"
   },
   "repository": {
     "type": "git",

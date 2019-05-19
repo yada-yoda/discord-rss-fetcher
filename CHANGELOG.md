@@ -1,4 +1,11 @@
 # Changelog
+## v4.0.0-b4
+### Updated
+- Module disharmony to v0.8.3
+
+### Fixed
+- Field `Guild.feeds` not correctly creating default value when empty
+
 ## v4.0.0-b3
 ### Updated
 - Module disharmony to v0.8.2
