@@ -25,7 +25,7 @@ async function postArticle(channel: TextChannel, article: RssArticle, roleId?: s
 function formatPost(article: RssArticle)
 {
     const title = article.title ? `\n**${article.title}**` : ""
-    const link = article.link ? `\n**${article.link}**` : ""
+    const link = article.link ? `\n${article.link}` : ""
 
     let message = title
 
