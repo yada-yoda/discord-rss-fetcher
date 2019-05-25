@@ -1,19 +1,24 @@
-import { Command, PermissionLevel } from "disharmony";
+import { Command, CommandRejection, PermissionLevel } from "disharmony";
 import Feed from "../models/feed";
 import Guild from "../models/guild";
 import Message from "../models/message";
 
-const paginationLimit = 10
+const paginationLimit = 2
 
 async function invoke(params: string[], message: Message)
 {
     if (message.guild.feeds.length === 0)
         return "No feeds configured for this server"
 
-    let startIdx = Number(params[0] || "")
-    startIdx = !isNaN(startIdx) ? startIdx - 1 * paginationLimit : 0
+    let startIdx = 0
+    if (params[0])
+    {
+        const maybeStartIdx = Number(params[0])
+        if (!isNaN(maybeStartIdx))
+            startIdx = (maybeStartIdx - 1) * paginationLimit
+    }
 
-    const endIdx = startIdx + paginationLimit + 1
+    const endIdx = startIdx + paginationLimit
 
     let responseStr = message.guild.feeds.slice(startIdx, endIdx).map(f => stringifyFeed(f, message.guild)).join("\n")
     if (message.guild.feeds.length > endIdx)
