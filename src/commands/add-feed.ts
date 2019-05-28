@@ -1,4 +1,4 @@
-import { Command, IClient, PermissionLevel } from "disharmony";
+import { Command, CommandRejection, IClient, PermissionLevel } from "disharmony";
 import * as ShortId from "shortid"
 import * as Url from "url"
 import Feed from "../models/feed";
@@ -9,13 +9,13 @@ async function invoke(params: string[], message: Message, client: IClient)
 {
     // validate and retrieve channel ID
     if (message.mentions.channels.size === 0)
-        throw new Error("Invalid channel")
+        throw new CommandRejection("Invalid channel")
     const channelId = message.mentions.channels.first().id
 
     // validate and retrieve feed URL
     const url = params[0]
     if (!isValid(url))
-        throw new Error("Invalid URL")
+        throw new CommandRejection("Invalid URL")
 
     // retrieve (optional) roleID
     let roleId = ""
@@ -25,7 +25,7 @@ async function invoke(params: string[], message: Message, client: IClient)
     // retrieve and validate against existing feeds for this channel
     const feeds = message.guild.feeds.filter(x => x.channelId === channelId)
     if (feeds.find(x => x.url === url))
-        throw new Error("Feed already exists")
+        throw new CommandRejection("Feed already exists")
 
     // add new feed
     const newFeed = Feed.create(ShortId.generate(), url, channelId, roleId)
@@ -58,9 +58,8 @@ async function invoke(params: string[], message: Message, client: IClient)
 }
 
 export default new Command(
-    /*name*/            "add-feed",
-    /*description*/     "Add an RSS feed to a channel, with optional role tagging",
     /*syntax*/          "add-feed <url> <#channel> [@role]",
+    /*description*/     "Add an RSS feed to a channel, with optional role tagging",
     /*permissionLevel*/ PermissionLevel.Admin,
     /*invoke*/          invoke,
 )

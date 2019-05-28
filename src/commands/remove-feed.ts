@@ -12,9 +12,8 @@ async function invoke(params: string[], message: Message)
 }
 
 export default new Command(
-        /*name*/            "remove-feed",
-        /*description*/     "Remove configured RSS feed by its ID",
         /*syntax*/          "remove-feed <id>",
+        /*description*/     "Remove configured RSS feed by its ID",
         /*permissionLevel*/ PermissionLevel.Admin,
         /*invoke*/          invoke,
 )

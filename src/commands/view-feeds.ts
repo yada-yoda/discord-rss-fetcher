@@ -22,9 +22,8 @@ async function invoke(params: string[], message: Message)
 }
 
 export default new Command(
-        /*name*/            "view-feeds",
-        /*description*/     "Show the configured RSS feeds for this server",
         /*syntax*/          "view-feeds",
+        /*description*/     "Show the configured RSS feeds for this server",
         /*permissionLevel*/ PermissionLevel.Admin,
         /*invoke*/          invoke,
 )
