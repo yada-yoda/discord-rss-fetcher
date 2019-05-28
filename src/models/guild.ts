@@ -3,8 +3,18 @@ import Feed from "./feed";
 
 export default class Guild extends BotGuild
 {
-    public get feeds(): Feed[] { return Feed.getArrayProxy(this.record.feeds, this, "feeds", Feed) }
-    public set feeds(value: Feed[]) { this.record.feeds = value }
+    private _feeds: Feed[];
+    public get feeds(): Feed[]
+    {
+        if (!this._feeds)
+            this.createFeedsBacking()
+        return this._feeds
+    }
+    public set feeds(value: Feed[])
+    {
+        this.record.feeds = value
+        this.createFeedsBacking()
+    }
 
     public get channels() { return this.djs.channels }
 
@@ -13,5 +23,10 @@ export default class Guild extends BotGuild
         super.loadRecord(record)
         if (!this.record.feeds)
             this.record.feeds = []
+    }
+
+    private createFeedsBacking()
+    {
+        this._feeds = Feed.getArrayProxy(this.record.feeds, this, "feeds", Feed)
     }
 }

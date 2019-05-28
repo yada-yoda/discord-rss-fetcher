@@ -14,6 +14,7 @@
         "interface-name": false,
         "arrow-parens": false,
         "no-floating-promises": true,
-        "space-before-function-paren": false
+        "space-before-function-paren": false,
+        "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"]
     }
 }
