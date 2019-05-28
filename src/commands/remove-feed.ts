@@ -3,11 +3,12 @@ import Message from "../models/message";
 
 async function invoke(params: string[], message: Message)
 {
-    const idx = message.guild.feeds.findIndex(feed => feed.id === params[0])
-    if (!Number.isInteger(idx))
+    const filtered = message.guild.feeds.filter(x => x.id !== params[0])
+
+    if (filtered.length === message.guild.feeds.length)
         throw new Error("Can't find feed with id " + params[0])
 
-    message.guild.feeds.splice(idx, 1)
+    message.guild.feeds = filtered
     return "Feed removed!"
 }
 
