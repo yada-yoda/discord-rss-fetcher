@@ -3,7 +3,7 @@ import Feed from "../models/feed";
 import Guild from "../models/guild";
 import Message from "../models/message";
 
-const paginationLimit = 2
+const paginationLimit = 5
 
 async function invoke(params: string[], message: Message)
 {

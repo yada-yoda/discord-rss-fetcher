@@ -3,10 +3,9 @@ import { Logger } from "disharmony";
 import * as HtmlToText from "html-to-text"
 import RssArticle from "../service/rss-reader/abstract/rss-article";
 
-const discordCharacterLimit = 2000
 const articleFormattingShort = "\n{{article}}"
 const articleFormattingLong = "\n{{article}}..."
-const articleCharacterLimit = discordCharacterLimit - articleFormattingLong.replace("{{article}}", "").length
+const articleCharacterLimit = 250
 
 async function postArticle(channel: TextChannel, article: RssArticle, roleId?: string)
 {
@@ -33,14 +32,11 @@ function formatPost(article: RssArticle)
     {
         const contentCharacterLimit = articleCharacterLimit - title.length - link.length
         let articleString = HtmlToText.fromString(article.content)
+        const isTooLong = articleString.length > contentCharacterLimit
 
-        articleString =
-            articleString.length > contentCharacterLimit ?
-                articleString.substr(0, contentCharacterLimit) : articleString
+        articleString = isTooLong ? articleString.substr(0, contentCharacterLimit) : articleString
 
-        message +=
-            (articleString.length > contentCharacterLimit ? articleFormattingLong : articleFormattingShort)
-                .replace("{{article}}", articleString)
+        message +=  (isTooLong ? articleFormattingLong : articleFormattingShort).replace("{{article}}", articleString)
     }
     message += link
 
