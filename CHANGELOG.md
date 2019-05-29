@@ -1,4 +1,13 @@
 # Changelog
+## v4.0.0-b5
+### Updated
+- Article content length to a more reasonable value
+
+### Fixed
+- Article links having Discord link preview suppressed due to being emboldened
+- Command 'remove-feed' not removing feeds
+- Command 'remove-feed' sometimes duplicating feeds
+
 ## v4.0.0-b4
 ### Updated
 - Module disharmony to v0.8.3
