@@ -4,21 +4,23 @@
     "url": "https://github.com/benji7425/discord-rss-feed/issues"
   },
   "dependencies": {
+    "@types/html-to-text": "^1.4.31",
+    "@types/node": "^11.13.7",
+    "@types/shortid": "0.0.29",
+    "@types/xml2js": "^0.4.4",
+    "alsatian": "^3.0.0",
     "disharmony": "^1.1.0",
     "get-urls": "^9.1.0",
     "html-to-text": "^5.1.1",
     "rss-parser": "^3.7.0",
     "shortid": "^2.2.14",
-    "strongly-typed-events": "^1.4.10"
+    "strongly-typed-events": "^1.4.10",
+    "typemoq": "^2.1.0",
+    "typescript": "^3.4.5"
   },
   "description": "",
   "devDependencies": {
-    "@types/html-to-text": "^1.4.31",
-    "@types/node": "^11.13.7",
-    "@types/shortid": "0.0.29",
-    "@types/xml2js": "^0.4.4",
-    "tslint": "^5.16.0",
-    "typescript": "^3.4.5"
+    "tslint": "^5.16.0"
   },
   "homepage": "https://github.com/benji7425/discord-rss-feed#readme",
   "license": "MIT",
