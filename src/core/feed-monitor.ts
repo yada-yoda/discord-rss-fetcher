@@ -71,10 +71,10 @@ export default class FeedMonitor
 if (!module.parent)
 {
     const configPath = process.argv[2]
-    const { config } = loadConfig(configPath)
+    const { config } = loadConfig(undefined, configPath)
     const client = new LightClient(config)
     const feedMonitor = new FeedMonitor(client)
-    client.initialize(config.token)
+    client.login(config.token)
         .then(() => feedMonitor.beginMonitoring())
         .catch(async err =>
         {

@@ -10,9 +10,9 @@ const { config, isLocalDb, configPath } = loadConfig()
 
 if (Cluster.isMaster)
 {
-    const client = new Client(commands, Message, config!)
+    const client = new Client(commands, config, Message)
     client.onMessage.sub(handleMessage)
-    client.initialize(config!.token)
+    client.login(config!.token)
         .then(() => startFeedMonitor(client, !isLocalDb))
         .catch(async err =>
         {

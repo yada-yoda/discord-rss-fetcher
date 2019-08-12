@@ -1,4 +1,4 @@
-import { Command, CommandRejection, IClient, PermissionLevel } from "disharmony";
+import { BotMessage, Command, CommandRejection, IClient, PermissionLevel, Question } from "disharmony"
 import * as ShortId from "shortid"
 import * as Url from "url"
 import Feed from "../models/feed"
@@ -31,13 +31,14 @@ async function invoke(params: string[], message: Message, client: IClient)
     const newFeed = Feed.create(ShortId.generate(), url, channelId, roleId)
 
     let prompt = `Are you happy with this? (y/n)\n\`\`\`JSON\n${JSON.stringify(newFeed.toFriendlyObject(message.guild), null, "\t")}\`\`\``
-    let userResponse, commandResponse = ""
+    let userResponse: BotMessage, commandResponse = ""
     while (commandResponse === "")
     {
-        // request confirmation
-        userResponse = (await Message.ask(client, message.channelId, prompt, message.member, true)).content.toLowerCase()
+        // Request confirmation
+        const question = new Question(client, message.channelId, prompt, message.member, true)
+        userResponse = await question.send()
 
-        if (userResponse === "y")
+        if (userResponse.content === "y")
         {
             await message.reply("Please wait while I validate the RSS feed")
 
@@ -49,7 +50,7 @@ async function invoke(params: string[], message: Message, client: IClient)
             else
                 commandResponse = "This RSS feed is invalid"
         }
-        else if (userResponse === "n")
+        else if (userResponse.content === "n")
             commandResponse = "Your feed has not been saved"
         else
             prompt = "Please enter **y** or **n** for yes or no"
