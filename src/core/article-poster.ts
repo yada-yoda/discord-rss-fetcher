@@ -1,7 +1,7 @@
-import { Role, TextChannel } from "discord.js";
-import { Logger } from "disharmony";
+import { TextChannel } from "discord.js"
+import { Logger } from "disharmony"
 import * as HtmlToText from "html-to-text"
-import RssArticle from "../service/rss-reader/abstract/rss-article";
+import RssArticle from "../service/rss-reader/abstract/rss-article"
 
 const overallCharacterLimit = 750
 const articleFormattingShort = "\n{{article}}"

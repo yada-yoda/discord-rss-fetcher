@@ -1,6 +1,6 @@
-import RssFetcher from "./abstract/rss-fetcher";
 import * as Parser from "rss-parser"
-import RssArticle from "./abstract/rss-article";
+import RssArticle from "./abstract/rss-article"
+import RssFetcher from "./abstract/rss-fetcher"
 
 export class RssParser implements RssFetcher
 {
@@ -18,7 +18,7 @@ export class RssParser implements RssFetcher
     }
 
     constructor(
-        //@ts-ignore
-        private parser = new Parser({ timeout: 5000 })
+        // @ts-ignore
+        private parser = new Parser({ timeout: 5000 }),
     ) { }
 }

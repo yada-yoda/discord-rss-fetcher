@@ -1,18 +1,18 @@
 import * as Cluster from "cluster"
 import { Client, forkWorkerClient, Logger } from "disharmony"
 import { loadConfig } from "disharmony"
-import { resolve } from "path";
+import { resolve } from "path"
 import commands from "./commands"
-import handleMessage from "./core/message-handler";
-import Message from "./models/message";
+import handleMessage from "./core/message-handler"
+import Message from "./models/message"
 
 const { config, isLocalDb, configPath } = loadConfig()
 
 if (Cluster.isMaster)
 {
-    const client = new Client(commands, Message, config!)
+    const client = new Client(commands, config, Message)
     client.onMessage.sub(handleMessage)
-    client.initialize(config!.token)
+    client.login(config!.token)
         .then(() => startFeedMonitor(client, !isLocalDb))
         .catch(async err =>
         {
