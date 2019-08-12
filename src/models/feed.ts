@@ -1,7 +1,7 @@
-import { TextChannel } from "discord.js";
-import { NotifyPropertyChanged, SubDocument } from "disharmony";
-import Normalise from "../core/normaliser";
-import Guild from "./guild";
+import { TextChannel } from "discord.js"
+import { NotifyPropertyChanged, SubDocument } from "disharmony"
+import Normalise from "../core/normaliser"
+import Guild from "./guild"
 
 export default class Feed extends SubDocument implements NotifyPropertyChanged
 {

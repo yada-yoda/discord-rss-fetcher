@@ -1,5 +1,5 @@
+import { RssParser } from "../rss-parser"
 import RssArticle from "./rss-article"
-import { RssParser } from "../rss-parser";
 
 export default interface RssFetcher
 {

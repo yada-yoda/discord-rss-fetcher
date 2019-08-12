@@ -1,6 +1,6 @@
 import { Message as DjsMessage } from "discord.js"
-import { BotMessage } from "disharmony";
-import Guild from "./guild";
+import { BotMessage } from "disharmony"
+import Guild from "./guild"
 
 export default class Message extends BotMessage
 {
@@ -8,7 +8,7 @@ export default class Message extends BotMessage
 
     constructor(djsMessage: DjsMessage)
     {
-        super(djsMessage);
+        super(djsMessage)
         this.guild = new Guild(djsMessage.guild)
     }
 }

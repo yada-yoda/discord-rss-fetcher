@@ -1,9 +1,9 @@
-import { BotGuild } from "disharmony";
-import Feed from "./feed";
+import { BotGuild } from "disharmony"
+import Feed from "./feed"
 
 export default class Guild extends BotGuild
 {
-    private _feeds: Feed[];
+    private _feeds: Feed[]
     public get feeds(): Feed[]
     {
         if (!this._feeds)

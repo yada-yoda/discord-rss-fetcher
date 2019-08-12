@@ -1,7 +1,7 @@
-import { TextChannel } from "discord.js";
-import { LightClient, loadConfig, Logger } from "disharmony";
-import Guild from "../models/guild";
-import RssFetcher, { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher";
+import { TextChannel } from "discord.js"
+import { LightClient, loadConfig, Logger } from "disharmony"
+import Guild from "../models/guild"
+import RssFetcher, { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher"
 import ArticlePoster from "./article-poster"
 import Normalise from "./normaliser"
 
@@ -11,7 +11,7 @@ export default class FeedMonitor
 
     public async beginMonitoring()
     {
-        // todo handle discord disconnects
+        // TODO Handle discord disconnects
         while (true)
             for (const djsGuild of this.client.djs.guilds.values())
             {
@@ -80,5 +80,5 @@ if (!module.parent)
         {
             await (Logger.debugLogError("Error initialising feed monitor", err) as Promise<void>)
             process.exit(1)
-        });
+        })
 }

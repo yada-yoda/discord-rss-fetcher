@@ -1,5 +1,5 @@
 import * as getUrls from "get-urls"
-import Message from "../models/message";
+import Message from "../models/message"
 
 export default async function handleMessage(message: Message)
 {

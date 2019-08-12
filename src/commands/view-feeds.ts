@@ -1,7 +1,7 @@
-import { Command, CommandRejection, PermissionLevel } from "disharmony";
-import Feed from "../models/feed";
-import Guild from "../models/guild";
-import Message from "../models/message";
+import { Command, PermissionLevel } from "disharmony"
+import Feed from "../models/feed"
+import Guild from "../models/guild"
+import Message from "../models/message"
 
 const paginationLimit = 5
 
@@ -35,5 +35,5 @@ export default new Command(
 
 function stringifyFeed(feed: Feed, guild: Guild): string
 {
-    return `\`\`\`JavaScript\n ${JSON.stringify(feed.toFriendlyObject(guild), null, "\t")} \`\`\``;
+    return `\`\`\`JavaScript\n ${JSON.stringify(feed.toFriendlyObject(guild), null, "\t")} \`\`\``
 }

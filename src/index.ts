@@ -1,10 +1,10 @@
 import * as Cluster from "cluster"
 import { Client, forkWorkerClient, Logger } from "disharmony"
 import { loadConfig } from "disharmony"
-import { resolve } from "path";
+import { resolve } from "path"
 import commands from "./commands"
-import handleMessage from "./core/message-handler";
-import Message from "./models/message";
+import handleMessage from "./core/message-handler"
+import Message from "./models/message"
 
 const { config, isLocalDb, configPath } = loadConfig()
 
