@@ -1,14 +1,11 @@
-import { TextChannel } from "discord.js"
-import { LightClient, loadConfig, Logger } from "disharmony"
+import { ILightClient, LightClient, loadConfig, Logger } from "disharmony"
+import Feed from "../models/feed"
 import Guild from "../models/guild"
 import RssFetcher, { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher"
 import ArticlePoster from "./article-poster"
-import Normalise from "./normaliser"
 
 export default class FeedMonitor
 {
-    private rssFetcher: RssFetcher = getRssFetcher()
-
     public async beginMonitoring()
     {
         // TODO Handle discord disconnects
@@ -16,6 +13,8 @@ export default class FeedMonitor
             for (const djsGuild of this.client.djs.guilds.values())
             {
                 const guild = new Guild(djsGuild)
+
+                // Allow the event queue to clear before processing the next guild if no perms in this one
                 if (!guild.hasPermissions(this.client.config.requiredPermissions))
                 {
                     await new Promise((resolve) => setImmediate(resolve))
@@ -23,47 +22,51 @@ export default class FeedMonitor
                 }
 
                 await guild.loadDocument()
-                const hasPostedArticles = await this.fetchAndProcessAllGuildFeeds(guild)
+                const didPostNewArticle = await this.fetchAndProcessAllGuildFeeds(guild)
 
-                if (hasPostedArticles)
+                if (didPostNewArticle)
                     await guild.save()
             }
     }
 
-    private async fetchAndProcessAllGuildFeeds(guild: Guild): Promise<boolean>
+    public async fetchAndProcessAllGuildFeeds(guild: Guild)
     {
-        let hasPostedArticles = false
+        let didPostNewArticle = false
         for (const feed of guild.feeds)
+            didPostNewArticle = await this.fetchAndProcessFeed(guild, feed) || didPostNewArticle
+        return didPostNewArticle
+    }
+
+    public async fetchAndProcessFeed(guild: Guild, feed: Feed): Promise<boolean>
+    {
+        try
         {
-            try
-            {
-                const articles = await this.rssFetcher.fetchArticles(feed.url)
+            const articles = await this.rssFetcher.fetchArticles(feed.url)
 
-                if (articles.length === 0)
-                    continue
+            if (articles.length === 0)
+                return false
 
-                const article = articles[0], link = article.link
+            const article = articles[0], link = article.link
 
-                if (!link || feed.isLinkInHistory(link))
-                    continue
+            if (!link || feed.isLinkInHistory(link))
+                return false
 
-                feed.pushHistory(Normalise.forCache(link))
+            feed.pushHistory(link)
 
-                const channel = guild.channels.get(feed.channelId) as TextChannel
-
-                await ArticlePoster.postArticle(channel, article, feed.roleId)
-                hasPostedArticles = true
-            }
-            catch (e)
-            {
-                Logger.debugLogError(`Error fetching feed ${feed.url} in guild ${guild.name}`, e)
-            }
+            await this.articlePoster.postArticle(guild, feed.channelId, article, feed.roleId)
+            return true
         }
-        return hasPostedArticles
+        catch (e)
+        {
+            Logger.debugLogError(`Error fetching feed ${feed.url} in guild ${guild.name}`, e)
+            return false
+        }
     }
 
     constructor(
-        private client: LightClient,
+        private client: ILightClient,
+        private rssFetcher: RssFetcher,
+        private articlePoster: ArticlePoster,
     )
     { }
 }
@@ -73,7 +76,8 @@ if (!module.parent)
     const configPath = process.argv[2]
     const { config } = loadConfig(undefined, configPath)
     const client = new LightClient(config)
-    const feedMonitor = new FeedMonitor(client)
+    const articlePoster = new ArticlePoster()
+    const feedMonitor = new FeedMonitor(client, getRssFetcher(), articlePoster)
     client.login(config.token)
         .then(() => feedMonitor.beginMonitoring())
         .catch(async err =>
