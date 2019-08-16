@@ -25,7 +25,10 @@ async function startFeedMonitor(client: Client<Message>, useForkedProcess: boole
 {
     const path = "./core/feed-monitor"
     if (useForkedProcess)
-        forkWorkerClient(resolve(__dirname, path), configPath)
+    {
+        const worker = forkWorkerClient(resolve(__dirname, path), configPath)
+        worker.on("exit", (code: number) => process.exit(code))
+    }
     else
     {
         // tslint:disable-next-line: variable-name

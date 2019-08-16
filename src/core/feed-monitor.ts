@@ -8,8 +8,8 @@ export default class FeedMonitor
 {
     public async beginMonitoring()
     {
-        // TODO Handle discord disconnects
-        while (true)
+        // See https://discord.js.org/#/docs/main/stable/typedef/Status
+        while (this.client.djs.status !== 5)
             for (const djsGuild of this.client.djs.guilds.values())
             {
                 const guild = new Guild(djsGuild)
@@ -27,6 +27,11 @@ export default class FeedMonitor
                 if (didPostNewArticle)
                     await guild.save()
             }
+
+        // Reaching this code means the above while loop exited, which means the bot disconnected
+        await Logger.debugLogError(`Feed monitor disconnected from Discord!`)
+        await Logger.logEvent("FeedMonitorDisconnect")
+        process.exit(1)
     }
 
     public async fetchAndProcessAllGuildFeeds(guild: Guild)
