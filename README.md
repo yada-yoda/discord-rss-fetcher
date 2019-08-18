@@ -49,7 +49,7 @@ Each permission has a reason for being required, explained below.
 ## Self hosting
 1. Install [Node.js v10](https://nodejs.org/en/) and 
 2. Clone the repository, or download and extract the zip file (preferrably from the [release page](https://github.com/benji7425/discord-rss-fetcher/releases))
-3. Open *config.json* and paste your bot token in the `token` field (between the quotes)
+3. Create a new file *config.json* from a copy of *config.sample.json*; paste your bot token in the `token` field (between the quotes)
 4. Run `npm run full-start` to compile and run the bot
 	- If you see yellow 'WARN' messages about peer dependencies, you can safely ignore these
 
