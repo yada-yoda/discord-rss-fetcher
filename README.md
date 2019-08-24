@@ -1,5 +1,5 @@
 [![Build status](https://badge.buildkite.com/8ce0723b03f875a2dd9ba526d3b6fbc8601d1be1f56a02e94e.svg)](https://buildkite.com/benji7425/rss-fetcher)
-![health status](https://healthchecks.io/badge/757a86c5-43a4-4c74-a134-72ba9e7b391b/xJed9T7a.svg)
+![Health status](https://healthchecks.io/badge/757a86c5-43a4-4c74-a134-72ba9e7b391b/nh1ydWLJ/rss-fetcher.svg)
 
 # Discord RSS fetcher
 <!--summary-->

@@ -3,10 +3,10 @@ import { Client, forkWorkerClient, Logger } from "disharmony"
 import { loadConfig } from "disharmony"
 import { resolve } from "path"
 import commands from "./commands"
-import ArticlePoster from "./core/article-poster";
+import ArticlePoster from "./core/article-poster"
 import handleMessage from "./core/message-handler"
 import Message from "./models/message"
-import { getRssFetcher } from "./service/rss-reader/abstract/rss-fetcher";
+import { getRssFetcher } from "./service/rss-reader/abstract/rss-fetcher"
 
 const { config, isLocalDb, configPath } = loadConfig()
 
