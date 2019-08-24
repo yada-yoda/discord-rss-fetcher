@@ -60,7 +60,7 @@ Each permission has a reason for being required, explained below.
 If you cloned the repository with git, make sure you `git reset --hard vX.Y` to a specific version, as latest master isn't always production ready!
 
 ### Docker
-`docker run [OPTIONS] benji7425/discord-role-assigner`
+`docker run [OPTIONS] benji7425/discord-rss-fetcher`
 
 #### Options
 - To gain access to the log files  
@@ -74,7 +74,7 @@ If you cloned the repository with git, make sure you `git reset --hard vX.Y` to 
 
 #### Notes
 - **Due to limitations with volume mounting cross-OS you cannost use a Windows host with the inbuilt NeDB database**
-- View the image on Docker Hub [here](https://cloud.docker.com/u/benji7425/repository/docker/benji7425/discord-role-assigner)
+- View the image on Docker Hub [here](https://hub.docker.com/r/benji7425/discord-rss-fetcher)
 
 ### Database
 - Out of the box the project uses [NeDB](https://github.com/louischatriot/nedb/) as a local database, storing the data in *./nedb-data*

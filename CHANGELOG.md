@@ -1,4 +1,8 @@
 # Changelog
+## v4.0.1
+### Added
+- Docker image [available on Docker Hub](https://hub.docker.com/r/benji7425/discord-rss-fetcher)
+
 ## v4.0.0
 Version 4.0 is a complete re-write of the bot using TypeScript and built on top of my [disharmony library](https://github.com/benji7425/disharmony).
 This changelog entry does not assume knowledge of v3.5 or prior, and so list additions as if this is a new project.
