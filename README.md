@@ -26,16 +26,16 @@ A Discord bot to post the latest articles from an RSS feed into a channel, optio
 - See the [self hosting section](#self-hosting) for details on running on your own server
 
 ### Setup
-Use `@RSS Poster help` to view available commands
+Use `@RSS Fetcher help` to view available commands
 
 **Admin only**
 These commands require administrator permission in the Discord server
-- `@RSS Poster add-feed <url> <#channel> [@role]` to add a new feed
-- `@RSS Poster view-feeds` to view configured feeds for this server
-- `@RSS Poster remove-feed <feed-id>` to remove a feed by it's ID (found using the `view-feeds` command)
+- `@RSS Fetcher add-feed <url> <#channel> [@role]` to add a new feed
+- `@RSS Fetcher view-feeds` to view configured feeds for this server
+- `@RSS Fetcher remove-feed <feed-id>` to remove a feed by it's ID (found using the `view-feeds` command)
 
 Example:
-`@RSS Poster add-feed http://lorem-rss.herokuapp.com/feed?unit=second&interval=30 #rss-posts @subscribers`
+`@RSS Fetcher add-feed http://lorem-rss.herokuapp.com/feed?unit=second&interval=30 #rss-posts @subscribers`
 
 ## Permissions
 The bot requires certain permissions, which you are prompted for on the invite screen.
