@@ -1,11 +1,11 @@
-import { BotMessage, Command, CommandRejection, IClient, PermissionLevel, Question } from "disharmony"
+import { Client, Command, CommandRejection, DisharmonyMessage, PermissionLevel, Question } from "disharmony"
 import * as ShortId from "shortid"
 import * as Url from "url"
 import Feed from "../models/feed"
 import Message from "../models/message"
 import { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher"
 
-async function invoke(params: string[], message: Message, client: IClient)
+async function invoke(params: string[], message: Message, client: Client)
 {
     // Validate and retrieve channel ID
     if (message.mentions.channels.size === 0)
@@ -31,7 +31,7 @@ async function invoke(params: string[], message: Message, client: IClient)
     const newFeed = Feed.create(ShortId.generate(), url, channelId, roleId)
 
     let prompt = `Are you happy with this? (y/n)\n\`\`\`JSON\n${JSON.stringify(newFeed.toFriendlyObject(message.guild), null, "\t")}\`\`\``
-    let userResponse: BotMessage, commandResponse = ""
+    let userResponse: DisharmonyMessage, commandResponse = ""
     while (commandResponse === "")
     {
         // Request confirmation

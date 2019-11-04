@@ -1,5 +1,5 @@
 import { Expect, Setup, Test, TestFixture } from "alsatian"
-import { ILightClient } from "disharmony"
+import { LiteClient } from "disharmony"
 import { IMock, It, Mock, Times } from "typemoq"
 import Feed from "../models/feed"
 import Guild from "../models/guild"
@@ -16,7 +16,7 @@ export class FeedMonitorTestFixture
     public roleId = "role-id"
     public articleLink = "article-link"
 
-    private client: ILightClient
+    private client: LiteClient
 
     private mockArcitlePoster: IMock<ArticlePoster>
     private mockGuild: IMock<Guild>
@@ -48,7 +48,7 @@ export class FeedMonitorTestFixture
         const client = {} as any
         client.djs = { guilds: new Map<string, Guild>() }
         client.config = { requiredPermissions: 1 }
-        this.client = client as ILightClient
+        this.client = client as LiteClient
 
     }
 

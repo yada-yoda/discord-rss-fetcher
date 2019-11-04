@@ -9,7 +9,7 @@
     "@types/shortid": "0.0.29",
     "@types/xml2js": "^0.4.4",
     "alsatian": "^3.0.0",
-    "disharmony": "^1.1.0",
+    "disharmony": "^2.0.5",
     "get-urls": "^9.1.0",
     "html-to-text": "^5.1.1",
     "rss-parser": "^3.7.0",

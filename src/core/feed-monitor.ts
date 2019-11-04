@@ -1,4 +1,4 @@
-import { ILightClient, LightClient, loadConfig, Logger } from "disharmony"
+import { LiteClient, LiteDisharmonyClient, loadConfig, Logger } from "disharmony"
 import Feed from "../models/feed"
 import Guild from "../models/guild"
 import RssFetcher, { getRssFetcher } from "../service/rss-reader/abstract/rss-fetcher"
@@ -69,7 +69,7 @@ export default class FeedMonitor
     }
 
     constructor(
-        private client: ILightClient,
+        private client: LiteClient,
         private rssFetcher: RssFetcher,
         private articlePoster: ArticlePoster,
     )
@@ -79,8 +79,8 @@ export default class FeedMonitor
 if (!module.parent)
 {
     const configPath = process.argv[2]
-    const { config } = loadConfig(undefined, configPath)
-    const client = new LightClient(config)
+    const config = loadConfig(undefined, configPath)
+    const client = new LiteDisharmonyClient(config)
     const articlePoster = new ArticlePoster()
     const feedMonitor = new FeedMonitor(client, getRssFetcher(), articlePoster)
     client.login(config.token)

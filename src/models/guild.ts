@@ -1,7 +1,7 @@
-import { BotGuild } from "disharmony"
+import { DisharmonyGuild } from "disharmony"
 import Feed from "./feed"
 
-export default class Guild extends BotGuild
+export default class Guild extends DisharmonyGuild
 {
     private _feeds: Feed[]
     public get feeds(): Feed[]
