@@ -1,0 +1,25 @@
+{
+    "name": "Discord RSS Fetcher",
+    "description": "Discord bot to post links from an RSS feed into a channel",
+    "env": {
+      "TOKEN": {
+        "description": "Your bot token from the Discord Developer Portal",
+        "required": true
+      },
+      "DB_STRING":{
+        "description": "Your MongoDB connection string",
+        "required": true
+      }
+    },
+    "repository": "https://github.com/benji7425/discord-rss-fetcher",
+    "stack": "container",
+    "formation": {
+      "worker": {
+        "quantity": 1
+      }
+    },
+    "keywords": [
+      "discord"
+    ],
+    "website": "https://benji7425.io/discord-rss-fetcher"
+  }
