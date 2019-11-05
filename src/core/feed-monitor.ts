@@ -39,6 +39,7 @@ export default class FeedMonitor
         let didPostNewArticle = false
         for (const feed of guild.feeds)
             didPostNewArticle = await this.fetchAndProcessFeed(guild, feed) || didPostNewArticle
+
         return didPostNewArticle
     }
 
@@ -46,6 +47,9 @@ export default class FeedMonitor
     {
         try
         {
+            if (!guild.channels.has(feed.channelId))
+                return false
+
             const articles = await this.rssFetcher.fetchArticles(feed.url)
 
             if (articles.length === 0)

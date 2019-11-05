@@ -1,4 +1,5 @@
 import { Expect, Setup, Test, TestFixture } from "alsatian"
+import { Collection, GuildChannel } from "discord.js"
 import { LiteClient } from "disharmony"
 import { IMock, It, Mock, Times } from "typemoq"
 import Feed from "../models/feed"
@@ -28,6 +29,7 @@ export class FeedMonitorTestFixture
     public setup()
     {
         this.mockGuild = Mock.ofType<Guild>()
+        this.mockGuild.setup(x => x.channels).returns(() => new Map([[this.channelId, {} as any]]) as Collection<string, GuildChannel>)
         this.mockGuild.setup(x => x.feeds).returns(() => [this.mockFeed.object])
 
         this.mockArcitlePoster = Mock.ofType<ArticlePoster>()
@@ -121,5 +123,24 @@ export class FeedMonitorTestFixture
         // ASSERT
         Expect(didPostNewArticle).toBe(false)
         // Expect no exception to be thrown (test will fail on exceptions)
+    }
+
+    @Test()
+    public async feed_not_processed_if_channel_doesnt_exist()
+    {
+        // ARRANGE
+        // tslint:disable-next-line: no-unused-expression
+        void (this.mockFeed.object.channelId)
+        this.mockFeed.setup(x => x.channelId).returns(() => "non-existent-channel")
+
+        // ACT
+        const sut = new FeedMonitor(this.client, this.mockRssFetcher.object, this.mockArcitlePoster.object)
+        const didPostNewArticle = await sut.fetchAndProcessFeed(this.mockGuild.object, this.mockFeed.object)
+
+        // ASSERT
+        Expect(didPostNewArticle).toBe(false)
+        this.mockArcitlePoster.verify(x =>
+            x.postArticle(It.isAny(), It.isAny(), It.isAny(), It.isAny()),
+            Times.never())
     }
 }
