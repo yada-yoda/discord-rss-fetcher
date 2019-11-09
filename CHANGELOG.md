@@ -1,4 +1,10 @@
 # Changelog
+## v4.1.0
+### Added
+- Script `monitor.js` to restart the bot daily (usage optional)
+- Commands `import` and `export` for server data transfer
+- Config option to set bot 'playing' status
+
 ## v4.0.1
 ### Added
 - Docker image [available on Docker Hub](https://hub.docker.com/r/benji7425/discord-rss-fetcher)
