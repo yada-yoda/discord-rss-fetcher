@@ -46,6 +46,17 @@ Each permission has a reason for being required, explained below.
 | Read message history | Check if any new RSS links have been posted during downtime         |
 | Embed links          | Responses to 'help' requests use message embeds for nice formatting |
 
+## Troubleshooting
+
+- Test RSS Fetcher's ability to reply by using the version command `@RSS Fetcher version`
+- Double check that RSS Fetcher has both *read* and *write* permissions in the channel you're using
+- Make sure you're actually mentioning the bot and *not the role with the same name*
+- Make sure you have the 'Administrator' permission if you're trying to use an admin command
+- Double check that you've given RSS Fetcher all the necessary [permissions](#permissions)
+- If you want RSS Fetcher to mention a role when it posts a new feed, make sure this role is mentionable
+- Make sure your RSS feed is valid by testing it on an RSS feed validator website
+- If you delete a channel and recreate it with the same name, you will need to delete and re-create the feed also
+
 ## Built With
 - [Node.js](https://nodejs.org/en/) - *Runtime*
 - [discord.js](https://github.com/discordjs/discord.js) - *Discord library*
