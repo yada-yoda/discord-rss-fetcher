@@ -1,4 +1,4 @@
-[![Build status](https://badge.buildkite.com/8ce0723b03f875a2dd9ba526d3b6fbc8601d1be1f56a02e94e.svg)](https://buildkite.com/benji7425/rss-fetcher)
+[![Build status](https://badge.buildkite.com/62f486c46eee48d183946c0afee863a7e64ab349544077a38b.svg?branch=master)](https://buildkite.com/benji7425/rss-fetcher)
 
 # Discord RSS fetcher
 A Discord bot to post the latest articles from an RSS feed into a channel, optionally mentioning a role when posting.
